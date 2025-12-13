@@ -4,3 +4,11 @@ __pycache__/
 .ipynb_checkpoints
 .DS_Store
 data/
+
+# Environment variables with API keys
+.env
+
+# Output files
+output/
+*.wav
+*_script.txt

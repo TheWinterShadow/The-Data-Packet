@@ -20,11 +20,23 @@ class TestPackageIntegration(unittest.TestCase):
             __version__,
         )
 
+        # Test new module imports
+        from the_data_packet.ai import ClaudeClient, ScriptGenerator
+        from the_data_packet.audio import GeminiTTSGenerator
+        from the_data_packet.config import Settings
+        from the_data_packet.core import get_logger, setup_logging
+        from the_data_packet.workflows import PipelineConfig, PodcastPipeline
+
         # Verify classes can be instantiated
         scraper = WiredArticleScraper()
         article = ArticleData()
+        settings = Settings()
+        config = PipelineConfig()
+
         self.assertIsNotNone(scraper)
         self.assertIsNotNone(article)
+        self.assertIsNotNone(settings)
+        self.assertIsNotNone(config)
         self.assertIsNotNone(__version__)
 
     @patch("the_data_packet.clients.rss_client.feedparser")
@@ -33,7 +45,8 @@ class TestPackageIntegration(unittest.TestCase):
         """Test complete flow from RSS to extracted article."""
         # Mock RSS feed response
         mock_feed = Mock()
-        mock_feed.entries = [{"link": "https://www.wired.com/story/test-article/"}]
+        mock_feed.entries = [
+            {"link": "https://www.wired.com/story/test-article/"}]
         mock_feedparser.parse.return_value = mock_feed
 
         # Mock HTTP response
@@ -81,7 +94,8 @@ class TestPackageIntegration(unittest.TestCase):
         ]
 
         guide_feed = Mock()
-        guide_feed.entries = [{"link": "https://www.wired.com/story/guide-article/"}]
+        guide_feed.entries = [
+            {"link": "https://www.wired.com/story/guide-article/"}]
 
         # Mock feedparser to return different feeds based on URL
         def mock_parse(url):

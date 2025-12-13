@@ -1,157 +1,285 @@
-"""Command-line interface for the_data_packet."""
+"""Command-line interface for The Data Packet podcast generator."""
 
 import argparse
 import json
-import logging
 import sys
+from datetime import datetime
+from pathlib import Path
 
-from the_data_packet.models import ArticleData
-from the_data_packet.scrapers import WiredArticleScraper
-
-
-def setup_logging(verbose: bool = False) -> None:
-    """Set up logging configuration."""
-    level = logging.DEBUG if verbose else logging.INFO
-    logging.basicConfig(
-        level=level,
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S",
-    )
-
-
-def format_article_output(article: ArticleData, format_type: str = "json") -> str:
-    """Format article data for output."""
-    if format_type == "json":
-        return json.dumps(article.to_dict(), indent=2, ensure_ascii=False)
-    elif format_type == "text":
-        output = []
-        output.append(f"Title: {article.title or 'N/A'}")
-        output.append(f"Author: {article.author or 'N/A'}")
-        output.append(f"Category: {article.category or 'N/A'}")
-        output.append(f"URL: {article.url or 'N/A'}")
-        output.append(
-            f"Content Length: {len(article.content) if article.content else 0} characters"
-        )
-        if article.content:
-            output.append("\\nContent:")
-            output.append("-" * 50)
-            output.append(article.content)
-        return "\\n".join(output)
-    else:
-        raise ValueError(f"Unsupported format: {format_type}")
+from the_data_packet.core import get_logger, setup_logging
+from the_data_packet.workflows import PipelineConfig, PodcastPipeline
 
 
 def main() -> None:
-    """Main CLI function."""
+    """Main CLI function for podcast generation."""
     parser = argparse.ArgumentParser(
-        description="Scrape articles from Wired.com",
+        description="Generate automated tech news podcasts",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  %(prog)s security                    # Get latest security article
-  %(prog)s guide                       # Get latest guide article  
-  %(prog)s both                        # Get both latest articles
-  %(prog)s security --count 5          # Get 5 security articles
-  %(prog)s --url https://wired.com/... # Scrape specific URL
-  %(prog)s security --format text      # Output as text instead of JSON
+  # Generate complete podcast with environment variables
+  podcast-generator --output ./episode
+
+  # Generate script only with custom API keys
+  podcast-generator --anthropic-key sk-ant-... --script-only --output ./scripts
+
+  # Generate with custom show name and voices
+  podcast-generator --show-name "Tech Brief" --voice-a Charon --voice-b Aoede
+
+  # Generate from specific categories
+  podcast-generator --categories security guide --output ./multi-category
+
+Environment Variables:
+  ANTHROPIC_API_KEY    - Claude API key for script generation
+  GOOGLE_API_KEY       - Gemini API key for audio generation
+  GEMINI_API_KEY       - Alternative name for Google API key
         """,
     )
 
+    # API Keys
     parser.add_argument(
-        "category",
-        nargs="?",
-        choices=["security", "guide", "both"],
-        help="Article category to fetch (required unless using --url)",
+        "--anthropic-key",
+        help="Anthropic API key (overrides ANTHROPIC_API_KEY env var)",
+    )
+    parser.add_argument(
+        "--google-key",
+        help="Google API key (overrides GOOGLE_API_KEY env var)",
     )
 
-    parser.add_argument("--url", help="Specific article URL to scrape")
-
+    # Output control
     parser.add_argument(
-        "--count",
-        type=int,
-        default=1,
-        help="Number of articles to fetch (default: 1, max: 10)",
+        "--output",
+        "-o",
+        type=str,
+        default="./output",
+        help="Output directory for generated files (default: ./output)",
+    )
+    parser.add_argument(
+        "--script-only",
+        action="store_true",
+        help="Generate script only, skip audio generation",
+    )
+    parser.add_argument(
+        "--audio-only",
+        action="store_true",
+        help="Generate audio from existing script file (requires --script-file)",
+    )
+    parser.add_argument(
+        "--script-file",
+        type=str,
+        help="Path to existing script file for audio-only generation",
     )
 
+    # Podcast configuration
     parser.add_argument(
-        "--format",
-        choices=["json", "text"],
-        default="json",
-        help="Output format (default: json)",
+        "--show-name",
+        type=str,
+        default="Tech Daily",
+        help="Name of the podcast show (default: Tech Daily)",
+    )
+    parser.add_argument(
+        "--episode-date",
+        type=str,
+        help="Episode date (default: current date)",
+    )
+    parser.add_argument(
+        "--categories",
+        nargs="+",
+        default=["security", "guide"],
+        help="Article categories to scrape (default: security guide)",
     )
 
+    # Audio configuration
     parser.add_argument(
-        "--verbose", "-v", action="store_true", help="Enable verbose logging"
+        "--voice-a",
+        type=str,
+        default="Puck",
+        help="Voice for host Alex (default: Puck)",
+    )
+    parser.add_argument(
+        "--voice-b",
+        type=str,
+        default="Kore",
+        help="Voice for host Sam (default: Kore)",
+    )
+
+    # Output files
+    parser.add_argument(
+        "--script-filename",
+        type=str,
+        default="episode_script.txt",
+        help="Filename for generated script (default: episode_script.txt)",
+    )
+    parser.add_argument(
+        "--audio-filename",
+        type=str,
+        default="episode.wav",
+        help="Filename for generated audio (default: episode.wav)",
+    )
+
+    # Logging and debug
+    parser.add_argument(
+        "--verbose",
+        "-v",
+        action="store_true",
+        help="Enable verbose logging",
+    )
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        help="Enable debug logging",
+    )
+    parser.add_argument(
+        "--quiet",
+        "-q",
+        action="store_true",
+        help="Suppress output except errors",
+    )
+
+    # Validation and cleanup
+    parser.add_argument(
+        "--no-cleanup",
+        action="store_true",
+        help="Don't clean up temporary files",
+    )
+    parser.add_argument(
+        "--validate",
+        action="store_true",
+        help="Validate results after generation",
     )
 
     args = parser.parse_args()
 
-    # Validate arguments
-    if not args.url and not args.category:
-        parser.error("Must specify either category or --url")
+    # Setup logging
+    if args.quiet:
+        log_level = "ERROR"
+    elif args.debug:
+        log_level = "DEBUG"
+    elif args.verbose:
+        log_level = "INFO"
+    else:
+        log_level = "WARNING"
 
-    if args.url and args.category:
-        parser.error("Cannot specify both category and --url")
-
-    if args.count < 1 or args.count > 10:
-        parser.error("Count must be between 1 and 10")
-
-    # Set up logging
-    setup_logging(args.verbose)
-    logger = logging.getLogger(__name__)
-
-    # Initialize scraper
-    scraper = WiredArticleScraper()
+    setup_logging(level=log_level)
+    logger = get_logger(__name__)
 
     try:
-        if args.url:
-            # Scrape specific URL
-            logger.info(f"Scraping URL: {args.url}")
-            article = scraper.scrape_article_from_url(args.url)
-            print(format_article_output(article, args.format))
+        # Handle audio-only mode
+        if args.audio_only:
+            if not args.script_file:
+                print(
+                    "❌ --script-file is required when using --audio-only",
+                    file=sys.stderr,
+                )
+                sys.exit(1)
 
-        elif args.category == "both":
-            # Get both latest articles
-            logger.info("Fetching both latest articles")
-            both_articles = scraper.get_both_latest_articles()
+            script_path = Path(args.script_file)
+            if not script_path.exists():
+                print(f"❌ Script file not found: {script_path}", file=sys.stderr)
+                sys.exit(1)
 
-            if args.format == "json":
-                both_output = {
-                    category: article.to_dict()
-                    for category, article in both_articles.items()
-                }
-                print(json.dumps(both_output, indent=2, ensure_ascii=False))
-            else:
-                for category, article in both_articles.items():
-                    print(f"\\n=== {category.upper()} ARTICLE ===")
-                    print(format_article_output(article, "text"))
+            # Read existing script
+            with open(script_path, "r", encoding="utf-8") as f:
+                script_content = f.read()
+
+            # Generate audio only
+            from the_data_packet.audio import GeminiTTSGenerator
+
+            audio_gen = GeminiTTSGenerator(
+                api_key=args.google_key, voice_a=args.voice_a, voice_b=args.voice_b
+            )
+
+            output_path = Path(args.output) / args.audio_filename
+            result = audio_gen.generate_audio(script_content, output_path)
+
+            print(f"✅ Audio generated: {result.output_file}")
+            return
+
+        # Create pipeline configuration
+        config = PipelineConfig(
+            episode_date=args.episode_date or datetime.now().strftime("%A, %B %d, %Y"),
+            show_name=args.show_name,
+            categories=args.categories,
+            generate_script=True,
+            generate_audio=not args.script_only,
+            output_directory=Path(args.output),
+            script_filename=args.script_filename,
+            audio_filename=args.audio_filename,
+            anthropic_api_key=args.anthropic_key,
+            google_api_key=args.google_key,
+            voice_a=args.voice_a,
+            voice_b=args.voice_b,
+            cleanup_temp_files=not args.no_cleanup,
+            validate_results=args.validate,
+        )
+
+        # Validate configuration
+        validation_errors = config.validate()
+        if validation_errors:
+            print("❌ Configuration errors:", file=sys.stderr)
+            for error in validation_errors:
+                print(f"  - {error}", file=sys.stderr)
+            sys.exit(1)
+
+        # Display configuration (if not quiet)
+        if not args.quiet:
+            print("🎙️ The Data Packet - Podcast Generator")
+            print("=" * 50)
+            print(f"Show Name: {config.show_name}")
+            print(f"Episode Date: {config.episode_date}")
+            print(f"Categories: {', '.join(config.categories)}")
+            print(f"Generate Script: {'✅' if config.generate_script else '❌'}")
+            print(f"Generate Audio: {'✅' if config.generate_audio else '❌'}")
+            print(f"Output Directory: {config.output_directory}")
+            print(f"Voices: {config.voice_a} & {config.voice_b}")
+            print("=" * 50)
+
+        # Create and run pipeline
+        pipeline = PodcastPipeline(config)
+        result = pipeline.run()
+
+        # Display results
+        if result.success:
+            if not args.quiet:
+                print("\n🎉 Podcast generation completed successfully!")
+                print("📊 Results:")
+                print(f"  Articles Scraped: {result.articles_scraped}")
+                print(
+                    f"  Script Generated: {'✅' if result.script_generated else '❌'}"
+                )
+                print(f"  Audio Generated: {'✅' if result.audio_generated else '❌'}")
+
+                if result.script_path:
+                    print(f"  📝 Script: {result.script_path}")
+                if result.audio_path:
+                    print(f"  🎵 Audio: {result.audio_path}")
+
+                print(f"  ⏱️ Execution Time: {result.execution_time_seconds:.1f}s")
+
+            # Output paths as JSON for programmatic use
+            output_data = {
+                "success": True,
+                "script_path": str(result.script_path) if result.script_path else None,
+                "audio_path": str(result.audio_path) if result.audio_path else None,
+                "execution_time": result.execution_time_seconds,
+            }
+
+            if args.debug:
+                print(f"\n📋 Output JSON: {json.dumps(output_data, indent=2)}")
 
         else:
-            # Get articles from specific category
-            if args.count == 1:
-                logger.info(f"Fetching latest {args.category} article")
-                article = scraper.get_latest_article(args.category)
-                print(format_article_output(article, args.format))
-            else:
-                logger.info(f"Fetching {args.count} {args.category} articles")
-                article_list = scraper.get_multiple_articles(args.category, args.count)
-
-                if args.format == "json":
-                    list_output = [article.to_dict() for article in article_list]
-                    print(json.dumps(list_output, indent=2, ensure_ascii=False))
-                else:
-                    for i, article in enumerate(article_list, 1):
-                        print(f"\\n=== ARTICLE {i} ===")
-                        print(format_article_output(article, "text"))
+            print(
+                f"❌ Podcast generation failed: {result.error_message}", file=sys.stderr
+            )
+            sys.exit(1)
 
     except KeyboardInterrupt:
-        logger.info("Operation cancelled by user")
-        sys.exit(1)
+        print("\n⏹️ Generation cancelled by user", file=sys.stderr)
+        sys.exit(130)
     except Exception as e:
-        logger.error(f"Error: {e}")
+        logger.exception("Unexpected error during podcast generation")
+        print(f"❌ Unexpected error: {e}", file=sys.stderr)
         sys.exit(1)
-    finally:
-        scraper.close()
 
 
 if __name__ == "__main__":

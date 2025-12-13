@@ -2,7 +2,7 @@
 .git
 .gitignore
 
-# Python cache
+# Python cache and build artifacts
 __pycache__/
 *.py[cod]
 *$py.class
@@ -18,6 +18,68 @@ lib/
 lib64/
 parts/
 sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Testing and development
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+.cache/
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+pytest_cache/
+
+# IDE and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Environment and configuration
+.env
+.env.*
+!.env.template
+
+# Documentation (except README)
+docs/
+*.md
+!README.md
+
+# Output and temporary files
+output/
+temp/
+*.log
+*.tmp
+*.pid
+
+# Development files
+testing.ipynb
+examples.py
+tests/
+episode_script.txt
+
+# Docker files (for multi-stage builds)
+deploy.sh
+docker-compose.yml
 var/
 wheels/
 *.egg-info/
