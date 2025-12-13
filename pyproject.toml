@@ -1,0 +1,257 @@
+# ==============================================================================
+# BUILD SYSTEM
+# ==============================================================================
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "the_data_packet"
+dynamic = ["version"]
+description = "A Python package for scraping and extracting article data from Wired.com"
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+keywords = [""]
+dependencies = [
+    "feedparser>=6.0.0",
+    "requests>=2.25.0",
+    "beautifulsoup4>=4.9.0",
+    "google-genai",
+]
+authors = [
+  { name = "TheWinterShadow", email = "elijah.j.winter@outlook.com" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "Intended Audience :: System Administrators",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
+
+[project.urls]
+Documentation = "https://thewintershadow.github.io/the_data_packet/"
+Homepage = "https://github.com/TheWinterShadow/the_data_packet"
+Repository = "https://github.com/TheWinterShadow/the_data_packet"
+Issues = "https://github.com/TheWinterShadow/the_data_packet/issues"
+Changelog = "https://github.com/TheWinterShadow/the_data_packet/blob/main/CHANGELOG.md"
+
+[project.scripts]
+wired-scraper = "the_data_packet.cli:main"
+
+[project.optional-dependencies]
+
+# Development dependencies
+dev = [
+  "black>=23.0.0",
+  "isort>=5.12.0",
+  "flake8>=6.0.0",
+  "mypy>=1.0.0",
+  "pytest>=7.0.0",
+  "pytest-cov>=4.0.0",
+  "bandit>=1.7.0",
+]
+
+# Documentation dependencies
+docs = [
+  "sphinx>=5.0.0",
+  "furo>=2023.0.0",
+  "myst-parser>=2.0.0",
+]
+
+# All optional dependencies combined
+all = [
+  "black>=23.0.0",
+  "isort>=5.12.0",
+  "flake8>=6.0.0",
+  "mypy>=1.0.0",
+  "pytest>=7.0.0",
+  "pytest-cov>=4.0.0",
+  "bandit>=1.7.0",
+  "sphinx>=5.0.0",
+  "furo>=2.0.0", 
+  "myst-parser>=2.0.0",
+]
+
+# ==============================================================================
+# HATCH CONFIGURATION
+# ==============================================================================
+[tool.hatch.version]
+path = "the_data_packet/__about__.py"
+
+[tool.hatch.build]
+directory = "dist"
+
+[tool.hatch.build.targets.wheel]
+packages = ["the_data_packet"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "the_data_packet/",
+  "README.md",
+  "LICENSE.txt",
+]
+exclude = [
+  "tests/",
+  "docs/",
+  ".github/",
+  "*.pyc",
+  "__pycache__/",
+]
+
+# ==============================================================================
+# HATCH ENVIRONMENTS
+# ==============================================================================
+[tool.hatch.envs.default]
+dependencies = [
+]
+
+[tool.hatch.envs.dev]
+dependencies = [
+  # Core dependencies (needed for type checking)
+  # Documentation
+  "sphinx",
+  "furo",
+  "myst-parser", 
+  # Type stubs for better IDE support and mypy
+
+  # Code formatting and linting
+  "black",
+  "flake8",
+  "flake8-pyproject",
+  "isort",
+  "mypy",
+  # Testing
+  "pytest",
+  "coverage[toml]>=6.5",
+  # Security
+  "bandit",
+]
+
+[tool.hatch.envs.dev.scripts]
+# Type checking scripts
+typecheck = "mypy the_data_packet"
+typecheck-strict = "mypy --strict the_data_packet"
+typecheck-report = "mypy --html-report mypy-report the_data_packet"
+# Documentation scripts  
+docs = "sphinx-build -b html docs/source docs/build"
+docs-clean = "sphinx-build -b html -E docs/source docs/build"
+docs-serve = "python -m http.server 8000 --directory docs/build"
+
+[tool.hatch.envs.hatch-test]
+dependencies = [
+    # Core dependencies
+    "pytest",
+    "pytest-cov",
+]
+
+# Keep test environment for backwards compatibility
+[tool.hatch.envs.test]
+template = "hatch-test"
+
+# ==============================================================================
+# HATCH SCRIPTS
+# ==============================================================================
+[tool.hatch.envs.default.scripts]
+# Application scripts
+
+# Documentation scripts
+docs = "sphinx-build -b html docs/source docs/build"
+docs-clean = "sphinx-build -b html -E docs/source docs/build"
+docs-serve = "python -m http.server 8000 --directory docs/build"
+
+# Testing scripts
+test = "pytest {args:tests}"
+test-cov = "coverage run -m pytest {args:tests}"
+cov-report = [
+  "- coverage combine",
+  "coverage report",
+]
+cov = [
+  "test-cov",
+  "cov-report",
+]
+
+# Development scripts
+isort = "python -m isort {args}"
+black = "python -m black {args}"
+flake8 = "python -m flake8 {args}"
+mypy = "python -m mypy --exclude 'docs' {args}"
+
+# Build scripts
+format = [
+  "isort the_data_packet tests",
+  "black the_data_packet tests",
+]
+build = "python -m build"
+clean = "hatch clean"
+pre-build = [
+  "isort the_data_packet tests",
+  "black --check the_data_packet tests",
+  "mypy the_data_packet",
+]
+
+[[tool.hatch.envs.all.matrix]]
+python = ["3.9", "3.10", "3.11", "3.12", "3.13"]
+
+# ==============================================================================
+# TOOL CONFIGURATION
+# ==============================================================================
+
+# Coverage configuration
+[tool.coverage.run]
+source_pkgs = ["the_data_packet", "tests"]
+branch = true
+parallel = true
+omit = [
+  "the_data_packet/__about__.py",
+]
+
+[tool.coverage.paths]
+the_data_packet = ["the_data_packet", "*/the_data_packet/the_data_packet"]
+tests = ["tests", "*/the_data_packet/tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]
+
+# Code formatting configuration
+[tool.black]
+line-length = 88
+target-version = ["py39"]
+include = '\.pyi?$'
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 88
+
+# Linting configuration
+[tool.flake8]
+max-line-length = 120
+
+# Type checking configuration
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+exclude = ["docs/.*"]
+# Allow imports that might not be available at runtime (like type stubs)
+ignore_missing_imports = true
+# Show error codes for easier debugging
+show_error_codes = true
+# Be strict about TYPE_CHECKING imports
+warn_unused_ignores = true
