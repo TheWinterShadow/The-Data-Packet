@@ -8,11 +8,11 @@ build-backend = "hatchling.build"
 [project]
 name = "the_data_packet"
 dynamic = ["version"]
-description = "A Python package for scraping and extracting article data from Wired.com"
+description = "Automated podcast generation from news articles using AI"
 readme = "README.md"
 requires-python = ">=3.9"
 license = "MIT"
-keywords = ["podcast", "ai", "automation", "news", "scraping", "tts", "claude", "gemini"]
+keywords = ["podcast", "ai", "automation", "news", "scraping", "tts", "claude", "gemini", "s3", "aws", "storage"]
 dependencies = [
     "feedparser>=6.0.0",
     "requests>=2.25.0",
@@ -20,6 +20,7 @@ dependencies = [
     "google-genai>=0.3.0",
     "tenacity>=8.0.0",
     "anthropic>=0.25.0",
+    "boto3>=1.20.0",
 ]
 authors = [
   { name = "TheWinterShadow", email = "elijah.j.winter@outlook.com" },
@@ -48,13 +49,20 @@ Issues = "https://github.com/TheWinterShadow/the_data_packet/issues"
 Changelog = "https://github.com/TheWinterShadow/the_data_packet/blob/main/CHANGELOG.md"
 
 [project.scripts]
-podcast-generator = "the_data_packet.cli:main"
 the-data-packet = "the_data_packet.cli:main"
 
 [project.optional-dependencies]
 
 # Development dependencies
 dev = [
+  # Core dependencies
+  "feedparser>=6.0.0",
+  "requests>=2.25.0",
+  "beautifulsoup4>=4.9.0",
+  "google-genai>=0.3.0",
+  "tenacity>=8.0.0",
+  "anthropic>=0.25.0",
+  "boto3>=1.20.0",
   "black>=23.0.0",
   "isort>=5.12.0",
   "flake8>=6.0.0",
@@ -73,6 +81,14 @@ docs = [
 
 # All optional dependencies combined
 all = [
+  # Core dependencies
+  "feedparser>=6.0.0",
+  "requests>=2.25.0",
+  "beautifulsoup4>=4.9.0",
+  "google-genai>=0.3.0",
+  "tenacity>=8.0.0",
+  "anthropic>=0.25.0",
+  "boto3>=1.20.0",
   "black>=23.0.0",
   "isort>=5.12.0",
   "flake8>=6.0.0",
@@ -116,61 +132,55 @@ exclude = [
 # ==============================================================================
 [tool.hatch.envs.default]
 dependencies = [
-]
-
-[tool.hatch.envs.dev]
-dependencies = [
-  # Core dependencies (needed for type checking)
-  # Documentation
-  "sphinx",
-  "furo",
-  "myst-parser", 
-  # Type stubs for better IDE support and mypy
-
-  # Code formatting and linting
-  "black",
-  "flake8",
-  "flake8-pyproject",
-  "isort",
-  "mypy",
   # Testing
   "pytest",
-  "coverage[toml]>=6.5",
-  # Security
-  "bandit",
+  "pytest-cov",
+  "coverage[toml]",
+  # Formatting and linting
+  "black",
+  "isort", 
+  "mypy",
+  # Type stubs for better type checking
+  "types-requests",
 ]
 
-[tool.hatch.envs.dev.scripts]
-# Type checking scripts
-typecheck = "mypy the_data_packet"
-typecheck-strict = "mypy --strict the_data_packet"
-typecheck-report = "mypy --html-report mypy-report the_data_packet"
-# Documentation scripts  
-docs = "sphinx-build -b html docs/source docs/build"
-docs-clean = "sphinx-build -b html -E docs/source docs/build"
-docs-serve = "python -m http.server 8000 --directory docs/build"
-
-[tool.hatch.envs.hatch-test]
+[tool.hatch.envs.docs]
 dependencies = [
-    # Core dependencies
-    "pytest",
-    "pytest-cov",
+  "sphinx",
+  "furo", 
+  "myst-parser",
 ]
 
-# Keep test environment for backwards compatibility
-[tool.hatch.envs.test]
-template = "hatch-test"
+[tool.hatch.envs.docs.scripts]
+build = "sphinx-build -b html docs/source docs/build"
+clean = "sphinx-build -b html -E docs/source docs/build"
+serve = "python -m http.server 8000 --directory docs/build"
 
 # ==============================================================================
 # HATCH SCRIPTS
 # ==============================================================================
 [tool.hatch.envs.default.scripts]
-# Application scripts
+# Format code
+format = [
+  "isort the_data_packet tests",
+  "black the_data_packet tests",
+]
 
-# Documentation scripts
-docs = "sphinx-build -b html docs/source docs/build"
-docs-clean = "sphinx-build -b html -E docs/source docs/build"
-docs-serve = "python -m http.server 8000 --directory docs/build"
+# Check formatting
+format-check = [
+  "isort --check the_data_packet tests",
+  "black --check the_data_packet tests",
+]
+
+# Type checking
+typecheck = "mypy --exclude 'docs' the_data_packet"
+
+# Full quality check pipeline
+check = [
+  "format",
+  "format-check", 
+  "typecheck",
+]
 
 # Testing scripts
 test = "pytest {args:tests}"
@@ -180,27 +190,29 @@ cov-report = [
   "coverage report",
 ]
 cov = [
-  "test-cov",
+  "test-cov", 
   "cov-report",
 ]
 
-# Development scripts
-isort = "python -m isort {args}"
-black = "python -m black {args}"
-flake8 = "python -m flake8 {args}"
-mypy = "python -m mypy --exclude 'docs' {args}"
+# Documentation scripts
+docs = "sphinx-build -b html docs/source docs/build"
+docs-clean = "sphinx-build -b html -E docs/source docs/build"
+docs-serve = "python -m http.server 8000 --directory docs/build"
 
-# Build scripts
-format = [
-  "isort the_data_packet tests",
-  "black the_data_packet tests",
-]
-build = "python -m build"
-clean = "hatch clean"
+# Build pipeline
 pre-build = [
-  "isort the_data_packet tests",
-  "black --check the_data_packet tests",
-  "mypy the_data_packet",
+  "format",
+  "format-check",
+  "typecheck",
+]
+build = "hatch build"
+clean = "hatch clean"
+
+# Full build pipeline (equivalent to your bb command)
+bb = [
+  "format",
+  "format-check", 
+  "typecheck",
 ]
 
 [[tool.hatch.envs.all.matrix]]

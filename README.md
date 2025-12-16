@@ -57,9 +57,39 @@ docker run --rm \
 
 ## 📖 Documentation
 
-- **[USAGE.md](USAGE.md)** - Complete usage guide and examples
+- **[SIMPLE_USAGE.md](SIMPLE_USAGE.md)** - **NEW**: Simplified interface with S3 upload
+- **[USAGE.md](USAGE.md)** - Complete usage guide and examples  
 - **[DOCKER.md](DOCKER.md)** - Docker deployment and configuration
 - **[docs/](docs/)** - API documentation and development guides
+
+## ⚡ Simple Python Interface (NEW)
+
+For easier integration, use the simplified Python interface with automatic S3 upload:
+
+```python
+from the_data_packet import SimplePodcastGenerator
+
+# Initialize with S3 bucket (optional)
+generator = SimplePodcastGenerator(s3_bucket="my-podcast-bucket")
+
+# Generate and upload podcast in one line
+result = generator.generate_podcast(show_name="My Tech Show")
+
+if result.success:
+    print(f"Podcast created: {result.audio_path}")
+    print(f"S3 URL: {result.s3_result.s3_url}")
+```
+
+**Simple CLI:**
+```bash
+# Generate and upload to S3
+simple-podcast-generator --show-name "Daily Tech" --s3-bucket my-podcast-bucket
+
+# Upload existing audio file  
+simple-podcast-generator --upload-only episode.wav --show-name "Tech Show" --episode-date 2025-12-13
+```
+
+## 📖 Full Documentation
 
 ## 🎛️ Command Examples
 

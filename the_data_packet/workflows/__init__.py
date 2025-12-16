@@ -1,6 +1,8 @@
-"""Workflow orchestration for the complete podcast generation pipeline."""
+"""Workflows package for The Data Packet."""
 
-from .pipeline_config import PipelineConfig
-from .podcast_pipeline import PodcastPipeline
+from the_data_packet.workflows.podcast import PodcastPipeline, PodcastResult
 
-__all__ = ["PodcastPipeline", "PipelineConfig"]
+__all__ = [
+    "PodcastPipeline",
+    "PodcastResult",
+]

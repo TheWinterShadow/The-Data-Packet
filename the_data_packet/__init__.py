@@ -1,78 +1,99 @@
 """
-The Data Packet - A comprehensive Python package for automated podcast generation from news articles.
+The Data Packet - Automated podcast generation from news articles.
 
 This package provides end-to-end tools for:
-- Scraping articles from Wired.com
+- Collecting articles from multiple news sources
 - Generating podcast scripts using Claude AI
 - Creating audio content using Gemini TTS
 - Complete workflow orchestration
 
 Main Components:
 - PodcastPipeline: Complete workflow orchestration
-- WiredArticleScraper: Article scraping and extraction
-- PodcastScriptGenerator: AI-powered script generation
-- GeminiTTSGenerator: Multi-speaker audio generation
-- Settings: Configuration management
+- ArticleSource: Extensible article collection
+- ScriptGenerator: AI-powered script generation
+- AudioGenerator: Multi-speaker audio generation
+- Config: Unified configuration management
 
 Quick Start:
-    >>> from the_data_packet import PodcastPipeline, PipelineConfig
-    >>> config = PipelineConfig()
-    >>> pipeline = PodcastPipeline(config)
+    >>> from the_data_packet import PodcastPipeline
+    >>> pipeline = PodcastPipeline()
     >>> result = pipeline.run()
 
 Individual Components:
-    >>> from the_data_packet import WiredArticleScraper, PodcastScriptGenerator, GeminiTTSGenerator
-    >>> scraper = WiredArticleScraper()
-    >>> script_gen = PodcastScriptGenerator(api_key="your-key")
-    >>> audio_gen = GeminiTTSGenerator(api_key="your-key")
+    >>> from the_data_packet.sources import WiredSource
+    >>> from the_data_packet.generation import ScriptGenerator, AudioGenerator
+    >>> from the_data_packet.storage import S3Storage
 """
 
-# Initialize package-level logging
-import logging
-
 from the_data_packet.__about__ import __version__
-from the_data_packet.ai import ClaudeClient, PodcastScriptGenerator
-from the_data_packet.audio import GeminiTTSGenerator
-from the_data_packet.clients import HTTPClient, RSSClient
 
-# Core configuration and logging
-from the_data_packet.config import Settings, get_settings
-from the_data_packet.core import get_logger, setup_logging
-from the_data_packet.extractors import WiredContentExtractor
+# Core components
+from the_data_packet.core import (
+    AIGenerationError,
+    AudioGenerationError,
+    Config,
+    ConfigurationError,
+    NetworkError,
+    ScrapingError,
+    TheDataPacketError,
+    ValidationError,
+    get_config,
+    get_logger,
+    setup_logging,
+)
 
-# Data models and utilities
-from the_data_packet.models import ArticleData
+# Generation modules
+from the_data_packet.generation import (
+    AudioGenerator,
+    ScriptGenerator,
+)
 
-# Individual components
-from the_data_packet.scrapers import WiredArticleScraper
+# Article sources
+from the_data_packet.sources import (
+    Article,
+    ArticleSource,
+    WiredSource,
+)
 
-# Main workflow
-from the_data_packet.workflows import PipelineConfig, PodcastPipeline
+# Storage modules
+from the_data_packet.utils import (
+    S3Storage,
+    S3UploadResult,
+)
 
-logger = logging.getLogger(__name__)
-logger.addHandler(logging.NullHandler())
+# Main workflows
+from the_data_packet.workflows import (
+    PodcastPipeline,
+    PodcastResult,
+)
 
-# Define what gets imported with "from the_data_packet import *"
 __all__ = [
     # Version
     "__version__",
-    # Configuration
-    "Settings",
-    "get_settings",
+    # Core
+    "Config",
+    "get_config",
     "setup_logging",
     "get_logger",
-    # Main workflow
+    # Exceptions
+    "TheDataPacketError",
+    "ConfigurationError",
+    "ScrapingError",
+    "AIGenerationError",
+    "AudioGenerationError",
+    "ValidationError",
+    "NetworkError",
+    # Sources
+    "ArticleSource",
+    "Article",
+    "WiredSource",
+    # Generation
+    "ScriptGenerator",
+    "AudioGenerator",
+    # Storage
+    "S3Storage",
+    "S3UploadResult",
+    # Workflows
     "PodcastPipeline",
-    "PipelineConfig",
-    # Core components
-    "WiredArticleScraper",
-    "PodcastScriptGenerator",
-    "GeminiTTSGenerator",
-    "ClaudeClient",
-    # Data models
-    "ArticleData",
-    # Utilities
-    "HTTPClient",
-    "RSSClient",
-    "WiredContentExtractor",
+    "PodcastResult",
 ]

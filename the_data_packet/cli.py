@@ -1,13 +1,11 @@
-"""Command-line interface for The Data Packet podcast generator."""
+"""Command-line interface for The Data Packet."""
 
 import argparse
-import json
 import sys
-from datetime import datetime
 from pathlib import Path
 
-from the_data_packet.core import get_logger, setup_logging
-from the_data_packet.workflows import PipelineConfig, PodcastPipeline
+from .core import ConfigurationError, get_config, get_logger, setup_logging
+from .workflows import PodcastPipeline
 
 
 def main() -> None:
@@ -18,21 +16,23 @@ def main() -> None:
         epilog="""
 Examples:
   # Generate complete podcast with environment variables
-  podcast-generator --output ./episode
+  the-data-packet --output ./episode
 
-  # Generate script only with custom API keys
-  podcast-generator --anthropic-key sk-ant-... --script-only --output ./scripts
+  # Generate script only with custom API keys  
+  the-data-packet --anthropic-key sk-ant-... --script-only --output ./scripts
 
   # Generate with custom show name and voices
-  podcast-generator --show-name "Tech Brief" --voice-a Charon --voice-b Aoede
+  the-data-packet --show-name "Tech Brief" --voice-a charon --voice-b aoede
 
-  # Generate from specific categories
-  podcast-generator --categories security guide --output ./multi-category
+  # Generate from specific sources and categories
+  the-data-packet --sources wired --categories security guide --output ./multi-category
 
 Environment Variables:
   ANTHROPIC_API_KEY    - Claude API key for script generation
-  GOOGLE_API_KEY       - Gemini API key for audio generation
-  GEMINI_API_KEY       - Alternative name for Google API key
+  GOOGLE_API_KEY       - Gemini API key for audio generation  
+  S3_BUCKET_NAME       - S3 bucket for uploads (optional)
+  AWS_ACCESS_KEY_ID    - AWS access key (optional)
+  AWS_SECRET_ACCESS_KEY - AWS secret key (optional)
         """,
     )
 
@@ -46,238 +46,194 @@ Environment Variables:
         help="Google API key (overrides GOOGLE_API_KEY env var)",
     )
 
-    # Output control
+    # Content Options
     parser.add_argument(
-        "--output",
-        "-o",
-        type=str,
-        default="./output",
-        help="Output directory for generated files (default: ./output)",
-    )
-    parser.add_argument(
-        "--script-only",
-        action="store_true",
-        help="Generate script only, skip audio generation",
-    )
-    parser.add_argument(
-        "--audio-only",
-        action="store_true",
-        help="Generate audio from existing script file (requires --script-file)",
-    )
-    parser.add_argument(
-        "--script-file",
-        type=str,
-        help="Path to existing script file for audio-only generation",
-    )
-
-    # Podcast configuration
-    parser.add_argument(
-        "--show-name",
-        type=str,
-        default="Tech Daily",
-        help="Name of the podcast show (default: Tech Daily)",
-    )
-    parser.add_argument(
-        "--episode-date",
-        type=str,
-        help="Episode date (default: current date)",
+        "--sources",
+        nargs="+",
+        default=["wired"],
+        choices=["wired"],
+        help="Article sources to use (default: wired)",
     )
     parser.add_argument(
         "--categories",
         nargs="+",
         default=["security", "guide"],
-        help="Article categories to scrape (default: security guide)",
+        help="Article categories to fetch (default: security guide)",
+    )
+    parser.add_argument(
+        "--max-articles",
+        type=int,
+        default=1,
+        help="Maximum articles per source (default: 1)",
     )
 
-    # Audio configuration
+    # Generation Options
+    parser.add_argument(
+        "--script-only",
+        action="store_true",
+        help="Generate script only (skip audio)",
+    )
+    parser.add_argument(
+        "--audio-only",
+        action="store_true",
+        help="Generate audio only (requires existing script)",
+    )
+
+    # Audio Settings
     parser.add_argument(
         "--voice-a",
-        type=str,
-        default="Puck",
-        help="Voice for host Alex (default: Puck)",
+        default="puck",
+        choices=["puck", "charon", "kore", "fenrir", "aoede", "zephyr"],
+        help="Voice for first speaker (default: puck)",
     )
     parser.add_argument(
         "--voice-b",
-        type=str,
-        default="Kore",
-        help="Voice for host Sam (default: Kore)",
+        default="kore",
+        choices=["puck", "charon", "kore", "fenrir", "aoede", "zephyr"],
+        help="Voice for second speaker (default: kore)",
     )
 
-    # Output files
+    # Output Settings
     parser.add_argument(
-        "--script-filename",
-        type=str,
-        default="episode_script.txt",
-        help="Filename for generated script (default: episode_script.txt)",
+        "--output",
+        type=Path,
+        default=Path("./output"),
+        help="Output directory (default: ./output)",
     )
     parser.add_argument(
-        "--audio-filename",
-        type=str,
-        default="episode.wav",
-        help="Filename for generated audio (default: episode.wav)",
-    )
-
-    # Logging and debug
-    parser.add_argument(
-        "--verbose",
-        "-v",
-        action="store_true",
-        help="Enable verbose logging",
-    )
-    parser.add_argument(
-        "--debug",
-        action="store_true",
-        help="Enable debug logging",
-    )
-    parser.add_argument(
-        "--quiet",
-        "-q",
-        action="store_true",
-        help="Suppress output except errors",
+        "--show-name",
+        default="The Data Packet",
+        help="Name of your podcast show (default: The Data Packet)",
     )
 
-    # Validation and cleanup
+    # S3 Upload
     parser.add_argument(
-        "--no-cleanup",
-        action="store_true",
-        help="Don't clean up temporary files",
+        "--s3-bucket",
+        help="S3 bucket for uploads (overrides S3_BUCKET_NAME env var)",
     )
     parser.add_argument(
-        "--validate",
+        "--no-s3",
         action="store_true",
-        help="Validate results after generation",
+        help="Disable S3 uploads even if configured",
+    )
+
+    # Other Options
+    parser.add_argument(
+        "--log-level",
+        default="INFO",
+        choices=["DEBUG", "INFO", "WARNING", "ERROR"],
+        help="Log level (default: INFO)",
+    )
+    parser.add_argument(
+        "--save-intermediate",
+        action="store_true",
+        help="Save intermediate files",
     )
 
     args = parser.parse_args()
 
-    # Setup logging
-    if args.quiet:
-        log_level = "ERROR"
-    elif args.debug:
-        log_level = "DEBUG"
-    elif args.verbose:
-        log_level = "INFO"
-    else:
-        log_level = "WARNING"
+    # Validate argument combinations
+    if args.script_only and args.audio_only:
+        print("Error: Cannot use both --script-only and --audio-only", file=sys.stderr)
+        sys.exit(1)
 
-    setup_logging(level=log_level)
+    # Set up logging
+    setup_logging(args.log_level)
     logger = get_logger(__name__)
 
     try:
-        # Handle audio-only mode
-        if args.audio_only:
-            if not args.script_file:
-                print(
-                    "❌ --script-file is required when using --audio-only",
-                    file=sys.stderr,
-                )
-                sys.exit(1)
+        # Build configuration from arguments
+        config_overrides = {
+            "show_name": args.show_name,
+            "output_directory": args.output,
+            "article_sources": args.sources,
+            "article_categories": args.categories,
+            "max_articles_per_source": args.max_articles,
+            "voice_a": args.voice_a,
+            "voice_b": args.voice_b,
+            "save_intermediate_files": args.save_intermediate,
+            "log_level": args.log_level,
+        }
 
-            script_path = Path(args.script_file)
-            if not script_path.exists():
-                print(f"❌ Script file not found: {script_path}", file=sys.stderr)
-                sys.exit(1)
+        # API keys
+        if args.anthropic_key:
+            config_overrides["anthropic_api_key"] = args.anthropic_key
+        if args.google_key:
+            config_overrides["google_api_key"] = args.google_key
+        if args.s3_bucket:
+            config_overrides["s3_bucket_name"] = args.s3_bucket
 
-            # Read existing script
-            with open(script_path, "r", encoding="utf-8") as f:
-                script_content = f.read()
-
-            # Generate audio only
-            from the_data_packet.audio import GeminiTTSGenerator
-
-            audio_gen = GeminiTTSGenerator(
-                api_key=args.google_key, voice_a=args.voice_a, voice_b=args.voice_b
+        # Generation options
+        if args.script_only:
+            config_overrides.update(
+                {
+                    "generate_script": True,
+                    "generate_audio": False,
+                }
+            )
+        elif args.audio_only:
+            config_overrides.update(
+                {
+                    "generate_script": False,
+                    "generate_audio": True,
+                }
+            )
+        else:
+            config_overrides.update(
+                {
+                    "generate_script": True,
+                    "generate_audio": True,
+                }
             )
 
-            output_path = Path(args.output) / args.audio_filename
-            result = audio_gen.generate_audio(script_content, output_path)
+        # Disable S3 if requested
+        if args.no_s3:
+            config_overrides["s3_bucket_name"] = None
 
-            print(f"✅ Audio generated: {result.output_file}")
-            return
+        # Get configuration with overrides
+        config = get_config(**config_overrides)
 
-        # Create pipeline configuration
-        config = PipelineConfig(
-            episode_date=args.episode_date or datetime.now().strftime("%A, %B %d, %Y"),
-            show_name=args.show_name,
-            categories=args.categories,
-            generate_script=True,
-            generate_audio=not args.script_only,
-            output_directory=Path(args.output),
-            script_filename=args.script_filename,
-            audio_filename=args.audio_filename,
-            anthropic_api_key=args.anthropic_key,
-            google_api_key=args.google_key,
-            voice_a=args.voice_a,
-            voice_b=args.voice_b,
-            cleanup_temp_files=not args.no_cleanup,
-            validate_results=args.validate,
-        )
+        logger.info(f"Starting {config.show_name} generation")
+        logger.info(f"Sources: {config.article_sources}")
+        logger.info(f"Categories: {config.article_categories}")
+        logger.info(f"Output: {config.output_directory}")
 
-        # Validate configuration
-        validation_errors = config.validate()
-        if validation_errors:
-            print("❌ Configuration errors:", file=sys.stderr)
-            for error in validation_errors:
-                print(f"  - {error}", file=sys.stderr)
-            sys.exit(1)
-
-        # Display configuration (if not quiet)
-        if not args.quiet:
-            print("🎙️ The Data Packet - Podcast Generator")
-            print("=" * 50)
-            print(f"Show Name: {config.show_name}")
-            print(f"Episode Date: {config.episode_date}")
-            print(f"Categories: {', '.join(config.categories)}")
-            print(f"Generate Script: {'✅' if config.generate_script else '❌'}")
-            print(f"Generate Audio: {'✅' if config.generate_audio else '❌'}")
-            print(f"Output Directory: {config.output_directory}")
-            print(f"Voices: {config.voice_a} & {config.voice_b}")
-            print("=" * 50)
-
-        # Create and run pipeline
+        # Run pipeline
         pipeline = PodcastPipeline(config)
         result = pipeline.run()
 
-        # Display results
+        # Report results
         if result.success:
-            if not args.quiet:
-                print("\n🎉 Podcast generation completed successfully!")
-                print("📊 Results:")
-                print(f"  Articles Scraped: {result.articles_scraped}")
-                print(
-                    f"  Script Generated: {'✅' if result.script_generated else '❌'}"
-                )
-                print(f"  Audio Generated: {'✅' if result.audio_generated else '❌'}")
+            print("✅ Podcast generation completed successfully!")
+            print(f"⏱️  Execution time: {result.execution_time_seconds:.1f} seconds")
+            print(f"📰 Articles collected: {result.articles_collected}")
 
-                if result.script_path:
-                    print(f"  📝 Script: {result.script_path}")
-                if result.audio_path:
-                    print(f"  🎵 Audio: {result.audio_path}")
+            if result.script_generated and result.script_path:
+                print(f"📝 Script saved: {result.script_path}")
+                if result.s3_script_url:
+                    print(f"🔗 Script URL: {result.s3_script_url}")
 
-                print(f"  ⏱️ Execution Time: {result.execution_time_seconds:.1f}s")
-
-            # Output paths as JSON for programmatic use
-            output_data = {
-                "success": True,
-                "script_path": str(result.script_path) if result.script_path else None,
-                "audio_path": str(result.audio_path) if result.audio_path else None,
-                "execution_time": result.execution_time_seconds,
-            }
-
-            if args.debug:
-                print(f"\n📋 Output JSON: {json.dumps(output_data, indent=2)}")
+            if result.audio_generated and result.audio_path:
+                print(f"🎧 Audio saved: {result.audio_path}")
+                if result.s3_audio_url:
+                    print(f"🔗 Audio URL: {result.s3_audio_url}")
 
         else:
-            print(
-                f"❌ Podcast generation failed: {result.error_message}", file=sys.stderr
-            )
+            print("❌ Podcast generation failed!", file=sys.stderr)
+            print(f"⏱️  Execution time: {result.execution_time_seconds:.1f} seconds")
+            print(f"❗ Error: {result.error_message}", file=sys.stderr)
             sys.exit(1)
 
+    except ConfigurationError as e:
+        logger.error(f"Configuration error: {e}")
+        print(f"❌ Configuration error: {e}", file=sys.stderr)
+        sys.exit(1)
     except KeyboardInterrupt:
-        print("\n⏹️ Generation cancelled by user", file=sys.stderr)
+        logger.info("Interrupted by user")
+        print("\\n⏹️  Generation cancelled by user")
         sys.exit(130)
     except Exception as e:
-        logger.exception("Unexpected error during podcast generation")
+        logger.error(f"Unexpected error: {e}")
         print(f"❌ Unexpected error: {e}", file=sys.stderr)
         sys.exit(1)
 

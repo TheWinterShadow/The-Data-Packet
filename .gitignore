@@ -12,3 +12,10 @@ data/
 output/
 *.wav
 *_script.txt
+
+.auth
+*.ipynb
+dist/
+infra/.terraform.lock.hcl
+infra/terraform.tfstate
+infra/.terraform/
