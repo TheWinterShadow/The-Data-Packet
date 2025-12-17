@@ -20,7 +20,7 @@ Quick Start:
     >>> result = pipeline.run()
 
 Individual Components:
-    >>> from the_data_packet.sources import WiredSource
+    >>> from the_data_packet.sources import WiredSource, TechCrunchSource
     >>> from the_data_packet.generation import ScriptGenerator, AudioGenerator
     >>> from the_data_packet.storage import S3Storage
 """
@@ -52,6 +52,7 @@ from the_data_packet.generation import (
 from the_data_packet.sources import (
     Article,
     ArticleSource,
+    TechCrunchSource,
     WiredSource,
 )
 
@@ -86,6 +87,7 @@ __all__ = [
     # Sources
     "ArticleSource",
     "Article",
+    "TechCrunchSource",
     "WiredSource",
     # Generation
     "ScriptGenerator",

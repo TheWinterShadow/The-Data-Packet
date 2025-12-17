@@ -3,24 +3,49 @@ The Data Packet Documentation
 
 Welcome to The Data Packet's documentation!
 
-**The Data Packet** is a Python package for scraping and extracting article data from Wired.com. It provides a clean, object-oriented interface for fetching the latest articles from specific categories, extracting content with proper parsing, and outputting structured data.
+**The Data Packet** is an AI-powered automated podcast generation system that transforms tech news articles into engaging podcast content. It combines web scraping, AI script generation, and text-to-speech to create complete podcast episodes from start to finish.
 
-Features
---------
+What It Does
+------------
 
-- 🔍 **RSS Feed Integration**: Fetch latest article URLs from Wired's RSS feeds
-- 🌐 **Smart Content Extraction**: Extract titles, authors, and content with fallback methods
-- 📱 **Multiple Output Formats**: Support for JSON and human-readable text output
-- 🛡️ **Robust Error Handling**: Graceful handling of network issues and parsing errors
-- 🧪 **Comprehensive Testing**: Full test suite with 86+ tests using unittest framework
-- 📋 **Type Safety**: Complete type annotations with mypy compatibility
-- 🎯 **CLI Interface**: Command-line tool for easy article fetching
+The Data Packet automates the entire podcast creation workflow:
+
+1. **📰 Article Collection**: Scrapes latest tech news from Wired.com via RSS feeds
+2. **🤖 Script Generation**: Uses Anthropic Claude AI to create engaging dialogue scripts 
+3. **🎙️ Audio Production**: Generates multi-speaker audio using Google Gemini TTS
+4. **📦 Podcast Distribution**: Creates RSS feeds and uploads to AWS S3 for hosting
+5. **🔄 Complete Automation**: Runs the entire pipeline with a single command
+
+Key Features
+------------
+
+- **🐳 Docker-First Deployment**: Run anywhere with consistent environment
+- **🤖 AI-Powered Content**: Claude for natural dialogue, Gemini for realistic voices
+- **⚙️ Highly Configurable**: Multiple voices, show formats, and content categories
+- **🔒 Production Ready**: Robust error handling, logging, and security
+- **📊 Monitoring & Analytics**: Comprehensive logging and status tracking
+- **🚀 CI/CD Integration**: GitHub Actions for automated builds and releases
 
 Quick Start
 -----------
 
-Installation
-~~~~~~~~~~~~
+Docker Deployment (Recommended)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: bash
+
+   # Pull the latest image
+   docker pull ghcr.io/thewintershadow/the-data-packet:latest
+
+   # Run with your API keys
+   docker run --rm \\
+     -e ANTHROPIC_API_KEY="your-claude-key" \\
+     -e GOOGLE_API_KEY="your-gemini-key" \\
+     -v "$(pwd)/output:/app/output" \\
+     ghcr.io/thewintershadow/the-data-packet:latest
+
+Python Installation
+~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: bash
 
@@ -31,38 +56,45 @@ Basic Usage
 
 .. code-block:: python
 
-   from the_data_packet import WiredArticleScraper
+   from the_data_packet import PodcastPipeline
    
-   # Create a scraper instance
-   scraper = WiredArticleScraper()
+   # Create and run the complete pipeline
+   pipeline = PodcastPipeline()
+   result = pipeline.run()
    
-   # Get the latest security article
-   article = scraper.get_latest_article("security")
-   print(f"Title: {article.title}")
-   print(f"Author: {article.author}")
-   
-   # Get both latest articles (security and guide)
-   articles = scraper.get_both_latest_articles()
-   
-   # Clean up resources
-   scraper.close()
+   if result.success:
+       print(f"Podcast generated: {result.audio_path}")
+       print(f"RSS feed: {result.rss_path}")
 
 Command Line Interface
 ~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: bash
 
-   # Get latest security article
-   wired-scraper security
+   # Generate complete podcast episode
+   the-data-packet --output ./episode
    
-   # Get both latest articles
-   wired-scraper both
+   # Generate script only
+   the-data-packet --script-only --output ./scripts
    
-   # Get multiple articles
-   wired-scraper security --count 5
-   
-   # Scrape specific URL
-   wired-scraper --url "https://www.wired.com/story/example/"
+   # Custom configuration
+   the-data-packet \\
+     --show-name "Tech Brief" \\
+     --voice-a charon \\
+     --voice-b aoede \\
+     --categories security guide
+
+Architecture Overview
+--------------------
+
+The Data Packet is built with a modular architecture:
+
+- **Core**: Configuration, exceptions, logging
+- **Sources**: Article collection from news websites  
+- **Generation**: AI script and audio generation
+- **Storage**: AWS S3 integration for hosting
+- **Workflows**: End-to-end pipeline orchestration
+- **Utils**: HTTP clients, helper functions
 
 Package Structure
 -----------------
@@ -71,10 +103,11 @@ Package Structure
    :maxdepth: 2
    :caption: API Documentation:
 
-   api/models
-   api/clients
-   api/extractors
-   api/scrapers
+   api/core
+   api/sources  
+   api/generation
+   api/storage
+   api/workflows
    api/cli
 
 .. toctree::

@@ -25,11 +25,11 @@ Examples:
   the-data-packet --show-name "Tech Brief" --voice-a charon --voice-b aoede
 
   # Generate from specific sources and categories
-  the-data-packet --sources wired --categories security guide --output ./multi-category
+  the-data-packet --sources wired techcrunch --categories security ai --output ./multi-source
 
 Environment Variables:
   ANTHROPIC_API_KEY    - Claude API key for script generation
-  GOOGLE_API_KEY       - Gemini API key for audio generation  
+  GOOGLE_API_KEY       - Google Cloud API key for TTS audio generation  
   S3_BUCKET_NAME       - S3 bucket for uploads (optional)
   AWS_ACCESS_KEY_ID    - AWS access key (optional)
   AWS_SECRET_ACCESS_KEY - AWS secret key (optional)
@@ -43,7 +43,7 @@ Environment Variables:
     )
     parser.add_argument(
         "--google-key",
-        help="Google API key (overrides GOOGLE_API_KEY env var)",
+        help="Google Cloud API key (overrides GOOGLE_API_KEY env var)",
     )
 
     # Content Options
@@ -51,14 +51,14 @@ Environment Variables:
         "--sources",
         nargs="+",
         default=["wired"],
-        choices=["wired"],
+        choices=["wired", "techcrunch"],
         help="Article sources to use (default: wired)",
     )
     parser.add_argument(
         "--categories",
         nargs="+",
-        default=["security", "guide"],
-        help="Article categories to fetch (default: security guide)",
+        default=["security", "ai"],
+        help="Article categories to fetch (default: security ai)",
     )
     parser.add_argument(
         "--max-articles",
@@ -82,15 +82,13 @@ Environment Variables:
     # Audio Settings
     parser.add_argument(
         "--voice-a",
-        default="puck",
-        choices=["puck", "charon", "kore", "fenrir", "aoede", "zephyr"],
-        help="Voice for first speaker (default: puck)",
+        default="en-US-Neural2-A",
+        help="Voice for first speaker (default: en-US-Neural2-A)",
     )
     parser.add_argument(
         "--voice-b",
-        default="kore",
-        choices=["puck", "charon", "kore", "fenrir", "aoede", "zephyr"],
-        help="Voice for second speaker (default: kore)",
+        default="en-US-Neural2-B",
+        help="Voice for second speaker (default: en-US-Neural2-B)",
     )
 
     # Output Settings

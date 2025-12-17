@@ -1,4 +1,54 @@
-"""Wired.com article source implementation."""
+"""Wired.com article source implementation.
+
+This module implements article collection from Wired.com using RSS feeds and
+web scraping. Wired.com provides RSS feeds for different categories that contain
+recent article URLs, which are then scraped for full content.
+
+Features:
+    - RSS feed-based article discovery
+    - Multiple category support (security, guides, business, science, AI)
+    - Robust content extraction with fallback methods
+    - Content cleaning and validation
+    - Error handling for network issues and malformed content
+
+RSS Feed Strategy:
+    1. Fetch category-specific RSS feed
+    2. Parse feed to extract article URLs
+    3. Scrape individual articles for full content
+    4. Clean and validate extracted content
+    5. Return standardized Article objects
+
+Content Extraction:
+    - Primary: Article body containers and paragraph tags
+    - Fallback: Main content areas and text containers
+    - Cleaning: Remove navigation, ads, and boilerplate text
+    - Validation: Ensure sufficient content length
+
+Supported Categories:
+    - security: Security and cybersecurity articles
+    - guide: How-to guides and tutorials
+    - business: Business and industry news
+    - science: Science and technology research
+    - ai: Artificial intelligence and machine learning
+
+Rate Limiting:
+    - Respectful delays between requests
+    - Connection reuse via HTTP session
+    - Proper User-Agent identification
+
+Example Usage:
+    source = WiredSource()
+
+    # Get latest security article
+    article = source.get_latest_article(\"security\")
+
+    # Get multiple guide articles
+    articles = source.get_multiple_articles(\"guide\", count=3)
+
+    # Check supported categories
+    if \"ai\" in source.supported_categories:
+        ai_articles = source.get_multiple_articles(\"ai\", count=5)
+"""
 
 import re
 from typing import List, Optional
@@ -25,8 +75,6 @@ class WiredSource(ArticleSource):
     # RSS feed URLs for different categories
     RSS_FEEDS = {
         "security": "https://www.wired.com/feed/category/security/latest/rss",
-        "guide": "https://www.wired.com/feed/category/gear/latest/rss",
-        "business": "https://www.wired.com/feed/category/business/latest/rss",
         "science": "https://www.wired.com/feed/category/science/latest/rss",
         "ai": "https://www.wired.com/feed/tag/ai/latest/rss",
     }

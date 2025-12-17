@@ -1,6 +1,6 @@
 # Usage Guide - The Data Packet
 
-This guide covers all aspects of using The Data Packet Docker image for automated podcast generation.
+This comprehensive guide covers all aspects of using The Data Packet's AI-powered podcast generation system.
 
 ## 📦 Getting the Image
 

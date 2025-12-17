@@ -13,6 +13,7 @@ from the_data_packet.generation.audio import AudioGenerator, AudioResult
 from the_data_packet.generation.rss import RSSGenerator
 from the_data_packet.generation.script import ScriptGenerator
 from the_data_packet.sources.base import Article
+from the_data_packet.sources.techcrunch import TechCrunchSource
 from the_data_packet.sources.wired import WiredSource
 from the_data_packet.utils.s3 import S3Storage, S3UploadResult
 
@@ -44,6 +45,7 @@ class PodcastPipeline:
     # Available article sources
     SOURCES = {
         "wired": WiredSource,
+        "techcrunch": TechCrunchSource,
     }
 
     def __init__(self, config: Optional[Config] = None):
@@ -64,8 +66,7 @@ class PodcastPipeline:
         self._rss_generator: Optional[RSSGenerator] = None
         self._s3_storage: Optional[S3Storage] = None
 
-        logger.info(
-            f"Initialized podcast pipeline for '{self.config.show_name}'")
+        logger.info(f"Initialized podcast pipeline for '{self.config.show_name}'")
 
     def run(self) -> PodcastResult:
         """
@@ -176,8 +177,7 @@ class PodcastPipeline:
                     continue
 
                 try:
-                    logger.info(
-                        f"Collecting {category} articles from {source_name}")
+                    logger.info(f"Collecting {category} articles from {source_name}")
 
                     if self.config.max_articles_per_source == 1:
                         article = source.get_latest_article(category)
@@ -305,8 +305,7 @@ class PodcastPipeline:
                 if rss_result.s3_url:
                     logger.info(f"RSS feed URL: {rss_result.s3_url}")
             else:
-                logger.error(
-                    f"Failed to update RSS feed: {rss_result.error_message}")
+                logger.error(f"Failed to update RSS feed: {rss_result.error_message}")
 
         except Exception as e:
             logger.error(f"RSS feed generation failed: {e}")
@@ -317,11 +316,9 @@ class PodcastPipeline:
         errors = []
 
         # Validate article sources
-        unknown_sources = set(self.config.article_sources) - \
-            set(self.SOURCES.keys())
+        unknown_sources = set(self.config.article_sources) - set(self.SOURCES.keys())
         if unknown_sources:
-            errors.append(
-                f"Unknown article sources: {', '.join(unknown_sources)}")
+            errors.append(f"Unknown article sources: {', '.join(unknown_sources)}")
 
         # Validate that at least one generation is enabled
         if not self.config.generate_script and not self.config.generate_audio:

@@ -1,6 +1,7 @@
 """Script generation using Anthropic Claude."""
 
-from typing import List, Optional
+import re
+from typing import Any, List, Optional
 
 from anthropic import Anthropic, APIError, RateLimitError
 from tenacity import (
@@ -100,8 +101,11 @@ class ScriptGenerator:
             # Step 3: Combine into complete script
             complete_script = self._combine_script(framework, segments)
 
+            # Step 4: Optimize script for ElevenLabs TTS
+            optimized_script = self._optimize_script_for_tts(complete_script)
+
             logger.info("Script generation completed successfully")
-            return complete_script
+            return optimized_script
 
         except Exception as e:
             if isinstance(e, AIGenerationError):
@@ -303,7 +307,7 @@ class ScriptGenerator:
                 if current_section and current_lines:
                     sections[current_section] = "\n".join(current_lines).strip()
                 current_section = "opening"
-                current_lines: list[str] = []
+                current_lines = []
             elif line.startswith("## TRANSITION"):
                 if current_section and current_lines:
                     sections[current_section] = "\n".join(current_lines).strip()
@@ -312,12 +316,12 @@ class ScriptGenerator:
                 if len(parts) >= 2:
                     transition_id = parts[1].replace("→", "_").replace("->", "_")
                     current_section = f"transition_{transition_id}"
-                current_lines: list[str] = []
+                current_lines = []
             elif line.startswith("## SHOW CLOSING"):
                 if current_section and current_lines:
                     sections[current_section] = "\n".join(current_lines).strip()
                 current_section = "closing"
-                current_lines: list[str] = []
+                current_lines = []
             elif line.startswith("---"):
                 continue
             elif line:
@@ -328,6 +332,201 @@ class ScriptGenerator:
             sections[current_section] = "\n".join(current_lines).strip()
 
         return sections
+
+    def _optimize_script_for_tts(self, script: str) -> str:
+        """Optimize script text for ElevenLabs TTS following best practices."""
+
+        def normalize_currency(match: Any) -> str:
+            """Convert currency formats for TTS."""
+            currency_map = {"$": "dollars", "£": "pounds", "€": "euros", "¥": "yen"}
+            currency_symbol = match.group(1)
+            number = match.group(2).replace(",", "")
+
+            if "." in number:
+                dollars, cents = number.split(".")
+                dollars_word = self._number_to_words(int(dollars))
+                cents_word = self._number_to_words(int(cents))
+                return f"{dollars_word} {currency_map.get(currency_symbol, 'currency')} and {cents_word} cents"
+            else:
+                number_word = self._number_to_words(int(number))
+                return f"{number_word} {currency_map.get(currency_symbol, 'currency')}"
+
+        def normalize_numbers(match: Any) -> str:
+            """Convert large numbers for TTS."""
+            number = int(match.group().replace(",", ""))
+            return self._number_to_words(number)
+
+        def normalize_percentages(match: Any) -> str:
+            """Convert percentages for TTS."""
+            number = match.group(1)
+            return f"{self._number_to_words(int(number))} percent"
+
+        def normalize_phone_numbers(match: Any) -> str:
+            """Convert phone numbers for TTS."""
+            parts = [match.group(1), match.group(2), match.group(3)]
+            result = []
+            for part in parts:
+                result.append(
+                    " ".join([self._number_to_words(int(digit)) for digit in part])
+                )
+            return ", ".join(result)
+
+        # Apply text normalization
+        text = script
+
+        # Currency normalization
+        text = re.sub(r"([$£€¥])(\d+(?:,\d{3})*(?:\.\d{2})?)", normalize_currency, text)
+
+        # Large numbers with commas
+        text = re.sub(r"\\b\\d{1,3}(?:,\\d{3})+\\b", normalize_numbers, text)
+
+        # Percentages
+        text = re.sub(r"(\\d+)%", normalize_percentages, text)
+
+        # Phone numbers
+        text = re.sub(r"(\\d{3})-(\\d{3})-(\\d{4})", normalize_phone_numbers, text)
+
+        # URLs - simplify for speech
+        text = re.sub(r"https?://([\w.-]+)", r"\1", text)
+
+        # Abbreviations expansion
+        abbreviations = {
+            "AI": "artificial intelligence",
+            "ML": "machine learning",
+            "CEO": "C.E.O.",
+            "CTO": "C.T.O.",
+            "CFO": "C.F.O.",
+            "IPO": "I.P.O.",
+            "API": "A.P.I.",
+            "GPU": "G.P.U.",
+            "CPU": "C.P.U.",
+            "IoT": "Internet of Things",
+            "VR": "virtual reality",
+            "AR": "augmented reality",
+            "SaaS": "Software as a Service",
+            "AWS": "Amazon Web Services",
+            "SDK": "software development kit",
+            "vs.": "versus",
+            "etc.": "etcetera",
+            "Dr.": "Doctor",
+            "Mr.": "Mister",
+            "Ms.": "Miss",
+            "Inc.": "Incorporated",
+            "Corp.": "Corporation",
+            "Ltd.": "Limited",
+        }
+
+        for abbrev, expansion in abbreviations.items():
+            # Use word boundaries to avoid partial matches
+            text = re.sub(rf"\b{re.escape(abbrev)}\b", expansion, text)
+
+        # Add natural pauses for better flow
+        # After introductory phrases
+        text = re.sub(
+            r"(Speaking of|Now,|Meanwhile,|However,|Actually,)",
+            r'\1 <break time="0.3s"/>',
+            text,
+        )
+
+        # Before important statements
+        text = re.sub(
+            r"(But here\'s the thing|The key point is|What\'s interesting is)",
+            r'<break time="0.5s"/> \1',
+            text,
+        )
+
+        # Improve punctuation for speech flow
+        # Convert ellipses to pauses
+        text = re.sub(r"\.\.\. ?", ' <break time="0.7s"/> ', text)
+
+        # Add slight pauses after em dashes
+        text = re.sub(r" — ", ' <break time="0.2s"/> ', text)
+
+        return text
+
+    def _number_to_words(self, number: int) -> str:
+        """Convert numbers to words for better TTS pronunciation."""
+        if number == 0:
+            return "zero"
+
+        # Handle basic numbers (this is a simplified version)
+        ones = [
+            "",
+            "one",
+            "two",
+            "three",
+            "four",
+            "five",
+            "six",
+            "seven",
+            "eight",
+            "nine",
+        ]
+        teens = [
+            "ten",
+            "eleven",
+            "twelve",
+            "thirteen",
+            "fourteen",
+            "fifteen",
+            "sixteen",
+            "seventeen",
+            "eighteen",
+            "nineteen",
+        ]
+        tens = [
+            "",
+            "",
+            "twenty",
+            "thirty",
+            "forty",
+            "fifty",
+            "sixty",
+            "seventy",
+            "eighty",
+            "ninety",
+        ]
+
+        if number < 10:
+            return ones[number]
+        elif number < 20:
+            return teens[number - 10]
+        elif number < 100:
+            return tens[number // 10] + (
+                "" if number % 10 == 0 else " " + ones[number % 10]
+            )
+        elif number < 1000:
+            return (
+                ones[number // 100]
+                + " hundred"
+                + (
+                    ""
+                    if number % 100 == 0
+                    else " " + self._number_to_words(number % 100)
+                )
+            )
+        elif number < 1000000:
+            return (
+                self._number_to_words(number // 1000)
+                + " thousand"
+                + (
+                    ""
+                    if number % 1000 == 0
+                    else " " + self._number_to_words(number % 1000)
+                )
+            )
+        elif number < 1000000000:
+            return (
+                self._number_to_words(number // 1000000)
+                + " million"
+                + (
+                    ""
+                    if number % 1000000 == 0
+                    else " " + self._number_to_words(number % 1000000)
+                )
+            )
+        else:
+            return str(number)  # Fallback for very large numbers
 
 
 # Prompts (simplified versions of the original prompts)
@@ -341,6 +540,13 @@ IMPORTANT: If the article is NOT about technology (e.g., lifestyle, shopping, he
 - Alex is relatable, Sam is tech-savvy
 - Start in media res, end with clear takeaway
 - Include core news, key players, impact, and next steps
+
+## WRITING FOR AUDIO
+- Use full words instead of abbreviations when possible (write "artificial intelligence" instead of "AI" when it flows better)
+- Write out numbers naturally ("fifty million" instead of "50M")
+- Use natural speech patterns with contractions ("don't", "we're", "it's")
+- Add natural conversation fillers occasionally ("you know", "I mean", "actually")
+- Use punctuation that helps with speech flow (commas for pauses, periods for stops)
 
 ## OUTPUT FORMAT
 ### SEGMENT SCRIPT
