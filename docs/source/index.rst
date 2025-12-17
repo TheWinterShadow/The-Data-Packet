@@ -10,9 +10,9 @@ What It Does
 
 The Data Packet automates the entire podcast creation workflow:
 
-1. **📰 Article Collection**: Scrapes latest tech news from Wired.com via RSS feeds
+1. **📰 Article Collection**: Scrapes latest tech news from Wired.com and TechCrunch via RSS feeds
 2. **🤖 Script Generation**: Uses Anthropic Claude AI to create engaging dialogue scripts 
-3. **🎙️ Audio Production**: Generates multi-speaker audio using Google Gemini TTS
+3. **🎙️ Audio Production**: Generates multi-speaker audio using ElevenLabs TTS
 4. **📦 Podcast Distribution**: Creates RSS feeds and uploads to AWS S3 for hosting
 5. **🔄 Complete Automation**: Runs the entire pipeline with a single command
 
@@ -20,7 +20,7 @@ Key Features
 ------------
 
 - **🐳 Docker-First Deployment**: Run anywhere with consistent environment
-- **🤖 AI-Powered Content**: Claude for natural dialogue, Gemini for realistic voices
+- **🤖 AI-Powered Content**: Claude for natural dialogue, ElevenLabs for professional voices
 - **⚙️ Highly Configurable**: Multiple voices, show formats, and content categories
 - **🔒 Production Ready**: Robust error handling, logging, and security
 - **📊 Monitoring & Analytics**: Comprehensive logging and status tracking
@@ -40,7 +40,7 @@ Docker Deployment (Recommended)
    # Run with your API keys
    docker run --rm \\
      -e ANTHROPIC_API_KEY="your-claude-key" \\
-     -e GOOGLE_API_KEY="your-gemini-key" \\
+     -e ELEVENLABS_API_KEY="your-elevenlabs-key" \\
      -v "$(pwd)/output:/app/output" \\
      ghcr.io/thewintershadow/the-data-packet:latest
 
@@ -56,15 +56,17 @@ Basic Usage
 
 .. code-block:: python
 
-   from the_data_packet import PodcastPipeline
+   from the_data_packet import PodcastPipeline, get_config
    
-   # Create and run the complete pipeline
-   pipeline = PodcastPipeline()
+   # Create configuration and run the complete pipeline
+   config = get_config(show_name="Tech Brief", max_articles_per_source=1)
+   pipeline = PodcastPipeline(config)
    result = pipeline.run()
    
    if result.success:
        print(f"Podcast generated: {result.audio_path}")
-       print(f"RSS feed: {result.rss_path}")
+       if result.rss_path:
+           print(f"RSS feed: {result.rss_path}")
 
 Command Line Interface
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -80,12 +82,13 @@ Command Line Interface
    # Custom configuration
    the-data-packet \\
      --show-name "Tech Brief" \\
-     --voice-a charon \\
-     --voice-b aoede \\
-     --categories security guide
+     --voice-a XrExE9yKIg1WjnnlVkGX \\
+     --voice-b IKne3meq5aSn9XLyUdCD \\
+     --sources wired techcrunch \\
+     --categories security ai
 
 Architecture Overview
---------------------
+---------------------
 
 The Data Packet is built with a modular architecture:
 

@@ -3,10 +3,10 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Web Scrapers" href="scrapers.html"><link rel="prev" title="Client Modules" href="clients.html">
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.09.25 -->
-        <title>Content Extractors - The Data Packet 1.0.0 documentation</title>
+        <title>Sources Module - Article Extraction - The Data Packet 2.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=580074bf" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">The Data Packet 1.0.0 documentation</div></a>
+      <a href="../index.html"><div class="brand">The Data Packet 2.0.0 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -182,7 +182,7 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
   
-  <span class="sidebar-brand-text">The Data Packet 1.0.0 documentation</span>
+  <span class="sidebar-brand-text">The Data Packet 2.0.0 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -191,11 +191,12 @@
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">API Documentation:</span></p>
-<ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="models.html">Data Models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="clients.html">Client Modules</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Content Extractors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="scrapers.html">Web Scrapers</a></li>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="core.html">Core Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sources.html">Sources Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generation.html">Generation Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="storage.html">Storage Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workflows.html">Workflows Module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cli.html">Command Line Interface</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Development:</span></p>
@@ -240,149 +241,555 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="content-extractors">
-<h1>Content Extractors<a class="headerlink" href="#content-extractors" title="Link to this heading">¶</a></h1>
-<p>The extractors module handles parsing and extracting structured data from raw HTML content.</p>
-<section id="wired-content-extractor">
-<h2>Wired Content Extractor<a class="headerlink" href="#wired-content-extractor" title="Link to this heading">¶</a></h2>
+          <section id="sources-module-article-extraction">
+<h1>Sources Module - Article Extraction<a class="headerlink" href="#sources-module-article-extraction" title="Link to this heading">¶</a></h1>
+<p>The sources module handles article collection and content extraction from various news websites. Content extraction is integrated directly into source classes.</p>
+<section id="module-the_data_packet.sources.wired">
+<span id="wired-source"></span><h2>Wired Source<a class="headerlink" href="#module-the_data_packet.sources.wired" title="Link to this heading">¶</a></h2>
+<p>Wired.com article source implementation.</p>
+<p>This module implements article collection from Wired.com using RSS feeds and
+web scraping. Wired.com provides RSS feeds for different categories that contain
+recent article URLs, which are then scraped for full content.</p>
+<dl>
+<dt>Features:</dt><dd><ul class="simple">
+<li><p>RSS feed-based article discovery</p></li>
+<li><p>Multiple category support (security, guides, business, science, AI)</p></li>
+<li><p>Robust content extraction with fallback methods</p></li>
+<li><p>Content cleaning and validation</p></li>
+<li><p>Error handling for network issues and malformed content</p></li>
+</ul>
+</dd>
+<dt>RSS Feed Strategy:</dt><dd><ol class="arabic simple">
+<li><p>Fetch category-specific RSS feed</p></li>
+<li><p>Parse feed to extract article URLs</p></li>
+<li><p>Scrape individual articles for full content</p></li>
+<li><p>Clean and validate extracted content</p></li>
+<li><p>Return standardized Article objects</p></li>
+</ol>
+</dd>
+<dt>Content Extraction:</dt><dd><ul class="simple">
+<li><p>Primary: Article body containers and paragraph tags</p></li>
+<li><p>Fallback: Main content areas and text containers</p></li>
+<li><p>Cleaning: Remove navigation, ads, and boilerplate text</p></li>
+<li><p>Validation: Ensure sufficient content length</p></li>
+</ul>
+</dd>
+<dt>Supported Categories:</dt><dd><ul class="simple">
+<li><p>security: Security and cybersecurity articles</p></li>
+<li><p>guide: How-to guides and tutorials</p></li>
+<li><p>business: Business and industry news</p></li>
+<li><p>science: Science and technology research</p></li>
+<li><p>ai: Artificial intelligence and machine learning</p></li>
+</ul>
+</dd>
+<dt>Rate Limiting:</dt><dd><ul class="simple">
+<li><p>Respectful delays between requests</p></li>
+<li><p>Connection reuse via HTTP session</p></li>
+<li><p>Proper User-Agent identification</p></li>
+</ul>
+</dd>
+<dt>Example Usage:</dt><dd><p>source = WiredSource()</p>
+<p># Get latest security article
+article = source.get_latest_article(“security”)</p>
+<p># Get multiple guide articles
+articles = source.get_multiple_articles(“guide”, count=3)</p>
+<p># Check supported categories
+if “ai” in source.supported_categories:</p>
+<blockquote>
+<div><p>ai_articles = source.get_multiple_articles(“ai”, count=5)</p>
+</div></blockquote>
+</dd>
+</dl>
 <dl class="py class">
-<dt class="sig sig-object py" id="the_data_packet.extractors.WiredContentExtractor">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">the_data_packet.extractors.</span></span><span class="sig-name descname"><span class="pre">WiredContentExtractor</span></span><a class="reference internal" href="../_modules/the_data_packet/extractors/wired_extractor.html#WiredContentExtractor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.extractors.WiredContentExtractor" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
-<p>Extracts article data from Wired.com HTML pages.</p>
+<dt class="sig sig-object py" id="the_data_packet.sources.wired.WiredSource">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">the_data_packet.sources.wired.</span></span><span class="sig-name descname"><span class="pre">WiredSource</span></span><a class="reference internal" href="../_modules/the_data_packet/sources/wired.html#WiredSource"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.sources.wired.WiredSource" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="sources.html#the_data_packet.sources.base.ArticleSource" title="the_data_packet.sources.base.ArticleSource"><code class="xref py py-class docutils literal notranslate"><span class="pre">ArticleSource</span></code></a></p>
+<p>Article source for Wired.com.</p>
 <dl class="py method">
-<dt class="sig sig-object py" id="the_data_packet.extractors.WiredContentExtractor.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/the_data_packet/extractors/wired_extractor.html#WiredContentExtractor.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.extractors.WiredContentExtractor.__init__" title="Link to this definition">¶</a></dt>
-<dd><p>Initialize the content extractor.</p>
+<dt class="sig sig-object py" id="the_data_packet.sources.wired.WiredSource.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/the_data_packet/sources/wired.html#WiredSource.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.sources.wired.WiredSource.__init__" title="Link to this definition">¶</a></dt>
+<dd><p>Initialize Wired source.</p>
 </dd></dl>
 
-<p>The <cite>WiredContentExtractor</cite> is specialized for extracting article data from Wired.com
-pages. It uses multiple extraction strategies with fallbacks to ensure robust parsing.</p>
-<p><strong>Extraction Methods:</strong></p>
-<ul class="simple">
-<li><p><strong>Title Extraction</strong>: Tries page title, H1 tags, and OpenGraph meta tags</p></li>
-<li><p><strong>Author Extraction</strong>: Searches meta tags, JSON-LD structured data, and byline elements</p></li>
-<li><p><strong>Content Extraction</strong>: Identifies article content areas and filters promotional text</p></li>
-</ul>
-<p><strong>Example Usage:</strong></p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">the_data_packet.extractors</span><span class="w"> </span><span class="kn">import</span> <span class="n">WiredContentExtractor</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">the_data_packet.clients</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPClient</span>
-
-<span class="c1"># Create extractor</span>
-<span class="n">extractor</span> <span class="o">=</span> <span class="n">WiredContentExtractor</span><span class="p">()</span>
-
-<span class="c1"># Get a webpage</span>
-<span class="n">client</span> <span class="o">=</span> <span class="n">HTTPClient</span><span class="p">()</span>
-<span class="n">soup</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_page</span><span class="p">(</span><span class="s2">&quot;https://www.wired.com/story/example/&quot;</span><span class="p">)</span>
-
-<span class="c1"># Extract article data</span>
-<span class="n">article</span> <span class="o">=</span> <span class="n">extractor</span><span class="o">.</span><span class="n">extract</span><span class="p">(</span><span class="n">soup</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="s2">&quot;https://www.wired.com/story/example/&quot;</span><span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Title: </span><span class="si">{</span><span class="n">article</span><span class="o">.</span><span class="n">title</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Author: </span><span class="si">{</span><span class="n">article</span><span class="o">.</span><span class="n">author</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Content length: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">article</span><span class="o">.</span><span class="n">content</span><span class="p">)</span><span class="si">}</span><span class="s2"> characters&quot;</span><span class="p">)</span>
-
-<span class="c1"># Clean up</span>
-<span class="n">client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-</pre></div>
-</div>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="the_data_packet.extractors.WiredContentExtractor.SKIP_PATTERNS">
-<span class="sig-name descname"><span class="pre">SKIP_PATTERNS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['subscribe</span> <span class="pre">to</span> <span class="pre">wired',</span> <span class="pre">'most</span> <span class="pre">popular',</span> <span class="pre">'related</span> <span class="pre">stories',</span> <span class="pre">'advertisement',</span> <span class="pre">'get</span> <span class="pre">wired',</span> <span class="pre">'sign</span> <span class="pre">up']</span></em><a class="headerlink" href="#the_data_packet.extractors.WiredContentExtractor.SKIP_PATTERNS" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="the_data_packet.sources.wired.WiredSource.RSS_FEEDS">
+<span class="sig-name descname"><span class="pre">RSS_FEEDS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'ai':</span> <span class="pre">'https://www.wired.com/feed/tag/ai/latest/rss',</span> <span class="pre">'science':</span> <span class="pre">'https://www.wired.com/feed/category/science/latest/rss',</span> <span class="pre">'security':</span> <span class="pre">'https://www.wired.com/feed/category/security/latest/rss'}</span></em><a class="headerlink" href="#the_data_packet.sources.wired.WiredSource.RSS_FEEDS" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="the_data_packet.sources.wired.WiredSource.SKIP_PATTERNS">
+<span class="sig-name descname"><span class="pre">SKIP_PATTERNS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['subscribe</span> <span class="pre">to</span> <span class="pre">wired',</span> <span class="pre">'most</span> <span class="pre">popular',</span> <span class="pre">'related</span> <span class="pre">stories',</span> <span class="pre">'advertisement',</span> <span class="pre">'get</span> <span class="pre">wired',</span> <span class="pre">'sign</span> <span class="pre">up',</span> <span class="pre">'newsletter']</span></em><a class="headerlink" href="#the_data_packet.sources.wired.WiredSource.SKIP_PATTERNS" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="the_data_packet.sources.wired.WiredSource.name">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></em><a class="headerlink" href="#the_data_packet.sources.wired.WiredSource.name" title="Link to this definition">¶</a></dt>
+<dd><p>Source name identifier.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="the_data_packet.sources.wired.WiredSource.supported_categories">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">supported_categories</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#the_data_packet.sources.wired.WiredSource.supported_categories" title="Link to this definition">¶</a></dt>
+<dd><p>List of supported categories.</p>
+</dd></dl>
+
 <dl class="py method">
+<dt class="sig sig-object py" id="the_data_packet.sources.wired.WiredSource.get_latest_article">
+<span class="sig-name descname"><span class="pre">get_latest_article</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">category</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="sources.html#the_data_packet.sources.base.Article" title="the_data_packet.sources.base.Article"><span class="pre">Article</span></a></span></span><a class="reference internal" href="../_modules/the_data_packet/sources/wired.html#WiredSource.get_latest_article"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.sources.wired.WiredSource.get_latest_article" title="Link to this definition">¶</a></dt>
+<dd><p>Get the latest article from a category.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="the_data_packet.sources.wired.WiredSource.get_multiple_articles">
+<span class="sig-name descname"><span class="pre">get_multiple_articles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">category</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="sources.html#the_data_packet.sources.base.Article" title="the_data_packet.sources.base.Article"><span class="pre">Article</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/the_data_packet/sources/wired.html#WiredSource.get_multiple_articles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.sources.wired.WiredSource.get_multiple_articles" title="Link to this definition">¶</a></dt>
+<dd><p>Get multiple articles from a category.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-the_data_packet.sources.techcrunch">
+<span id="techcrunch-source"></span><h2>TechCrunch Source<a class="headerlink" href="#module-the_data_packet.sources.techcrunch" title="Link to this heading">¶</a></h2>
+<p>TechCrunch.com article source implementation.</p>
+<p>This module implements article collection from TechCrunch.com using RSS feeds and
+web scraping. TechCrunch provides RSS feeds for different categories that contain
+recent article URLs, which are then scraped for full content.</p>
+<dl>
+<dt>Features:</dt><dd><ul class="simple">
+<li><p>RSS feed-based article discovery</p></li>
+<li><p>Multiple category support (artificial-intelligence, security)</p></li>
+<li><p>Robust content extraction with fallback methods</p></li>
+<li><p>Content cleaning and validation</p></li>
+<li><p>Error handling for network issues and malformed content</p></li>
+</ul>
+</dd>
+<dt>RSS Feed Strategy:</dt><dd><ol class="arabic simple">
+<li><p>Fetch category-specific RSS feed</p></li>
+<li><p>Parse feed to extract article URLs</p></li>
+<li><p>Scrape individual articles for full content</p></li>
+<li><p>Clean and validate extracted content</p></li>
+<li><p>Return standardized Article objects</p></li>
+</ol>
+</dd>
+<dt>Content Extraction:</dt><dd><ul class="simple">
+<li><p>Primary: Article body containers and paragraph tags</p></li>
+<li><p>Fallback: Main content areas and text containers</p></li>
+<li><p>Cleaning: Remove navigation, ads, and boilerplate text</p></li>
+<li><p>Validation: Ensure sufficient content length</p></li>
+</ul>
+</dd>
+<dt>Supported Categories:</dt><dd><ul class="simple">
+<li><p>ai: Artificial intelligence and machine learning articles</p></li>
+<li><p>security: Security and cybersecurity articles</p></li>
+</ul>
+</dd>
+<dt>Rate Limiting:</dt><dd><ul class="simple">
+<li><p>Respectful delays between requests</p></li>
+<li><p>Connection reuse via HTTP session</p></li>
+<li><p>Proper User-Agent identification</p></li>
+</ul>
+</dd>
+<dt>Example Usage:</dt><dd><p>source = TechCrunchSource()</p>
+<p># Get latest AI article
+article = source.get_latest_article(“ai”)</p>
+<p># Get multiple security articles
+articles = source.get_multiple_articles(“security”, count=3)</p>
+<p># Check supported categories
+if “ai” in source.supported_categories:</p>
+<blockquote>
+<div><p>ai_articles = source.get_multiple_articles(“ai”, count=5)</p>
+</div></blockquote>
+</dd>
+</dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="the_data_packet.sources.techcrunch.TechCrunchSource">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">the_data_packet.sources.techcrunch.</span></span><span class="sig-name descname"><span class="pre">TechCrunchSource</span></span><a class="reference internal" href="../_modules/the_data_packet/sources/techcrunch.html#TechCrunchSource"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.sources.techcrunch.TechCrunchSource" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="sources.html#the_data_packet.sources.base.ArticleSource" title="the_data_packet.sources.base.ArticleSource"><code class="xref py py-class docutils literal notranslate"><span class="pre">ArticleSource</span></code></a></p>
+<p>Article source for TechCrunch.com.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="the_data_packet.sources.techcrunch.TechCrunchSource.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/the_data_packet/sources/techcrunch.html#TechCrunchSource.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.sources.techcrunch.TechCrunchSource.__init__" title="Link to this definition">¶</a></dt>
+<dd><p>Initialize TechCrunch source.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="the_data_packet.sources.techcrunch.TechCrunchSource.RSS_FEEDS">
+<span class="sig-name descname"><span class="pre">RSS_FEEDS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'ai':</span> <span class="pre">'https://techcrunch.com/category/artificial-intelligence/feed/',</span> <span class="pre">'security':</span> <span class="pre">'https://techcrunch.com/category/security/feed/'}</span></em><a class="headerlink" href="#the_data_packet.sources.techcrunch.TechCrunchSource.RSS_FEEDS" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="the_data_packet.sources.techcrunch.TechCrunchSource.SKIP_PATTERNS">
+<span class="sig-name descname"><span class="pre">SKIP_PATTERNS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['subscribe</span> <span class="pre">to</span> <span class="pre">techcrunch',</span> <span class="pre">'most</span> <span class="pre">popular',</span> <span class="pre">'related</span> <span class="pre">articles',</span> <span class="pre">'advertisement',</span> <span class="pre">'get</span> <span class="pre">techcrunch',</span> <span class="pre">'sign</span> <span class="pre">up',</span> <span class="pre">'newsletter',</span> <span class="pre">'techcrunch+',</span> <span class="pre">'techcrunch</span> <span class="pre">disrupt',</span> <span class="pre">'more</span> <span class="pre">techcrunch',</span> <span class="pre">'follow</span> <span class="pre">us',</span> <span class="pre">'share</span> <span class="pre">this</span> <span class="pre">article']</span></em><a class="headerlink" href="#the_data_packet.sources.techcrunch.TechCrunchSource.SKIP_PATTERNS" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="the_data_packet.sources.techcrunch.TechCrunchSource.name">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></em><a class="headerlink" href="#the_data_packet.sources.techcrunch.TechCrunchSource.name" title="Link to this definition">¶</a></dt>
+<dd><p>Source name identifier.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="the_data_packet.sources.techcrunch.TechCrunchSource.supported_categories">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">supported_categories</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#the_data_packet.sources.techcrunch.TechCrunchSource.supported_categories" title="Link to this definition">¶</a></dt>
+<dd><p>List of supported categories.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="the_data_packet.sources.techcrunch.TechCrunchSource.get_latest_article">
+<span class="sig-name descname"><span class="pre">get_latest_article</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">category</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="sources.html#the_data_packet.sources.base.Article" title="the_data_packet.sources.base.Article"><span class="pre">Article</span></a></span></span><a class="reference internal" href="../_modules/the_data_packet/sources/techcrunch.html#TechCrunchSource.get_latest_article"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.sources.techcrunch.TechCrunchSource.get_latest_article" title="Link to this definition">¶</a></dt>
+<dd><p>Get the latest article from a category.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="the_data_packet.sources.techcrunch.TechCrunchSource.get_multiple_articles">
+<span class="sig-name descname"><span class="pre">get_multiple_articles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">category</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="sources.html#the_data_packet.sources.base.Article" title="the_data_packet.sources.base.Article"><span class="pre">Article</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/the_data_packet/sources/techcrunch.html#TechCrunchSource.get_multiple_articles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.sources.techcrunch.TechCrunchSource.get_multiple_articles" title="Link to this definition">¶</a></dt>
+<dd><p>Get multiple articles from a category.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-the_data_packet.sources.base">
+<span id="base-classes"></span><h2>Base Classes<a class="headerlink" href="#module-the_data_packet.sources.base" title="Link to this heading">¶</a></h2>
+<p>Base classes for article sources.</p>
+<p>This module defines the core data structures and interfaces for collecting
+articles from various news sources. It provides a standardized way to
+represent articles and implement source-specific collection logic.</p>
+<p>The design supports:
+- Multiple news sources with different scraping strategies
+- Consistent article representation across sources
+- Validation of article content quality
+- Category-based article filtering
+- Extensible source implementation</p>
+<dl class="simple">
+<dt>Architecture:</dt><dd><p>Article: Data class representing a single news article
+ArticleSource: Abstract base class for implementing news sources</p>
+</dd>
+<dt>Current Sources:</dt><dd><ul class="simple">
+<li><p>WiredSource: Wired.com articles via RSS feeds</p></li>
+<li><p>TechCrunchSource: TechCrunch.com articles via RSS feeds</p></li>
+</ul>
+</dd>
+<dt>Future Sources (extensible):</dt><dd><ul class="simple">
+<li><p>ArsTechnicaSource</p></li>
+<li><p>HackerNewsSource</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="the_data_packet.sources.base.Article">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">the_data_packet.sources.base.</span></span><span class="sig-name descname"><span class="pre">Article</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">content</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">author</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">category</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/the_data_packet/sources/base.html#Article"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.sources.base.Article" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Represents a single news article from any source.</p>
+<p>This data class provides a standardized representation of news articles
+regardless of their source. It includes validation methods to ensure
+articles have sufficient content for podcast generation.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="the_data_packet.sources.base.Article.title">
+<span class="sig-name descname"><span class="pre">title</span></span><a class="headerlink" href="#the_data_packet.sources.base.Article.title" title="Link to this definition">¶</a></dt>
+<dd><p>Article headline/title. Required for all articles.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="the_data_packet.sources.base.Article.content">
+<span class="sig-name descname"><span class="pre">content</span></span><a class="headerlink" href="#the_data_packet.sources.base.Article.content" title="Link to this definition">¶</a></dt>
+<dd><p>Full article text content. Required and must be substantial.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="the_data_packet.sources.base.Article.author">
+<span class="sig-name descname"><span class="pre">author</span></span><a class="headerlink" href="#the_data_packet.sources.base.Article.author" title="Link to this definition">¶</a></dt>
+<dd><p>Article author name. Optional but recommended.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a> | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="the_data_packet.sources.base.Article.url">
+<span class="sig-name descname"><span class="pre">url</span></span><a class="headerlink" href="#the_data_packet.sources.base.Article.url" title="Link to this definition">¶</a></dt>
+<dd><p>Original article URL. Optional but useful for debugging.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a> | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="the_data_packet.sources.base.Article.category">
+<span class="sig-name descname"><span class="pre">category</span></span><a class="headerlink" href="#the_data_packet.sources.base.Article.category" title="Link to this definition">¶</a></dt>
+<dd><p>Article category (e.g., ‘security’, ‘guide’). Optional.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a> | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="the_data_packet.sources.base.Article.source">
+<span class="sig-name descname"><span class="pre">source</span></span><a class="headerlink" href="#the_data_packet.sources.base.Article.source" title="Link to this definition">¶</a></dt>
+<dd><p>Source identifier (e.g., ‘wired’). Optional but recommended.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a> | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="simple">
+<dt>Content Requirements:</dt><dd><ul class="simple">
+<li><p>Title must be non-empty</p></li>
+<li><p>Content must be at least 100 characters after stripping whitespace</p></li>
+<li><p>Content should be clean text without HTML tags or navigation elements</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<dl class="simple">
+<dt>article = Article(</dt><dd><p>title=”New Security Vulnerability Discovered”,
+content=”A critical security flaw has been found…”,
+author=”Jane Smith”,
+url=”<a class="reference external" href="https://example.com/article">https://example.com/article</a>”,
+category=”security”,
+source=”wired”</p>
+</dd>
+</dl>
+<p>)</p>
+<dl class="simple">
+<dt>if article.is_valid():</dt><dd><p># Process article for podcast generation
+pass</p>
+</dd>
+</dl>
+<dl class="py attribute">
 <dt class="sig sig-object py" id="id0">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/the_data_packet/extractors/wired_extractor.html#WiredContentExtractor.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id0" title="Link to this definition">¶</a></dt>
-<dd><p>Initialize the content extractor.</p>
-</dd></dl>
+<span class="sig-name descname"><span class="pre">title</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></em><a class="headerlink" href="#id0" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="the_data_packet.extractors.WiredContentExtractor.extract">
-<span class="sig-name descname"><span class="pre">extract</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">soup</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://www.crummy.com/software/BeautifulSoup/bs4/doc/api/bs4.html#bs4.BeautifulSoup" title="(in Beautiful Soup)"><span class="pre">BeautifulSoup</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="models.html#id1" title="the_data_packet.models.article.ArticleData"><span class="pre">ArticleData</span></a></span></span><a class="reference internal" href="../_modules/the_data_packet/extractors/wired_extractor.html#WiredContentExtractor.extract"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.extractors.WiredContentExtractor.extract" title="Link to this definition">¶</a></dt>
-<dd><p>Extract article data from a BeautifulSoup object of a Wired article page.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>soup</strong> – BeautifulSoup object of the article page</p></li>
-<li><p><strong>url</strong> – Optional URL of the article</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>ArticleData object with extracted information</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-</section>
-<section id="private-methods">
-<h2>Private Methods<a class="headerlink" href="#private-methods" title="Link to this heading">¶</a></h2>
-<p>The extractor uses several private methods for robust content extraction:</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="the_data_packet.extractors.WiredContentExtractor._extract_title">
-<span class="sig-prename descclassname"><span class="pre">WiredContentExtractor.</span></span><span class="sig-name descname"><span class="pre">_extract_title</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">soup</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://www.crummy.com/software/BeautifulSoup/bs4/doc/api/bs4.html#bs4.BeautifulSoup" title="(in Beautiful Soup)"><span class="pre">BeautifulSoup</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/the_data_packet/extractors/wired_extractor.html#WiredContentExtractor._extract_title"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.extractors.WiredContentExtractor._extract_title" title="Link to this definition">¶</a></dt>
-<dd><p>Extract the article title.</p>
-<p>Extracts article titles using multiple fallback strategies.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="the_data_packet.extractors.WiredContentExtractor._extract_author">
-<span class="sig-prename descclassname"><span class="pre">WiredContentExtractor.</span></span><span class="sig-name descname"><span class="pre">_extract_author</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">soup</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://www.crummy.com/software/BeautifulSoup/bs4/doc/api/bs4.html#bs4.BeautifulSoup" title="(in Beautiful Soup)"><span class="pre">BeautifulSoup</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/the_data_packet/extractors/wired_extractor.html#WiredContentExtractor._extract_author"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.extractors.WiredContentExtractor._extract_author" title="Link to this definition">¶</a></dt>
-<dd><p>Extract the article author.</p>
-<p>Extracts author information from various page elements.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="the_data_packet.extractors.WiredContentExtractor._extract_content">
-<span class="sig-prename descclassname"><span class="pre">WiredContentExtractor.</span></span><span class="sig-name descname"><span class="pre">_extract_content</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">soup</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://www.crummy.com/software/BeautifulSoup/bs4/doc/api/bs4.html#bs4.BeautifulSoup" title="(in Beautiful Soup)"><span class="pre">BeautifulSoup</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/the_data_packet/extractors/wired_extractor.html#WiredContentExtractor._extract_content"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.extractors.WiredContentExtractor._extract_content" title="Link to this definition">¶</a></dt>
-<dd><p>Extract the article content.</p>
-<p>Extracts the main article content while filtering out promotional text.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="the_data_packet.extractors.WiredContentExtractor._extract_author_from_json_ld">
-<span class="sig-prename descclassname"><span class="pre">WiredContentExtractor.</span></span><span class="sig-name descname"><span class="pre">_extract_author_from_json_ld</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">soup</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://www.crummy.com/software/BeautifulSoup/bs4/doc/api/bs4.html#bs4.BeautifulSoup" title="(in Beautiful Soup)"><span class="pre">BeautifulSoup</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/the_data_packet/extractors/wired_extractor.html#WiredContentExtractor._extract_author_from_json_ld"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.extractors.WiredContentExtractor._extract_author_from_json_ld" title="Link to this definition">¶</a></dt>
-<dd><p>Extract author from JSON-LD structured data.</p>
-<p>Parses JSON-LD structured data to extract author information.</p>
-</dd></dl>
-
-</section>
-<section id="module-the_data_packet.extractors.wired_extractor">
-<span id="module-functions"></span><h2>Module Functions<a class="headerlink" href="#module-the_data_packet.extractors.wired_extractor" title="Link to this heading">¶</a></h2>
-<p>Content extractor for Wired.com articles.</p>
-<dl class="py class">
-<dt class="sig sig-object py" id="the_data_packet.extractors.wired_extractor.WiredContentExtractor">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">the_data_packet.extractors.wired_extractor.</span></span><span class="sig-name descname"><span class="pre">WiredContentExtractor</span></span><a class="reference internal" href="../_modules/the_data_packet/extractors/wired_extractor.html#WiredContentExtractor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.extractors.wired_extractor.WiredContentExtractor" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
-<p>Extracts article data from Wired.com HTML pages.</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="the_data_packet.extractors.wired_extractor.WiredContentExtractor.SKIP_PATTERNS">
-<span class="sig-name descname"><span class="pre">SKIP_PATTERNS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['subscribe</span> <span class="pre">to</span> <span class="pre">wired',</span> <span class="pre">'most</span> <span class="pre">popular',</span> <span class="pre">'related</span> <span class="pre">stories',</span> <span class="pre">'advertisement',</span> <span class="pre">'get</span> <span class="pre">wired',</span> <span class="pre">'sign</span> <span class="pre">up']</span></em><a class="headerlink" href="#the_data_packet.extractors.wired_extractor.WiredContentExtractor.SKIP_PATTERNS" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="id1">
+<span class="sig-name descname"><span class="pre">content</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></em><a class="headerlink" href="#id1" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id2">
+<span class="sig-name descname"><span class="pre">author</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#id2" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id3">
+<span class="sig-name descname"><span class="pre">url</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#id3" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id4">
+<span class="sig-name descname"><span class="pre">category</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#id4" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id5">
+<span class="sig-name descname"><span class="pre">source</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#id5" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="the_data_packet.extractors.wired_extractor.WiredContentExtractor.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/the_data_packet/extractors/wired_extractor.html#WiredContentExtractor.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.extractors.wired_extractor.WiredContentExtractor.__init__" title="Link to this definition">¶</a></dt>
-<dd><p>Initialize the content extractor.</p>
+<dt class="sig sig-object py" id="the_data_packet.sources.base.Article.is_valid">
+<span class="sig-name descname"><span class="pre">is_valid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="../_modules/the_data_packet/sources/base.html#Article.is_valid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.sources.base.Article.is_valid" title="Link to this definition">¶</a></dt>
+<dd><p>Check if article has sufficient content for podcast generation.</p>
+<p>Validates that the article has:
+- Non-empty title
+- Non-empty content
+- Content length of at least 100 characters (after stripping)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if article meets minimum content requirements</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<dl class="simple">
+<dt>if not article.is_valid():</dt><dd><p>logger.warning(f”Skipping invalid article: {article.title}”)
+continue</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="the_data_packet.extractors.wired_extractor.WiredContentExtractor.extract">
-<span class="sig-name descname"><span class="pre">extract</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">soup</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://www.crummy.com/software/BeautifulSoup/bs4/doc/api/bs4.html#bs4.BeautifulSoup" title="(in Beautiful Soup)"><span class="pre">BeautifulSoup</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="models.html#id1" title="the_data_packet.models.article.ArticleData"><span class="pre">ArticleData</span></a></span></span><a class="reference internal" href="../_modules/the_data_packet/extractors/wired_extractor.html#WiredContentExtractor.extract"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.extractors.wired_extractor.WiredContentExtractor.extract" title="Link to this definition">¶</a></dt>
-<dd><p>Extract article data from a BeautifulSoup object of a Wired article page.</p>
+<dt class="sig sig-object py" id="the_data_packet.sources.base.Article.to_dict">
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/the_data_packet/sources/base.html#Article.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.sources.base.Article.to_dict" title="Link to this definition">¶</a></dt>
+<dd><p>Convert article to dictionary representation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dictionary with all article fields</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>article_data = article.to_dict()
+json.dump(article_data, file)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="the_data_packet.sources.base.Article.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">content</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">author</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">category</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#the_data_packet.sources.base.Article.__init__" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="the_data_packet.sources.base.ArticleSource">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">the_data_packet.sources.base.</span></span><span class="sig-name descname"><span class="pre">ArticleSource</span></span><a class="reference internal" href="../_modules/the_data_packet/sources/base.html#ArticleSource"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.sources.base.ArticleSource" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
+<p>Abstract base class for implementing news article sources.</p>
+<p>This class defines the interface that all article sources must implement.
+It provides a consistent way to collect articles from different news
+websites while handling source-specific details in subclasses.</p>
+<p>Each source implementation should:
+- Define supported categories
+- Implement RSS feed or web scraping logic
+- Handle rate limiting and error recovery
+- Clean and validate article content
+- Return standardized Article objects</p>
+<dl>
+<dt>Subclasses must implement:</dt><dd><p>name: Property returning source identifier
+supported_categories: Property returning list of valid categories
+get_latest_article(): Method to get single latest article
+get_multiple_articles(): Method to get multiple articles</p>
+</dd>
+<dt>Example Implementation:</dt><dd><dl>
+<dt>class ExampleSource(ArticleSource):</dt><dd><p>&#64;property
+def name(self) -&gt; str:</p>
+<blockquote>
+<div><p>return “example”</p>
+</div></blockquote>
+<p>&#64;property
+def supported_categories(self) -&gt; List[str]:</p>
+<blockquote>
+<div><p>return [“tech”, “science”]</p>
+</div></blockquote>
+<dl class="simple">
+<dt>def get_latest_article(self, category: str) -&gt; Article:</dt><dd><p># Implementation specific logic
+pass</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+<dt>Usage:</dt><dd><p>source = WiredSource()
+if “security” in source.supported_categories:</p>
+<blockquote>
+<div><p>article = source.get_latest_article(“security”)
+articles = source.get_multiple_articles(“security”, count=5)</p>
+</div></blockquote>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="the_data_packet.sources.base.ArticleSource.name">
+<em class="property"><span class="k"><span class="pre">abstract</span></span><span class="w"> </span><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></em><a class="headerlink" href="#the_data_packet.sources.base.ArticleSource.name" title="Link to this definition">¶</a></dt>
+<dd><p>Source name identifier.</p>
+<p>Returns a unique string identifier for this source.
+Used in configuration, logging, and file naming.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Source identifier (e.g., “wired”, “techcrunch”)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="the_data_packet.sources.base.ArticleSource.supported_categories">
+<em class="property"><span class="k"><span class="pre">abstract</span></span><span class="w"> </span><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">supported_categories</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#the_data_packet.sources.base.ArticleSource.supported_categories" title="Link to this definition">¶</a></dt>
+<dd><p>List of supported article categories for this source.</p>
+<p>Returns the categories this source can collect articles from.
+Categories should match the source’s RSS feeds or section structure.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of category strings (e.g., [“security”, “guide”, “business”])</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="the_data_packet.sources.base.ArticleSource.get_latest_article">
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_latest_article</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">category</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="sources.html#the_data_packet.sources.base.Article" title="the_data_packet.sources.base.Article"><span class="pre">Article</span></a></span></span><a class="reference internal" href="../_modules/the_data_packet/sources/base.html#ArticleSource.get_latest_article"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.sources.base.ArticleSource.get_latest_article" title="Link to this definition">¶</a></dt>
+<dd><p>Get the latest article from a specific category.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>category</strong> – Category to fetch from (must be in supported_categories)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Latest Article instance from the category</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="core.html#the_data_packet.core.exceptions.ScrapingError" title="the_data_packet.core.exceptions.ScrapingError"><strong>ScrapingError</strong></a> – If article collection fails</p></li>
+<li><p><a class="reference internal" href="core.html#the_data_packet.core.exceptions.ValidationError" title="the_data_packet.core.exceptions.ValidationError"><strong>ValidationError</strong></a> – If category is not supported</p></li>
+<li><p><a class="reference internal" href="core.html#the_data_packet.core.exceptions.NetworkError" title="the_data_packet.core.exceptions.NetworkError"><strong>NetworkError</strong></a> – If network request fails</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<dl class="simple">
+<dt>try:</dt><dd><p>article = source.get_latest_article(“security”)
+logger.info(f”Retrieved: {article.title}”)</p>
+</dd>
+<dt>except ValidationError:</dt><dd><p>logger.error(f”Category ‘invalid’ not supported”)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="the_data_packet.sources.base.ArticleSource.get_multiple_articles">
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_multiple_articles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">category</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="sources.html#the_data_packet.sources.base.Article" title="the_data_packet.sources.base.Article"><span class="pre">Article</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/the_data_packet/sources/base.html#ArticleSource.get_multiple_articles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.sources.base.ArticleSource.get_multiple_articles" title="Link to this definition">¶</a></dt>
+<dd><p>Get multiple articles from a specific category.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>soup</strong> – BeautifulSoup object of the article page</p></li>
-<li><p><strong>url</strong> – Optional URL of the article</p></li>
+<li><p><strong>category</strong> – Category to fetch from (must be in supported_categories)</p></li>
+<li><p><strong>count</strong> – Maximum number of articles to return</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>ArticleData object with extracted information</p>
+<dd class="field-even"><p>List of Article instances (may be fewer than count if unavailable)</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="core.html#the_data_packet.core.exceptions.ScrapingError" title="the_data_packet.core.exceptions.ScrapingError"><strong>ScrapingError</strong></a> – If article collection fails</p></li>
+<li><p><a class="reference internal" href="core.html#the_data_packet.core.exceptions.ValidationError" title="the_data_packet.core.exceptions.ValidationError"><strong>ValidationError</strong></a> – If category is not supported or count is invalid</p></li>
+<li><p><a class="reference internal" href="core.html#the_data_packet.core.exceptions.NetworkError" title="the_data_packet.core.exceptions.NetworkError"><strong>NetworkError</strong></a> – If network request fails</p></li>
+</ul>
 </dd>
 </dl>
+<p class="rubric">Example</p>
+<p>articles = source.get_multiple_articles(“guide”, count=3)
+valid_articles = [a for a in articles if a.is_valid()]</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="the_data_packet.sources.base.ArticleSource.validate_category">
+<span class="sig-name descname"><span class="pre">validate_category</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">category</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/the_data_packet/sources/base.html#ArticleSource.validate_category"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.sources.base.ArticleSource.validate_category" title="Link to this definition">¶</a></dt>
+<dd><p>Validate if a category is supported by this source.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>category</strong> – Category to validate</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="core.html#the_data_packet.core.exceptions.ValidationError" title="the_data_packet.core.exceptions.ValidationError"><strong>ValidationError</strong></a> – If category is not supported</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>source.validate_category(“security”)  # OK
+source.validate_category(“invalid”)   # Raises ValidationError</p>
 </dd></dl>
 
 </dd></dl>
@@ -395,26 +802,8 @@ pages. It uses multiple extraction strategies with fallbacks to ensure robust pa
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="scrapers.html">
-              <div class="page-info">
-                <div class="context">
-                  <span>Next</span>
-                </div>
-                <div class="title">Web Scrapers</div>
-              </div>
-              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
-            </a>
-          <a class="prev-page" href="clients.html">
-              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
-              <div class="page-info">
-                <div class="context">
-                  <span>Previous</span>
-                </div>
-                
-                <div class="title">Client Modules</div>
-                
-              </div>
-            </a>
+          
+          
         </div>
         <div class="bottom-of-page">
           <div class="left-details">
@@ -445,29 +834,58 @@ pages. It uses multiple extraction strategies with fallbacks to ensure robust pa
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Content Extractors</a><ul>
-<li><a class="reference internal" href="#wired-content-extractor">Wired Content Extractor</a><ul>
-<li><a class="reference internal" href="#the_data_packet.extractors.WiredContentExtractor"><code class="docutils literal notranslate"><span class="pre">WiredContentExtractor</span></code></a><ul>
-<li><a class="reference internal" href="#the_data_packet.extractors.WiredContentExtractor.__init__"><code class="docutils literal notranslate"><span class="pre">WiredContentExtractor.__init__()</span></code></a></li>
-<li><a class="reference internal" href="#the_data_packet.extractors.WiredContentExtractor.SKIP_PATTERNS"><code class="docutils literal notranslate"><span class="pre">WiredContentExtractor.SKIP_PATTERNS</span></code></a></li>
-<li><a class="reference internal" href="#id0"><code class="docutils literal notranslate"><span class="pre">WiredContentExtractor.__init__()</span></code></a></li>
-<li><a class="reference internal" href="#the_data_packet.extractors.WiredContentExtractor.extract"><code class="docutils literal notranslate"><span class="pre">WiredContentExtractor.extract()</span></code></a></li>
+<li><a class="reference internal" href="#">Sources Module - Article Extraction</a><ul>
+<li><a class="reference internal" href="#module-the_data_packet.sources.wired">Wired Source</a><ul>
+<li><a class="reference internal" href="#the_data_packet.sources.wired.WiredSource"><code class="docutils literal notranslate"><span class="pre">WiredSource</span></code></a><ul>
+<li><a class="reference internal" href="#the_data_packet.sources.wired.WiredSource.__init__"><code class="docutils literal notranslate"><span class="pre">WiredSource.__init__()</span></code></a></li>
+<li><a class="reference internal" href="#the_data_packet.sources.wired.WiredSource.RSS_FEEDS"><code class="docutils literal notranslate"><span class="pre">WiredSource.RSS_FEEDS</span></code></a></li>
+<li><a class="reference internal" href="#the_data_packet.sources.wired.WiredSource.SKIP_PATTERNS"><code class="docutils literal notranslate"><span class="pre">WiredSource.SKIP_PATTERNS</span></code></a></li>
+<li><a class="reference internal" href="#the_data_packet.sources.wired.WiredSource.name"><code class="docutils literal notranslate"><span class="pre">WiredSource.name</span></code></a></li>
+<li><a class="reference internal" href="#the_data_packet.sources.wired.WiredSource.supported_categories"><code class="docutils literal notranslate"><span class="pre">WiredSource.supported_categories</span></code></a></li>
+<li><a class="reference internal" href="#the_data_packet.sources.wired.WiredSource.get_latest_article"><code class="docutils literal notranslate"><span class="pre">WiredSource.get_latest_article()</span></code></a></li>
+<li><a class="reference internal" href="#the_data_packet.sources.wired.WiredSource.get_multiple_articles"><code class="docutils literal notranslate"><span class="pre">WiredSource.get_multiple_articles()</span></code></a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a class="reference internal" href="#private-methods">Private Methods</a><ul>
-<li><a class="reference internal" href="#the_data_packet.extractors.WiredContentExtractor._extract_title"><code class="docutils literal notranslate"><span class="pre">WiredContentExtractor._extract_title()</span></code></a></li>
-<li><a class="reference internal" href="#the_data_packet.extractors.WiredContentExtractor._extract_author"><code class="docutils literal notranslate"><span class="pre">WiredContentExtractor._extract_author()</span></code></a></li>
-<li><a class="reference internal" href="#the_data_packet.extractors.WiredContentExtractor._extract_content"><code class="docutils literal notranslate"><span class="pre">WiredContentExtractor._extract_content()</span></code></a></li>
-<li><a class="reference internal" href="#the_data_packet.extractors.WiredContentExtractor._extract_author_from_json_ld"><code class="docutils literal notranslate"><span class="pre">WiredContentExtractor._extract_author_from_json_ld()</span></code></a></li>
+<li><a class="reference internal" href="#module-the_data_packet.sources.techcrunch">TechCrunch Source</a><ul>
+<li><a class="reference internal" href="#the_data_packet.sources.techcrunch.TechCrunchSource"><code class="docutils literal notranslate"><span class="pre">TechCrunchSource</span></code></a><ul>
+<li><a class="reference internal" href="#the_data_packet.sources.techcrunch.TechCrunchSource.__init__"><code class="docutils literal notranslate"><span class="pre">TechCrunchSource.__init__()</span></code></a></li>
+<li><a class="reference internal" href="#the_data_packet.sources.techcrunch.TechCrunchSource.RSS_FEEDS"><code class="docutils literal notranslate"><span class="pre">TechCrunchSource.RSS_FEEDS</span></code></a></li>
+<li><a class="reference internal" href="#the_data_packet.sources.techcrunch.TechCrunchSource.SKIP_PATTERNS"><code class="docutils literal notranslate"><span class="pre">TechCrunchSource.SKIP_PATTERNS</span></code></a></li>
+<li><a class="reference internal" href="#the_data_packet.sources.techcrunch.TechCrunchSource.name"><code class="docutils literal notranslate"><span class="pre">TechCrunchSource.name</span></code></a></li>
+<li><a class="reference internal" href="#the_data_packet.sources.techcrunch.TechCrunchSource.supported_categories"><code class="docutils literal notranslate"><span class="pre">TechCrunchSource.supported_categories</span></code></a></li>
+<li><a class="reference internal" href="#the_data_packet.sources.techcrunch.TechCrunchSource.get_latest_article"><code class="docutils literal notranslate"><span class="pre">TechCrunchSource.get_latest_article()</span></code></a></li>
+<li><a class="reference internal" href="#the_data_packet.sources.techcrunch.TechCrunchSource.get_multiple_articles"><code class="docutils literal notranslate"><span class="pre">TechCrunchSource.get_multiple_articles()</span></code></a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#module-the_data_packet.extractors.wired_extractor">Module Functions</a><ul>
-<li><a class="reference internal" href="#the_data_packet.extractors.wired_extractor.WiredContentExtractor"><code class="docutils literal notranslate"><span class="pre">WiredContentExtractor</span></code></a><ul>
-<li><a class="reference internal" href="#the_data_packet.extractors.wired_extractor.WiredContentExtractor.SKIP_PATTERNS"><code class="docutils literal notranslate"><span class="pre">WiredContentExtractor.SKIP_PATTERNS</span></code></a></li>
-<li><a class="reference internal" href="#the_data_packet.extractors.wired_extractor.WiredContentExtractor.__init__"><code class="docutils literal notranslate"><span class="pre">WiredContentExtractor.__init__()</span></code></a></li>
-<li><a class="reference internal" href="#the_data_packet.extractors.wired_extractor.WiredContentExtractor.extract"><code class="docutils literal notranslate"><span class="pre">WiredContentExtractor.extract()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-the_data_packet.sources.base">Base Classes</a><ul>
+<li><a class="reference internal" href="#the_data_packet.sources.base.Article"><code class="docutils literal notranslate"><span class="pre">Article</span></code></a><ul>
+<li><a class="reference internal" href="#the_data_packet.sources.base.Article.title"><code class="docutils literal notranslate"><span class="pre">Article.title</span></code></a></li>
+<li><a class="reference internal" href="#the_data_packet.sources.base.Article.content"><code class="docutils literal notranslate"><span class="pre">Article.content</span></code></a></li>
+<li><a class="reference internal" href="#the_data_packet.sources.base.Article.author"><code class="docutils literal notranslate"><span class="pre">Article.author</span></code></a></li>
+<li><a class="reference internal" href="#the_data_packet.sources.base.Article.url"><code class="docutils literal notranslate"><span class="pre">Article.url</span></code></a></li>
+<li><a class="reference internal" href="#the_data_packet.sources.base.Article.category"><code class="docutils literal notranslate"><span class="pre">Article.category</span></code></a></li>
+<li><a class="reference internal" href="#the_data_packet.sources.base.Article.source"><code class="docutils literal notranslate"><span class="pre">Article.source</span></code></a></li>
+<li><a class="reference internal" href="#id0"><code class="docutils literal notranslate"><span class="pre">Article.title</span></code></a></li>
+<li><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">Article.content</span></code></a></li>
+<li><a class="reference internal" href="#id2"><code class="docutils literal notranslate"><span class="pre">Article.author</span></code></a></li>
+<li><a class="reference internal" href="#id3"><code class="docutils literal notranslate"><span class="pre">Article.url</span></code></a></li>
+<li><a class="reference internal" href="#id4"><code class="docutils literal notranslate"><span class="pre">Article.category</span></code></a></li>
+<li><a class="reference internal" href="#id5"><code class="docutils literal notranslate"><span class="pre">Article.source</span></code></a></li>
+<li><a class="reference internal" href="#the_data_packet.sources.base.Article.is_valid"><code class="docutils literal notranslate"><span class="pre">Article.is_valid()</span></code></a></li>
+<li><a class="reference internal" href="#the_data_packet.sources.base.Article.to_dict"><code class="docutils literal notranslate"><span class="pre">Article.to_dict()</span></code></a></li>
+<li><a class="reference internal" href="#the_data_packet.sources.base.Article.__init__"><code class="docutils literal notranslate"><span class="pre">Article.__init__()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#the_data_packet.sources.base.ArticleSource"><code class="docutils literal notranslate"><span class="pre">ArticleSource</span></code></a><ul>
+<li><a class="reference internal" href="#the_data_packet.sources.base.ArticleSource.name"><code class="docutils literal notranslate"><span class="pre">ArticleSource.name</span></code></a></li>
+<li><a class="reference internal" href="#the_data_packet.sources.base.ArticleSource.supported_categories"><code class="docutils literal notranslate"><span class="pre">ArticleSource.supported_categories</span></code></a></li>
+<li><a class="reference internal" href="#the_data_packet.sources.base.ArticleSource.get_latest_article"><code class="docutils literal notranslate"><span class="pre">ArticleSource.get_latest_article()</span></code></a></li>
+<li><a class="reference internal" href="#the_data_packet.sources.base.ArticleSource.get_multiple_articles"><code class="docutils literal notranslate"><span class="pre">ArticleSource.get_multiple_articles()</span></code></a></li>
+<li><a class="reference internal" href="#the_data_packet.sources.base.ArticleSource.validate_category"><code class="docutils literal notranslate"><span class="pre">ArticleSource.validate_category()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -483,7 +901,7 @@ pages. It uses multiple extraction strategies with fallbacks to ensure robust pa
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=8d563738"></script>
+</div><script src="../_static/documentation_options.js?v=51b770b3"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

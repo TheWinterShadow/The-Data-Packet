@@ -1,5 +1,5 @@
-Generation Module  
-================
+Generation Module
+=================
 
 The generation module handles AI-powered script generation and audio production.
 

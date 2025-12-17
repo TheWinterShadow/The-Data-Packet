@@ -3,31 +3,31 @@ Data Models
 
 The data models module provides the core data structures used throughout the package.
 
-ArticleData
------------
+Article Model
+-------------
 
-.. autoclass:: the_data_packet.models.ArticleData
+.. autoclass:: the_data_packet.sources.base.Article
    :members:
    :inherited-members:
    :show-inheritance:
 
    .. automethod:: __init__
    
-   The `ArticleData` class is the primary data container for scraped article information.
+   The `Article` class is the primary data container for collected article information.
    It provides validation methods and convenient serialization options.
    
    **Example Usage:**
    
    .. code-block:: python
    
-      from the_data_packet.models import ArticleData
+      from the_data_packet.sources import Article
       
       # Create an article instance
-      article = ArticleData(
+      article = Article(
           title="Sample Article Title",
           author="John Doe",
           content="Article content here...",
-          url="https://example.com/article",
+          url="https://example.com/article"
           category="technology"
       )
       

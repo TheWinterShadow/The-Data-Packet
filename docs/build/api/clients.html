@@ -3,10 +3,10 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Content Extractors" href="extractors.html"><link rel="prev" title="Data Models" href="models.html">
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.09.25 -->
-        <title>Client Modules - The Data Packet 1.0.0 documentation</title>
+        <title>HTTP Utilities - The Data Packet 2.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=580074bf" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">The Data Packet 1.0.0 documentation</div></a>
+      <a href="../index.html"><div class="brand">The Data Packet 2.0.0 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -182,7 +182,7 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
   
-  <span class="sidebar-brand-text">The Data Packet 1.0.0 documentation</span>
+  <span class="sidebar-brand-text">The Data Packet 2.0.0 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -191,11 +191,12 @@
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">API Documentation:</span></p>
-<ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="models.html">Data Models</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Client Modules</a></li>
-<li class="toctree-l1"><a class="reference internal" href="extractors.html">Content Extractors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="scrapers.html">Web Scrapers</a></li>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="core.html">Core Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sources.html">Sources Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generation.html">Generation Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="storage.html">Storage Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workflows.html">Workflows Module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cli.html">Command Line Interface</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Development:</span></p>
@@ -240,25 +241,25 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="client-modules">
-<h1>Client Modules<a class="headerlink" href="#client-modules" title="Link to this heading">¶</a></h1>
-<p>The clients module provides HTTP and RSS feed functionality for fetching data from external sources.</p>
+          <section id="http-utilities">
+<h1>HTTP Utilities<a class="headerlink" href="#http-utilities" title="Link to this heading">¶</a></h1>
+<p>The utils module provides HTTP functionality for fetching data from external sources.</p>
 <section id="http-client">
 <h2>HTTP Client<a class="headerlink" href="#http-client" title="Link to this heading">¶</a></h2>
 <dl class="py class">
-<dt class="sig sig-object py" id="the_data_packet.clients.HTTPClient">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">the_data_packet.clients.</span></span><span class="sig-name descname"><span class="pre">HTTPClient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_agent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/the_data_packet/clients/http_client.html#HTTPClient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.clients.HTTPClient" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="the_data_packet.utils.http.HTTPClient">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">the_data_packet.utils.http.</span></span><span class="sig-name descname"><span class="pre">HTTPClient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_agent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/the_data_packet/utils/http.html#HTTPClient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.utils.http.HTTPClient" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
-<p>HTTP client for fetching and parsing web pages.</p>
+<p>Simple HTTP client with error handling and configuration.</p>
 <dl class="py method">
-<dt class="sig sig-object py" id="the_data_packet.clients.HTTPClient.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_agent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/the_data_packet/clients/http_client.html#HTTPClient.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.clients.HTTPClient.__init__" title="Link to this definition">¶</a></dt>
-<dd><p>Initialize the HTTP client.</p>
+<dt class="sig sig-object py" id="the_data_packet.utils.http.HTTPClient.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_agent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/the_data_packet/utils/http.html#HTTPClient.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.utils.http.HTTPClient.__init__" title="Link to this definition">¶</a></dt>
+<dd><p>Initialize HTTP client.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>timeout</strong> – Request timeout in seconds</p></li>
-<li><p><strong>user_agent</strong> – Custom User-Agent string</p></li>
+<li><p><strong>timeout</strong> – Request timeout (defaults to config)</p></li>
+<li><p><strong>user_agent</strong> – User agent string (defaults to config)</p></li>
 </ul>
 </dd>
 </dl>
@@ -267,297 +268,218 @@
 <p>The <cite>HTTPClient</cite> handles all HTTP requests to fetch web pages. It includes automatic
 retries, proper error handling, and session management.</p>
 <p><strong>Example Usage:</strong></p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">the_data_packet.clients</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPClient</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">the_data_packet.utils.http</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPClient</span>
 
 <span class="c1"># Create client with custom settings</span>
 <span class="n">client</span> <span class="o">=</span> <span class="n">HTTPClient</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">user_agent</span><span class="o">=</span><span class="s2">&quot;MyBot/1.0&quot;</span><span class="p">)</span>
 
-<span class="c1"># Get a webpage as BeautifulSoup object</span>
-<span class="n">soup</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_page</span><span class="p">(</span><span class="s2">&quot;https://www.wired.com/story/example/&quot;</span><span class="p">)</span>
+<span class="c1"># Get a webpage content</span>
+<span class="n">content</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;https://www.wired.com/story/example/&quot;</span><span class="p">)</span>
 
-<span class="c1"># Get raw HTML content</span>
-<span class="n">html</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_raw_content</span><span class="p">(</span><span class="s2">&quot;https://www.wired.com/story/example/&quot;</span><span class="p">)</span>
+<span class="c1"># Get raw content</span>
+<span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;https://www.wired.com/story/example/&quot;</span><span class="p">)</span>
 
-<span class="c1"># Clean up resources</span>
-<span class="n">client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<span class="c1"># Client automatically handles sessions and cleanup</span>
 </pre></div>
 </div>
 <dl class="py method">
 <dt class="sig sig-object py" id="id0">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_agent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/the_data_packet/clients/http_client.html#HTTPClient.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id0" title="Link to this definition">¶</a></dt>
-<dd><p>Initialize the HTTP client.</p>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_agent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/the_data_packet/utils/http.html#HTTPClient.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id0" title="Link to this definition">¶</a></dt>
+<dd><p>Initialize HTTP client.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>timeout</strong> – Request timeout in seconds</p></li>
-<li><p><strong>user_agent</strong> – Custom User-Agent string</p></li>
+<li><p><strong>timeout</strong> – Request timeout (defaults to config)</p></li>
+<li><p><strong>user_agent</strong> – User agent string (defaults to config)</p></li>
 </ul>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="the_data_packet.clients.HTTPClient.get_page">
-<span class="sig-name descname"><span class="pre">get_page</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://www.crummy.com/software/BeautifulSoup/bs4/doc/api/bs4.html#bs4.BeautifulSoup" title="(in Beautiful Soup)"><span class="pre">BeautifulSoup</span></a></span></span><a class="reference internal" href="../_modules/the_data_packet/clients/http_client.html#HTTPClient.get_page"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.clients.HTTPClient.get_page" title="Link to this definition">¶</a></dt>
-<dd><p>Fetch a web page and return a BeautifulSoup object.</p>
+<dt class="sig sig-object py" id="the_data_packet.utils.http.HTTPClient.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://requests.readthedocs.io/en/latest/api/#requests.Response" title="(in Requests v2.32.5)"><span class="pre">Response</span></a></span></span><a class="reference internal" href="../_modules/the_data_packet/utils/http.html#HTTPClient.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.utils.http.HTTPClient.get" title="Link to this definition">¶</a></dt>
+<dd><p>Make a GET request.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>url</strong> – The URL to fetch</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>url</strong> – URL to fetch</p></li>
+<li><p><strong>**kwargs</strong> – Additional arguments passed to requests.get</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>BeautifulSoup object of the parsed HTML</p>
+<dd class="field-even"><p>Response object</p>
 </dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.14)"><strong>RuntimeError</strong></a> – If the request fails</p>
+<dd class="field-odd"><p><a class="reference internal" href="core.html#the_data_packet.core.exceptions.NetworkError" title="the_data_packet.core.exceptions.NetworkError"><strong>NetworkError</strong></a> – If request fails</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="the_data_packet.clients.HTTPClient.get_raw_content">
-<span class="sig-name descname"><span class="pre">get_raw_content</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../_modules/the_data_packet/clients/http_client.html#HTTPClient.get_raw_content"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.clients.HTTPClient.get_raw_content" title="Link to this definition">¶</a></dt>
-<dd><p>Fetch raw HTML content from a URL.</p>
+<dt class="sig sig-object py" id="the_data_packet.utils.http.HTTPClient.get_soup">
+<span class="sig-name descname"><span class="pre">get_soup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://www.crummy.com/software/BeautifulSoup/bs4/doc/api/bs4.html#bs4.BeautifulSoup" title="(in Beautiful Soup)"><span class="pre">BeautifulSoup</span></a></span></span><a class="reference internal" href="../_modules/the_data_packet/utils/http.html#HTTPClient.get_soup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.utils.http.HTTPClient.get_soup" title="Link to this definition">¶</a></dt>
+<dd><p>Get a URL and return parsed HTML.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>url</strong> – The URL to fetch</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>url</strong> – URL to fetch</p></li>
+<li><p><strong>**kwargs</strong> – Additional arguments passed to get()</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Raw HTML content as string</p>
+<dd class="field-even"><p>BeautifulSoup object</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="core.html#the_data_packet.core.exceptions.NetworkError" title="the_data_packet.core.exceptions.NetworkError"><strong>NetworkError</strong></a> – If request fails</p>
 </dd>
 </dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="the_data_packet.clients.HTTPClient.close">
-<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/the_data_packet/clients/http_client.html#HTTPClient.close"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.clients.HTTPClient.close" title="Link to this definition">¶</a></dt>
-<dd><p>Close the HTTP session.</p>
 </dd></dl>
 
 </dd></dl>
 
 </section>
-<section id="rss-client">
-<h2>RSS Client<a class="headerlink" href="#rss-client" title="Link to this heading">¶</a></h2>
+<section id="module-the_data_packet.utils.http">
+<span id="utility-modules"></span><h2>Utility Modules<a class="headerlink" href="#module-the_data_packet.utils.http" title="Link to this heading">¶</a></h2>
+<p>HTTP client utility.</p>
 <dl class="py class">
-<dt class="sig sig-object py" id="the_data_packet.clients.RSSClient">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">the_data_packet.clients.</span></span><span class="sig-name descname"><span class="pre">RSSClient</span></span><a class="reference internal" href="../_modules/the_data_packet/clients/rss_client.html#RSSClient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.clients.RSSClient" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
-<p>Client for fetching RSS feed data from Wired.com.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="the_data_packet.clients.RSSClient.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/the_data_packet/clients/rss_client.html#RSSClient.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.clients.RSSClient.__init__" title="Link to this definition">¶</a></dt>
-<dd><p>Initialize the RSS client.</p>
-</dd></dl>
-
-<p>The <cite>RSSClient</cite> interacts with Wired’s RSS feeds to discover the latest articles
-in different categories.</p>
-<p><strong>Example Usage:</strong></p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">the_data_packet.clients</span><span class="w"> </span><span class="kn">import</span> <span class="n">RSSClient</span>
-
-<span class="n">client</span> <span class="o">=</span> <span class="n">RSSClient</span><span class="p">()</span>
-
-<span class="c1"># Get the latest article URL from security feed</span>
-<span class="n">url</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_latest_article_url</span><span class="p">(</span><span class="s2">&quot;security&quot;</span><span class="p">)</span>
-
-<span class="c1"># Get multiple article URLs</span>
-<span class="n">urls</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_article_urls</span><span class="p">(</span><span class="s2">&quot;guide&quot;</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
-
-<span class="c1"># Check supported categories</span>
-<span class="n">categories</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_supported_categories</span><span class="p">()</span>
-</pre></div>
-</div>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="the_data_packet.clients.RSSClient.FEED_URLS">
-<span class="sig-name descname"><span class="pre">FEED_URLS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'guide':</span> <span class="pre">'https://www.wired.com/feed/tag/wired-guide/latest/rss',</span> <span class="pre">'security':</span> <span class="pre">'https://www.wired.com/feed/category/security/latest/rss'}</span></em><a class="headerlink" href="#the_data_packet.clients.RSSClient.FEED_URLS" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="id1">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/the_data_packet/clients/rss_client.html#RSSClient.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id1" title="Link to this definition">¶</a></dt>
-<dd><p>Initialize the RSS client.</p>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">the_data_packet.utils.http.</span></span><span class="sig-name descname"><span class="pre">HTTPClient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_agent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/the_data_packet/utils/http.html#HTTPClient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id1" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Simple HTTP client with error handling and configuration.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="id2">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_agent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/the_data_packet/utils/http.html#HTTPClient.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id2" title="Link to this definition">¶</a></dt>
+<dd><p>Initialize HTTP client.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>timeout</strong> – Request timeout (defaults to config)</p></li>
+<li><p><strong>user_agent</strong> – User agent string (defaults to config)</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="the_data_packet.clients.RSSClient.get_latest_article_url">
-<span class="sig-name descname"><span class="pre">get_latest_article_url</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">category</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../_modules/the_data_packet/clients/rss_client.html#RSSClient.get_latest_article_url"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.clients.RSSClient.get_latest_article_url" title="Link to this definition">¶</a></dt>
-<dd><p>Get the URL of the latest article from a specific category.</p>
+<dt class="sig sig-object py" id="id3">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://requests.readthedocs.io/en/latest/api/#requests.Response" title="(in Requests v2.32.5)"><span class="pre">Response</span></a></span></span><a class="reference internal" href="../_modules/the_data_packet/utils/http.html#HTTPClient.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id3" title="Link to this definition">¶</a></dt>
+<dd><p>Make a GET request.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>category</strong> – The category to fetch from (‘security’ or ‘guide’)</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>url</strong> – URL to fetch</p></li>
+<li><p><strong>**kwargs</strong> – Additional arguments passed to requests.get</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The URL of the latest article</p>
+<dd class="field-even"><p>Response object</p>
 </dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If category is not supported</p></li>
-<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.14)"><strong>RuntimeError</strong></a> – If no articles are found</p></li>
-</ul>
+<dd class="field-odd"><p><a class="reference internal" href="core.html#the_data_packet.core.exceptions.NetworkError" title="the_data_packet.core.exceptions.NetworkError"><strong>NetworkError</strong></a> – If request fails</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="the_data_packet.clients.RSSClient.get_article_urls">
-<span class="sig-name descname"><span class="pre">get_article_urls</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">category</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/the_data_packet/clients/rss_client.html#RSSClient.get_article_urls"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.clients.RSSClient.get_article_urls" title="Link to this definition">¶</a></dt>
-<dd><p>Get multiple article URLs from a specific category.</p>
+<dt class="sig sig-object py" id="id4">
+<span class="sig-name descname"><span class="pre">get_soup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://www.crummy.com/software/BeautifulSoup/bs4/doc/api/bs4.html#bs4.BeautifulSoup" title="(in Beautiful Soup)"><span class="pre">BeautifulSoup</span></a></span></span><a class="reference internal" href="../_modules/the_data_packet/utils/http.html#HTTPClient.get_soup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id4" title="Link to this definition">¶</a></dt>
+<dd><p>Get a URL and return parsed HTML.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>category</strong> – The category to fetch from</p></li>
-<li><p><strong>limit</strong> – Maximum number of URLs to return</p></li>
+<li><p><strong>url</strong> – URL to fetch</p></li>
+<li><p><strong>**kwargs</strong> – Additional arguments passed to get()</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>List of article URLs</p>
+<dd class="field-even"><p>BeautifulSoup object</p>
 </dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="the_data_packet.clients.RSSClient.get_feed_data">
-<span class="sig-name descname"><span class="pre">get_feed_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">category</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/the_data_packet/clients/rss_client.html#RSSClient.get_feed_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.clients.RSSClient.get_feed_data" title="Link to this definition">¶</a></dt>
-<dd><p>Get full feed data for a category.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>category</strong> – The category to fetch from</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Dictionary containing feed metadata and entries</p>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="core.html#the_data_packet.core.exceptions.NetworkError" title="the_data_packet.core.exceptions.NetworkError"><strong>NetworkError</strong></a> – If request fails</p>
 </dd>
 </dl>
 </dd></dl>
 
 </dd></dl>
 
-</section>
-<section id="module-the_data_packet.clients.rss_client">
-<span id="client-base-classes"></span><h2>Client Base Classes<a class="headerlink" href="#module-the_data_packet.clients.rss_client" title="Link to this heading">¶</a></h2>
-<p>RSS feed client for fetching article URLs.</p>
+<p id="module-the_data_packet.utils.s3">AWS S3 storage backend.</p>
 <dl class="py class">
-<dt class="sig sig-object py" id="the_data_packet.clients.rss_client.RSSClient">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">the_data_packet.clients.rss_client.</span></span><span class="sig-name descname"><span class="pre">RSSClient</span></span><a class="reference internal" href="../_modules/the_data_packet/clients/rss_client.html#RSSClient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.clients.rss_client.RSSClient" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="the_data_packet.utils.s3.S3UploadResult">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">the_data_packet.utils.s3.</span></span><span class="sig-name descname"><span class="pre">S3UploadResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">success</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">s3_url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_message</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_size_bytes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/the_data_packet/utils/s3.html#S3UploadResult"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.utils.s3.S3UploadResult" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
-<p>Client for fetching RSS feed data from Wired.com.</p>
+<p>Result of S3 upload operation.</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="the_data_packet.clients.rss_client.RSSClient.FEED_URLS">
-<span class="sig-name descname"><span class="pre">FEED_URLS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'guide':</span> <span class="pre">'https://www.wired.com/feed/tag/wired-guide/latest/rss',</span> <span class="pre">'security':</span> <span class="pre">'https://www.wired.com/feed/category/security/latest/rss'}</span></em><a class="headerlink" href="#the_data_packet.clients.rss_client.RSSClient.FEED_URLS" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="the_data_packet.utils.s3.S3UploadResult.success">
+<span class="sig-name descname"><span class="pre">success</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></em><a class="headerlink" href="#the_data_packet.utils.s3.S3UploadResult.success" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="the_data_packet.utils.s3.S3UploadResult.s3_url">
+<span class="sig-name descname"><span class="pre">s3_url</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#the_data_packet.utils.s3.S3UploadResult.s3_url" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="the_data_packet.utils.s3.S3UploadResult.error_message">
+<span class="sig-name descname"><span class="pre">error_message</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#the_data_packet.utils.s3.S3UploadResult.error_message" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="the_data_packet.utils.s3.S3UploadResult.file_size_bytes">
+<span class="sig-name descname"><span class="pre">file_size_bytes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#the_data_packet.utils.s3.S3UploadResult.file_size_bytes" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="the_data_packet.clients.rss_client.RSSClient.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/the_data_packet/clients/rss_client.html#RSSClient.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.clients.rss_client.RSSClient.__init__" title="Link to this definition">¶</a></dt>
-<dd><p>Initialize the RSS client.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="the_data_packet.clients.rss_client.RSSClient.get_latest_article_url">
-<span class="sig-name descname"><span class="pre">get_latest_article_url</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">category</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../_modules/the_data_packet/clients/rss_client.html#RSSClient.get_latest_article_url"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.clients.rss_client.RSSClient.get_latest_article_url" title="Link to this definition">¶</a></dt>
-<dd><p>Get the URL of the latest article from a specific category.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>category</strong> – The category to fetch from (‘security’ or ‘guide’)</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The URL of the latest article</p>
-</dd>
-<dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If category is not supported</p></li>
-<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.14)"><strong>RuntimeError</strong></a> – If no articles are found</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="the_data_packet.clients.rss_client.RSSClient.get_article_urls">
-<span class="sig-name descname"><span class="pre">get_article_urls</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">category</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/the_data_packet/clients/rss_client.html#RSSClient.get_article_urls"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.clients.rss_client.RSSClient.get_article_urls" title="Link to this definition">¶</a></dt>
-<dd><p>Get multiple article URLs from a specific category.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>category</strong> – The category to fetch from</p></li>
-<li><p><strong>limit</strong> – Maximum number of URLs to return</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>List of article URLs</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="the_data_packet.clients.rss_client.RSSClient.get_feed_data">
-<span class="sig-name descname"><span class="pre">get_feed_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">category</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/the_data_packet/clients/rss_client.html#RSSClient.get_feed_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.clients.rss_client.RSSClient.get_feed_data" title="Link to this definition">¶</a></dt>
-<dd><p>Get full feed data for a category.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>category</strong> – The category to fetch from</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Dictionary containing feed metadata and entries</p>
-</dd>
-</dl>
-</dd></dl>
+<dt class="sig sig-object py" id="the_data_packet.utils.s3.S3UploadResult.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">success</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">s3_url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_message</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_size_bytes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#the_data_packet.utils.s3.S3UploadResult.__init__" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
-<p id="module-the_data_packet.clients.http_client">HTTP client for fetching web pages.</p>
 <dl class="py class">
-<dt class="sig sig-object py" id="the_data_packet.clients.http_client.HTTPClient">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">the_data_packet.clients.http_client.</span></span><span class="sig-name descname"><span class="pre">HTTPClient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_agent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/the_data_packet/clients/http_client.html#HTTPClient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.clients.http_client.HTTPClient" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="the_data_packet.utils.s3.S3Storage">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">the_data_packet.utils.s3.</span></span><span class="sig-name descname"><span class="pre">S3Storage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aws_access_key_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aws_secret_access_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">region</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/the_data_packet/utils/s3.html#S3Storage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.utils.s3.S3Storage" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
-<p>HTTP client for fetching and parsing web pages.</p>
+<p>AWS S3 storage backend.</p>
 <dl class="py method">
-<dt class="sig sig-object py" id="the_data_packet.clients.http_client.HTTPClient.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_agent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/the_data_packet/clients/http_client.html#HTTPClient.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.clients.http_client.HTTPClient.__init__" title="Link to this definition">¶</a></dt>
-<dd><p>Initialize the HTTP client.</p>
+<dt class="sig sig-object py" id="the_data_packet.utils.s3.S3Storage.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aws_access_key_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aws_secret_access_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">region</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/the_data_packet/utils/s3.html#S3Storage.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.utils.s3.S3Storage.__init__" title="Link to this definition">¶</a></dt>
+<dd><p>Initialize S3 storage.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>timeout</strong> – Request timeout in seconds</p></li>
-<li><p><strong>user_agent</strong> – Custom User-Agent string</p></li>
+<li><p><strong>bucket_name</strong> – S3 bucket name (defaults to config)</p></li>
+<li><p><strong>aws_access_key_id</strong> – AWS access key (defaults to config/env)</p></li>
+<li><p><strong>aws_secret_access_key</strong> – AWS secret key (defaults to config/env)</p></li>
+<li><p><strong>region</strong> – AWS region (defaults to config)</p></li>
 </ul>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="the_data_packet.clients.http_client.HTTPClient.get_page">
-<span class="sig-name descname"><span class="pre">get_page</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://www.crummy.com/software/BeautifulSoup/bs4/doc/api/bs4.html#bs4.BeautifulSoup" title="(in Beautiful Soup)"><span class="pre">BeautifulSoup</span></a></span></span><a class="reference internal" href="../_modules/the_data_packet/clients/http_client.html#HTTPClient.get_page"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.clients.http_client.HTTPClient.get_page" title="Link to this definition">¶</a></dt>
-<dd><p>Fetch a web page and return a BeautifulSoup object.</p>
+<dt class="sig sig-object py" id="the_data_packet.utils.s3.S3Storage.upload_file">
+<span class="sig-name descname"><span class="pre">upload_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">local_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">s3_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">content_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="storage.html#the_data_packet.utils.s3.S3UploadResult" title="the_data_packet.utils.s3.S3UploadResult"><span class="pre">S3UploadResult</span></a></span></span><a class="reference internal" href="../_modules/the_data_packet/utils/s3.html#S3Storage.upload_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.utils.s3.S3Storage.upload_file" title="Link to this definition">¶</a></dt>
+<dd><p>Upload a file to S3.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>url</strong> – The URL to fetch</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>local_path</strong> – Path to local file</p></li>
+<li><p><strong>s3_key</strong> – S3 object key (defaults to filename)</p></li>
+<li><p><strong>public</strong> – Whether to make the file publicly readable</p></li>
+<li><p><strong>content_type</strong> – MIME type for the file</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>BeautifulSoup object of the parsed HTML</p>
-</dd>
-<dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.14)"><strong>RuntimeError</strong></a> – If the request fails</p>
+<dd class="field-even"><p>S3UploadResult with upload details</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="the_data_packet.clients.http_client.HTTPClient.get_raw_content">
-<span class="sig-name descname"><span class="pre">get_raw_content</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../_modules/the_data_packet/clients/http_client.html#HTTPClient.get_raw_content"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.clients.http_client.HTTPClient.get_raw_content" title="Link to this definition">¶</a></dt>
-<dd><p>Fetch raw HTML content from a URL.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>url</strong> – The URL to fetch</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Raw HTML content as string</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="the_data_packet.clients.http_client.HTTPClient.close">
-<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/the_data_packet/clients/http_client.html#HTTPClient.close"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.clients.http_client.HTTPClient.close" title="Link to this definition">¶</a></dt>
-<dd><p>Close the HTTP session.</p>
+<dt class="sig sig-object py" id="the_data_packet.utils.s3.S3Storage.bucket_exists">
+<span class="sig-name descname"><span class="pre">bucket_exists</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="../_modules/the_data_packet/utils/s3.html#S3Storage.bucket_exists"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.utils.s3.S3Storage.bucket_exists" title="Link to this definition">¶</a></dt>
+<dd><p>Check if the configured bucket exists and is accessible.</p>
 </dd></dl>
 
 </dd></dl>
@@ -570,26 +492,8 @@ in different categories.</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="extractors.html">
-              <div class="page-info">
-                <div class="context">
-                  <span>Next</span>
-                </div>
-                <div class="title">Content Extractors</div>
-              </div>
-              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
-            </a>
-          <a class="prev-page" href="models.html">
-              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
-              <div class="page-info">
-                <div class="context">
-                  <span>Previous</span>
-                </div>
-                
-                <div class="title">Data Models</div>
-                
-              </div>
-            </a>
+          
+          
         </div>
         <div class="bottom-of-page">
           <div class="left-details">
@@ -620,44 +524,36 @@ in different categories.</p>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Client Modules</a><ul>
+<li><a class="reference internal" href="#">HTTP Utilities</a><ul>
 <li><a class="reference internal" href="#http-client">HTTP Client</a><ul>
-<li><a class="reference internal" href="#the_data_packet.clients.HTTPClient"><code class="docutils literal notranslate"><span class="pre">HTTPClient</span></code></a><ul>
-<li><a class="reference internal" href="#the_data_packet.clients.HTTPClient.__init__"><code class="docutils literal notranslate"><span class="pre">HTTPClient.__init__()</span></code></a></li>
+<li><a class="reference internal" href="#the_data_packet.utils.http.HTTPClient"><code class="docutils literal notranslate"><span class="pre">HTTPClient</span></code></a><ul>
+<li><a class="reference internal" href="#the_data_packet.utils.http.HTTPClient.__init__"><code class="docutils literal notranslate"><span class="pre">HTTPClient.__init__()</span></code></a></li>
 <li><a class="reference internal" href="#id0"><code class="docutils literal notranslate"><span class="pre">HTTPClient.__init__()</span></code></a></li>
-<li><a class="reference internal" href="#the_data_packet.clients.HTTPClient.get_page"><code class="docutils literal notranslate"><span class="pre">HTTPClient.get_page()</span></code></a></li>
-<li><a class="reference internal" href="#the_data_packet.clients.HTTPClient.get_raw_content"><code class="docutils literal notranslate"><span class="pre">HTTPClient.get_raw_content()</span></code></a></li>
-<li><a class="reference internal" href="#the_data_packet.clients.HTTPClient.close"><code class="docutils literal notranslate"><span class="pre">HTTPClient.close()</span></code></a></li>
+<li><a class="reference internal" href="#the_data_packet.utils.http.HTTPClient.get"><code class="docutils literal notranslate"><span class="pre">HTTPClient.get()</span></code></a></li>
+<li><a class="reference internal" href="#the_data_packet.utils.http.HTTPClient.get_soup"><code class="docutils literal notranslate"><span class="pre">HTTPClient.get_soup()</span></code></a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a class="reference internal" href="#rss-client">RSS Client</a><ul>
-<li><a class="reference internal" href="#the_data_packet.clients.RSSClient"><code class="docutils literal notranslate"><span class="pre">RSSClient</span></code></a><ul>
-<li><a class="reference internal" href="#the_data_packet.clients.RSSClient.__init__"><code class="docutils literal notranslate"><span class="pre">RSSClient.__init__()</span></code></a></li>
-<li><a class="reference internal" href="#the_data_packet.clients.RSSClient.FEED_URLS"><code class="docutils literal notranslate"><span class="pre">RSSClient.FEED_URLS</span></code></a></li>
-<li><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">RSSClient.__init__()</span></code></a></li>
-<li><a class="reference internal" href="#the_data_packet.clients.RSSClient.get_latest_article_url"><code class="docutils literal notranslate"><span class="pre">RSSClient.get_latest_article_url()</span></code></a></li>
-<li><a class="reference internal" href="#the_data_packet.clients.RSSClient.get_article_urls"><code class="docutils literal notranslate"><span class="pre">RSSClient.get_article_urls()</span></code></a></li>
-<li><a class="reference internal" href="#the_data_packet.clients.RSSClient.get_feed_data"><code class="docutils literal notranslate"><span class="pre">RSSClient.get_feed_data()</span></code></a></li>
+<li><a class="reference internal" href="#module-the_data_packet.utils.http">Utility Modules</a><ul>
+<li><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">HTTPClient</span></code></a><ul>
+<li><a class="reference internal" href="#id2"><code class="docutils literal notranslate"><span class="pre">HTTPClient.__init__()</span></code></a></li>
+<li><a class="reference internal" href="#id3"><code class="docutils literal notranslate"><span class="pre">HTTPClient.get()</span></code></a></li>
+<li><a class="reference internal" href="#id4"><code class="docutils literal notranslate"><span class="pre">HTTPClient.get_soup()</span></code></a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#the_data_packet.utils.s3.S3UploadResult"><code class="docutils literal notranslate"><span class="pre">S3UploadResult</span></code></a><ul>
+<li><a class="reference internal" href="#the_data_packet.utils.s3.S3UploadResult.success"><code class="docutils literal notranslate"><span class="pre">S3UploadResult.success</span></code></a></li>
+<li><a class="reference internal" href="#the_data_packet.utils.s3.S3UploadResult.s3_url"><code class="docutils literal notranslate"><span class="pre">S3UploadResult.s3_url</span></code></a></li>
+<li><a class="reference internal" href="#the_data_packet.utils.s3.S3UploadResult.error_message"><code class="docutils literal notranslate"><span class="pre">S3UploadResult.error_message</span></code></a></li>
+<li><a class="reference internal" href="#the_data_packet.utils.s3.S3UploadResult.file_size_bytes"><code class="docutils literal notranslate"><span class="pre">S3UploadResult.file_size_bytes</span></code></a></li>
+<li><a class="reference internal" href="#the_data_packet.utils.s3.S3UploadResult.__init__"><code class="docutils literal notranslate"><span class="pre">S3UploadResult.__init__()</span></code></a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#module-the_data_packet.clients.rss_client">Client Base Classes</a><ul>
-<li><a class="reference internal" href="#the_data_packet.clients.rss_client.RSSClient"><code class="docutils literal notranslate"><span class="pre">RSSClient</span></code></a><ul>
-<li><a class="reference internal" href="#the_data_packet.clients.rss_client.RSSClient.FEED_URLS"><code class="docutils literal notranslate"><span class="pre">RSSClient.FEED_URLS</span></code></a></li>
-<li><a class="reference internal" href="#the_data_packet.clients.rss_client.RSSClient.__init__"><code class="docutils literal notranslate"><span class="pre">RSSClient.__init__()</span></code></a></li>
-<li><a class="reference internal" href="#the_data_packet.clients.rss_client.RSSClient.get_latest_article_url"><code class="docutils literal notranslate"><span class="pre">RSSClient.get_latest_article_url()</span></code></a></li>
-<li><a class="reference internal" href="#the_data_packet.clients.rss_client.RSSClient.get_article_urls"><code class="docutils literal notranslate"><span class="pre">RSSClient.get_article_urls()</span></code></a></li>
-<li><a class="reference internal" href="#the_data_packet.clients.rss_client.RSSClient.get_feed_data"><code class="docutils literal notranslate"><span class="pre">RSSClient.get_feed_data()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#the_data_packet.clients.http_client.HTTPClient"><code class="docutils literal notranslate"><span class="pre">HTTPClient</span></code></a><ul>
-<li><a class="reference internal" href="#the_data_packet.clients.http_client.HTTPClient.__init__"><code class="docutils literal notranslate"><span class="pre">HTTPClient.__init__()</span></code></a></li>
-<li><a class="reference internal" href="#the_data_packet.clients.http_client.HTTPClient.get_page"><code class="docutils literal notranslate"><span class="pre">HTTPClient.get_page()</span></code></a></li>
-<li><a class="reference internal" href="#the_data_packet.clients.http_client.HTTPClient.get_raw_content"><code class="docutils literal notranslate"><span class="pre">HTTPClient.get_raw_content()</span></code></a></li>
-<li><a class="reference internal" href="#the_data_packet.clients.http_client.HTTPClient.close"><code class="docutils literal notranslate"><span class="pre">HTTPClient.close()</span></code></a></li>
+<li><a class="reference internal" href="#the_data_packet.utils.s3.S3Storage"><code class="docutils literal notranslate"><span class="pre">S3Storage</span></code></a><ul>
+<li><a class="reference internal" href="#the_data_packet.utils.s3.S3Storage.__init__"><code class="docutils literal notranslate"><span class="pre">S3Storage.__init__()</span></code></a></li>
+<li><a class="reference internal" href="#the_data_packet.utils.s3.S3Storage.upload_file"><code class="docutils literal notranslate"><span class="pre">S3Storage.upload_file()</span></code></a></li>
+<li><a class="reference internal" href="#the_data_packet.utils.s3.S3Storage.bucket_exists"><code class="docutils literal notranslate"><span class="pre">S3Storage.bucket_exists()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -673,7 +569,7 @@ in different categories.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=8d563738"></script>
+</div><script src="../_static/documentation_options.js?v=51b770b3"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

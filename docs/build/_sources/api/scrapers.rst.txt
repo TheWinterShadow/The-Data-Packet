@@ -1,33 +1,31 @@
-Web Scrapers
-============
+Article Sources
+===============
 
-The scrapers module provides high-level interfaces for orchestrating the article scraping process.
+The sources module provides high-level interfaces for collecting articles from various news websites.
 
-Wired Article Scraper
-----------------------
+Wired Source
+------------
 
-.. autoclass:: the_data_packet.scrapers.WiredArticleScraper
+.. automodule:: the_data_packet.sources.wired
    :members:
-   :inherited-members:
+   :undoc-members:
    :show-inheritance:
 
-   .. automethod:: __init__
-   
-   The `WiredArticleScraper` is the main orchestrator that combines RSS feeds, HTTP clients,
-   and content extractors to provide a simple interface for scraping Wired articles.
-   
-   **Key Features:**
-   
-   - **Category Support**: Handles 'security' and 'guide' article categories
-   - **Batch Operations**: Can fetch multiple articles at once
-   - **Resource Management**: Automatic cleanup of HTTP sessions
-   - **Error Handling**: Comprehensive error reporting and recovery
-   
-   **Example Usage:**
-   
-   .. code-block:: python
-   
-      from the_data_packet.scrapers import WiredArticleScraper
+TechCrunch Source  
+-----------------
+
+.. automodule:: the_data_packet.sources.techcrunch
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Base Source Classes
+-------------------
+
+.. automodule:: the_data_packet.sources.base
+   :members:
+   :undoc-members:
+   :show-inheritance:
       
       # Create scraper with custom timeout
       scraper = WiredArticleScraper(timeout=60)

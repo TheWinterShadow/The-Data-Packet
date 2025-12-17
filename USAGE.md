@@ -33,10 +33,9 @@ docker build -t the-data-packet:local .
    - Get from: https://console.anthropic.com/
    - Used for: Converting articles into podcast dialogue
 
-2. **Google API Key** (for Gemini TTS audio generation)
-   - Get from: https://console.cloud.google.com/
-   - Enable: Generative AI API
-   - Used for: Converting scripts to multi-speaker audio
+2. **ElevenLabs API Key** (for high-quality TTS audio generation)
+   - Get from: https://elevenlabs.io/
+   - Used for: Converting scripts to multi-speaker audio with professional voices
 
 ### Setting Up Environment Variables
 
@@ -45,7 +44,7 @@ docker build -t the-data-packet:local .
 # Create .env file
 cat > .env << EOF
 ANTHROPIC_API_KEY=sk-ant-api03-your-key-here
-GOOGLE_API_KEY=AIzaSyYour-google-key-here
+ELEVENLABS_API_KEY=your-elevenlabs-key-here
 EOF
 
 # Use with Docker
@@ -58,7 +57,7 @@ docker run --rm --env-file .env \
 ```bash
 docker run --rm \
   -e ANTHROPIC_API_KEY="sk-ant-api03-your-key" \
-  -e GOOGLE_API_KEY="AIzaSyYour-google-key" \
+  -e ELEVENLABS_API_KEY="your-elevenlabs-key" \
   -v "$(pwd)/output:/app/output" \
   ghcr.io/thewintershadow/the-data-packet:latest
 ```
@@ -122,44 +121,56 @@ docker run --rm \
 
 ### Voice Customization
 
-Available voices:
-- **Puck** - Energetic and dynamic
-- **Charon** - Deep and authoritative  
-- **Kore** - Warm and conversational
-- **Fenrir** - Rich and engaging
-- **Aoede** - Clear and professional
-- **Zephyr** - Natural and balanced
+ElevenLabs Voice Configuration:
+
+**Default Voices:**
+- **Alex (Voice A)**: `XrExE9yKIg1WjnnlVkGX` - George (Professional male narrator)
+- **Sam (Voice B)**: `IKne3meq5aSn9XLyUdCD` - Rachel (Clear female narrator)
+
+**Additional Available Voices:**
+- `JBFqnCBsd6RMkjVDRZzb` - George (Primary narrator)
+- `N2lVS1w4EtoT3dr4eOWO` - Callum (Conversational)
+- `21m00Tcm4TlvDq8ikWAM` - Rachel (Female narrator)
+- `5Q0t7uMcjvnagumLfvZi` - Charlie (Young adult male)
 
 ```bash
 docker run --rm \
   --env-file .env \
   -v "$(pwd)/output:/app/output" \
   ghcr.io/thewintershadow/the-data-packet:latest \
-  --voice-a Charon \
-  --voice-b Aoede \
+  --voice-a JBFqnCBsd6RMkjVDRZzb \
+  --voice-b 21m00Tcm4TlvDq8ikWAM \
   --show-name "Professional Tech Update"
 ```
 
 ### Category Selection
 
-Available categories:
+Available sources and categories:
+
+**Wired.com**:
 - `security` - Cybersecurity and privacy articles
-- `guide` - How-to and tutorial articles
+- `science` - Science and technology articles
+- `ai` - Artificial intelligence and machine learning
+
+**TechCrunch**:
+- `ai` - AI and machine learning coverage
+- `security` - Security and privacy news
 
 ```bash
-# Security articles only
+# Security articles from multiple sources
 docker run --rm \
   --env-file .env \
   -v "$(pwd)/output:/app/output" \
   ghcr.io/thewintershadow/the-data-packet:latest \
+  --sources wired techcrunch \
   --categories security
 
-# Both categories (default)
+# AI articles from all sources (default)
 docker run --rm \
   --env-file .env \
   -v "$(pwd)/output:/app/output" \
   ghcr.io/thewintershadow/the-data-packet:latest \
-  --categories security guide
+  --categories security ai
 ```
 
 ## 🐳 Docker Compose Usage
@@ -174,7 +185,7 @@ services:
     image: ghcr.io/thewintershadow/the-data-packet:latest
     environment:
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
-      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - ELEVENLABS_API_KEY=${ELEVENLABS_API_KEY}
     volumes:
       - ./output:/app/output
     command: ["--show-name", "Daily Tech Update"]
@@ -195,14 +206,15 @@ services:
     image: ghcr.io/thewintershadow/the-data-packet:latest
     environment:
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
-      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - ELEVENLABS_API_KEY=${ELEVENLABS_API_KEY}
     volumes:
       - ./output:/app/output
     command: [
       "--show-name", "Tech Daily",
-      "--categories", "security", "guide",
-      "--voice-a", "Puck",
-      "--voice-b", "Kore"
+      "--sources", "wired", "techcrunch", 
+      "--categories", "security", "ai",
+      "--voice-a", "XrExE9yKIg1WjnnlVkGX",
+      "--voice-b", "IKne3meq5aSn9XLyUdCD"
     ]
     
   # Script-only generation
@@ -268,32 +280,34 @@ docker-compose --profile audio up audio-only
 
 | Option | Description | Default |
 |--------|-------------|---------|
-| `--voice-a VOICE` | Voice for Alex | `Puck` |
-| `--voice-b VOICE` | Voice for Sam | `Kore` |
+| `--voice-a VOICE` | ElevenLabs Voice ID for Alex | `XrExE9yKIg1WjnnlVkGX` |
+| `--voice-b VOICE` | ElevenLabs Voice ID for Sam | `IKne3meq5aSn9XLyUdCD` |
 
-### Output Files
+### Content Sources
 
 | Option | Description | Default |
 |--------|-------------|---------|
-| `--script-filename FILE` | Script filename | `episode_script.txt` |
-| `--audio-filename FILE` | Audio filename | `episode.wav` |
+| `--sources SOURCES` | Article sources (wired, techcrunch) | `wired` |
+| `--categories CATS` | Article categories | `security ai` |
+| `--max-articles NUM` | Max articles per source | `1` |
 
 ### API Keys (Override Environment)
 
 | Option | Description |
 |--------|-------------|
 | `--anthropic-key KEY` | Anthropic API key |
-| `--google-key KEY` | Google API key |
+| `--elevenlabs-key KEY` | ElevenLabs API key |
+| `--s3-bucket BUCKET` | S3 bucket for uploads |
+| `--no-s3` | Disable S3 uploads |
 
 ### Debugging
 
 | Option | Description |
 |--------|-------------|
-| `--verbose` | Verbose logging |
-| `--debug` | Debug logging |
-| `--quiet` | Quiet mode (errors only) |
-| `--no-cleanup` | Don't clean up temp files |
-| `--validate` | Validate results after generation |
+| `--log-level LEVEL` | Log level (DEBUG/INFO/WARNING/ERROR) |
+| `--save-intermediate` | Save intermediate files |
+| `--show-name NAME` | Custom podcast name |
+| `--output DIR` | Output directory |
 
 ## 🔄 Production Workflows
 
@@ -401,7 +415,14 @@ docker run --rm \
   --env-file .env \
   -v "$(pwd)/output:/app/output" \
   ghcr.io/thewintershadow/the-data-packet:latest \
-  --debug
+  --log-level DEBUG
+
+# Save intermediate files for inspection
+docker run --rm \
+  --env-file .env \
+  -v "$(pwd)/output:/app/output" \
+  ghcr.io/thewintershadow/the-data-packet:latest \
+  --save-intermediate
 
 # Get help
 docker run --rm \

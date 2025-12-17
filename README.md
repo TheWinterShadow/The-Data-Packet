@@ -22,7 +22,7 @@ The Data Packet is a complete end-to-end podcast generation system that:
 
 ### 🤖 AI-Powered Content Creation
 - **Anthropic Claude Integration**: Advanced script generation with natural dialogue
-- **Google Gemini TTS**: High-quality multi-speaker audio with 6 voice options
+- **ElevenLabs TTS**: High-quality multi-speaker audio with professional voice models
 - **Intelligent Content Processing**: Smart article summarization and podcast formatting
 - **Context-Aware Generation**: Creates cohesive episodes from multiple news sources
 
@@ -33,7 +33,7 @@ The Data Packet is a complete end-to-end podcast generation system that:
 - **Health Monitoring**: Built-in status checks and performance metrics
 
 ### ⚙️ Highly Configurable
-- **Multiple Voice Combinations**: 6 distinct TTS voices (Puck, Charon, Kore, Fenrir, Aoede, Zephyr)
+- **Multiple Voice Combinations**: ElevenLabs professional voice library with male/female narrator options
 - **Content Category Selection**: Security, guides, business, science, and AI news
 - **Custom Show Configuration**: Personalized podcast names, descriptions, and branding
 - **Flexible Output Options**: Local files, S3 hosting, RSS feeds, or individual components
@@ -254,7 +254,7 @@ docker build -t the-data-packet .
 # Run complete podcast generation
 docker run --rm \
   -e ANTHROPIC_API_KEY="your-claude-key" \
-  -e GOOGLE_API_KEY="your-gemini-key" \
+  -e ELEVENLABS_API_KEY="your-elevenlabs-key" \
   -v "$(pwd)/output:/app/output" \
   the-data-packet
 
@@ -267,13 +267,13 @@ docker run --rm \
 # Run with custom parameters
 docker run --rm \
   -e ANTHROPIC_API_KEY="your-claude-key" \
-  -e GOOGLE_API_KEY="your-gemini-key" \
+  -e ELEVENLABS_API_KEY="your-elevenlabs-key" \
   -v "$(pwd)/output:/app/output" \
   the-data-packet \
   --show-name "My Tech Podcast" \
   --categories security \
-  --voice-a Charon \
-  --voice-b Aoede
+  --voice-a XrExE9yKIg1WjnnlVkGX \
+  --voice-b IKne3meq5aSn9XLyUdCD
 ```
 
 ### Local Installation
@@ -290,18 +290,20 @@ pip install -e .
 
 ```bash
 export ANTHROPIC_API_KEY="your-claude-api-key"
-export GOOGLE_API_KEY="your-gemini-api-key"
+export ELEVENLABS_API_KEY="your-elevenlabs-api-key"
 ```
 
 ### Generate a Podcast (Local)
 
 ```python
-from the_data_packet import PodcastPipeline, PipelineConfig
+from the_data_packet import PodcastPipeline, get_config
 
-# Create configuration
-config = PipelineConfig(
-    episode_date="Monday, December 16, 2024",
-    show_name="Daily Tech Update"
+# Create configuration  
+config = get_config(
+    show_name="Daily Tech Update",
+    article_sources=["wired", "techcrunch"],
+    article_categories=["security", "ai"],
+    max_articles_per_source=1
 )
 
 # Run complete pipeline
@@ -310,8 +312,10 @@ result = pipeline.run()
 
 if result.success:
     print(f"✅ Podcast generated!")
-    print(f"📝 Script: {result.script_path}")
+    print(f"📝 Script: {result.script_path}")  
     print(f"🎵 Audio: {result.audio_path}")
+    if result.rss_path:
+        print(f"📡 RSS: {result.rss_path}")
 ```
 
 ## 📋 Usage Examples
@@ -319,11 +323,13 @@ if result.success:
 ### 1. Complete Automated Pipeline
 
 ```python
-from the_data_packet import PodcastPipeline, PipelineConfig
+from the_data_packet import PodcastPipeline, get_config
 
-config = PipelineConfig(
-    episode_date="Wednesday, December 18, 2024",
-    categories=["security", "guide"],
+config = get_config(
+    show_name="Daily Tech Briefing",
+    article_sources=["wired", "techcrunch"],
+    article_categories=["security", "ai"],
+    max_articles_per_source=2,
     generate_script=True,
     generate_audio=True,
     output_directory="./my_podcast"
@@ -336,10 +342,13 @@ result = pipeline.run()
 ### 2. Script Generation Only
 
 ```python
-config = PipelineConfig(
+from the_data_packet import PodcastPipeline, get_config
+
+config = get_config(
+    article_categories=["security"],
     generate_script=True,
-    generate_audio=False,  # Skip audio
-    categories=["security"]
+    generate_audio=False,  # Skip audio generation
+    output_directory="./scripts"
 )
 
 pipeline = PodcastPipeline(config)
@@ -349,47 +358,46 @@ result = pipeline.run()
 ### 3. Individual Components
 
 ```python
-from the_data_packet import WiredArticleScraper, PodcastScriptGenerator, GeminiTTSGenerator
+from the_data_packet.sources import WiredSource, TechCrunchSource
+from the_data_packet.generation import ScriptGenerator, AudioGenerator
 
-# Step 1: Scrape articles
-scraper = WiredArticleScraper()
-articles = scraper.get_both_latest_articles()
+# Step 1: Collect articles
+wired = WiredSource()
+articles = wired.get_articles(category="security", limit=1)
 
 # Step 2: Generate script
-script_gen = PodcastScriptGenerator(show_name="Tech Brief")
-script = script_gen.generate_complete_episode(
-    articles=[f"TITLE: {a.title}, CONTENT: {a.content}" for a in articles.values()],
-    episode_date="Today"
-)
+script_gen = ScriptGenerator()
+script = script_gen.generate_script(articles)
 
 # Step 3: Generate audio
-audio_gen = GeminiTTSGenerator()
-result = audio_gen.generate_audio(script, "episode.wav")
-
-scraper.close()
+audio_gen = AudioGenerator()
+result = audio_gen.generate_audio(script, Path("episode.mp3"))
 ```
 
 ### 4. Custom Configuration
 
 ```python
-from the_data_packet import PipelineConfig, Settings, setup_logging
+from the_data_packet import PodcastPipeline, get_config, setup_logging
 
 # Setup custom logging
 setup_logging(level="DEBUG")
 
-# Custom configuration
-config = PipelineConfig(
+# Custom configuration with ElevenLabs voice IDs
+config = get_config(
     show_name="Custom Tech Talk",
-    voice_a="Charon",    # Different voice
-    voice_b="Aoede",     # Different voice
-    max_articles_per_category=2,
-    save_intermediate_files=True
+    voice_a="XrExE9yKIg1WjnnlVkGX",  # George (narrator)
+    voice_b="IKne3meq5aSn9XLyUdCD",  # Rachel (female narrator)
+    max_articles_per_source=2,
+    save_intermediate_files=True,
+    claude_model="claude-sonnet-4-5-20250929",
+    tts_model="eleven_turbo_v2_5"
 )
 
-# Get current settings
-settings = Settings()
-print(f"Default show: {settings.show_name}")
-print(f"Available voices: {GeminiTTSGenerator.list_available_voices()}")
+# Create and run pipeline
+pipeline = PodcastPipeline(config)
+result = pipeline.run()
+
+print(f"Generated episode: {result.audio_path}")
 ```
 
 ## 🏗️ Architecture
@@ -398,21 +406,23 @@ print(f"Available voices: {GeminiTTSGenerator.list_available_voices()}")
 the_data_packet/
 ├── 🎬 workflows/          # Complete pipeline orchestration
 │   ├── PodcastPipeline    # Main workflow coordinator
-│   └── PipelineConfig     # Configuration management
-├── 🕷️ scrapers/           # Web scraping components
-│   └── WiredArticleScraper # Article extraction from Wired.com
-├── 🤖 ai/                 # AI content generation
-│   ├── ClaudeClient       # Anthropic Claude API client
-│   ├── PodcastScriptGenerator # Script generation logic
-│   └── prompts/           # AI prompts and templates
-├── 🎙️ audio/              # Audio generation
-│   └── GeminiTTSGenerator # Gemini Text-to-Speech
-├── ⚙️ config/             # Configuration management
-│   └── Settings           # Application settings
-├── 🛠️ core/               # Core utilities
+│   └── PodcastResult      # Pipeline execution results
+├── 📰 sources/            # Article collection
+│   ├── ArticleSource      # Base class for news sources
+│   ├── WiredSource        # Wired.com article scraping
+│   └── TechCrunchSource   # TechCrunch article scraping
+├── 🤖 generation/         # AI content generation
+│   ├── ScriptGenerator    # Anthropic Claude script generation
+│   ├── AudioGenerator     # ElevenLabs TTS audio generation
+│   └── RSSGenerator       # RSS feed generation
+├── ⚙️ core/               # Core configuration
+│   ├── Config             # Unified configuration management
 │   ├── exceptions         # Custom exception classes
-│   └── logging_config     # Logging setup
-├── 📄 models/             # Data models
+│   └── logging            # Logging setup
+├── 🛠️ utils/              # Utility components
+│   ├── S3Storage          # AWS S3 integration
+│   └── HTTPClient         # HTTP request handling
+└── 📄 cli.py              # Command-line interface
 │   └── ArticleData        # Article data structure
 └── 🔧 utils/              # Utility components
     ├── HTTPClient         # HTTP request handling
@@ -446,43 +456,70 @@ graph LR
 ### Environment Variables
 
 ```bash
-# Required
+# Required for script generation
 ANTHROPIC_API_KEY=your-claude-api-key
-GOOGLE_API_KEY=your-gemini-api-key
 
-# Optional
-THE_DATA_PACKET_LOG_LEVEL=INFO
-THE_DATA_PACKET_OUTPUT_DIR=./output
-THE_DATA_PACKET_SHOW_NAME="Custom Show Name"
+# Required for audio generation  
+ELEVENLABS_API_KEY=your-elevenlabs-api-key
+
+# Optional AWS S3 configuration
+S3_BUCKET_NAME=your-bucket-name
+AWS_ACCESS_KEY_ID=your-aws-key
+AWS_SECRET_ACCESS_KEY=your-aws-secret
+AWS_REGION=us-east-1
+
+# Optional customizations
+SHOW_NAME="Custom Show Name"
+LOG_LEVEL=INFO
+OUTPUT_DIRECTORY=./output
 ```
 
 ### Configuration File
 
 ```python
-from the_data_packet.config import Settings
+from the_data_packet import get_config
 
-settings = Settings(
+config = get_config(
     show_name="My Tech Podcast",
-    claude_model="claude-3-5-sonnet-20241022",
-    gemini_model="gemini-2.5-pro-preview-tts",
-    default_voice_a="Puck",
-    default_voice_b="Kore",
+    claude_model="claude-sonnet-4-5-20250929",
+    tts_model="eleven_turbo_v2_5",
+    voice_a="XrExE9yKIg1WjnnlVkGX",  # George (narrator)
+    voice_b="IKne3meq5aSn9XLyUdCD",  # Rachel (female narrator)
     max_tokens=3000,
     temperature=0.7,
     output_directory="./episodes"
 )
 ```
 
-## 🎙️ Available Voices
+## 🎙️ Available ElevenLabs Voices
 
-| Voice | Description |
+### Default Voice Configuration
+
+| Role | Voice ID | Description |
+|------|----------|-------------|
+| **Alex (Voice A)** | `XrExE9yKIg1WjnnlVkGX` | George - Professional male narrator |
+| **Sam (Voice B)** | `IKne3meq5aSn9XLyUdCD` | Rachel - Clear female narrator |
+
+### Additional Available Voices
+
+| Gender | Voice ID | Description |
+|--------|----------|-------------|
+| Male | `JBFqnCBsd6RMkjVDRZzb` | George - Primary narrator voice |
+| Male | `N2lVS1w4EtoT3dr4eOWO` | Callum - Conversational style |
+| Male | `5Q0t7uMcjvnagumLfvZi` | Charlie - Young adult male |
+| Male | `onwK4e9ZLuTAKqWW03F9` | Daniel - Middle-aged voice |
+| Female | `21m00Tcm4TlvDq8ikWAM` | Rachel - Primary female narrator |
+| Female | `AZnzlk1XvdvUeBnXmlld` | Domi - Young woman voice |
+| Female | `EXAVITQu4vr4xnSDxMaL` | Bella - Reading style |
+| Female | `MF3mGyEYCl7XYWbV9V6O` | Elli - Emotional range |
+
+### TTS Models
+
+| Model | Description |
 |-------|-------------|
-| **Puck** | Energetic and dynamic |
-| **Charon** | Deep and authoritative |
-| **Kore** | Warm and conversational |
-| **Fenrir** | Rich and engaging |
-| **Aoede** | Clear and professional |
-| **Zephyr** | Natural and balanced |
+| `eleven_turbo_v2_5` | Ultra-fast, high-quality (recommended) |
+| `eleven_multilingual_v2` | High-quality multilingual |
+| `eleven_flash_v2_5` | Fast generation with good quality |
 
 ## 📈 What's New in v2.0
 
@@ -573,115 +610,36 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- **Anthropic** for Claude AI API
-- **Google** for Gemini TTS capabilities
-- **Wired.com** for providing excellent tech journalism
+- **Anthropic** for Claude AI API capabilities
+- **ElevenLabs** for high-quality text-to-speech technology
+- **Wired.com** and **TechCrunch** for providing excellent tech journalism
 
 ---
 
-**⭐ If you find this useful, please star the repository!**
-pip install -e ".[dev]"
-```
+**⭐ If you find this useful, please star the repository!** | 🐳 **[View on GitHub Container Registry](https://github.com/TheWinterShadow/the_data_packet/pkgs/container/the-data-packet)**
+## 📊 Testing
 
-## Quick Start
-
-### Python API
-
-```python
-from the_data_packet import WiredArticleScraper
-
-# Initialize the scraper
-scraper = WiredArticleScraper()
-
-# Get the latest security article
-security_article = scraper.get_latest_security_article()
-print(f"Title: {security_article.title}")
-print(f"Author: {security_article.author}")
-print(f"Content: {security_article.content[:200]}...")
-
-# Get both latest articles
-articles = scraper.get_both_latest_articles()
-for category, article in articles.items():
-    print(f"{category}: {article.title}")
-
-# Get multiple articles
-security_articles = scraper.get_multiple_articles("security", limit=5)
-for article in security_articles:
-    print(f"- {article.title}")
-
-# Clean up
-scraper.close()
-```
-
-### Command Line Interface
-
-The package includes a CLI tool accessible via the `wired-scraper` command:
+The project includes comprehensive test coverage with **231 passing tests**:
 
 ```bash
-# Get latest security article
-wired-scraper security
+# Run all tests
+pytest tests/ -v
 
-# Get latest guide article  
-wired-scraper guide
+# Run specific test modules
+pytest tests/test_generation/ -v
+pytest tests/test_sources/ -v  
+pytest tests/test_workflows/ -v
 
-# Get both latest articles
-wired-scraper both
-
-# Get multiple articles
-wired-scraper security --count 5
-
-# Scrape a specific URL
-wired-scraper --url "https://www.wired.com/story/example-article/"
-
-# Output as text instead of JSON
-wired-scraper security --format text
-
-# Enable verbose logging
-wired-scraper security --verbose
+# Generate coverage report
+pytest --cov=the_data_packet tests/
 ```
 
-### Docker Usage
+### Test Structure
 
-Build and run the Docker container:
-
-```bash
-# Build the image
-docker build -t wired-scraper .
-
-# Run the container (outputs to ./output directory)
-docker run -v $(pwd)/output:/app/output wired-scraper
-
-# Run with custom command
-docker run -v $(pwd)/output:/app/output wired-scraper python -m the_data_packet.cli security --format text
-
-# Interactive mode
-docker run -it wired-scraper bash
-```
-
-## API Reference
-
-### WiredArticleScraper
-
-Main scraper class for extracting articles from Wired.com.
-
-```python
-class WiredArticleScraper:
-    def __init__(self, timeout: int = 30, user_agent: Optional[str] = None)
-    def get_latest_article(self, category: str) -> ArticleData
-    def get_latest_security_article(self) -> ArticleData  
-    def get_latest_guide_article(self) -> ArticleData
-    def get_both_latest_articles(self) -> Dict[str, ArticleData]
-    def get_multiple_articles(self, category: str, limit: int = 5) -> List[ArticleData]
-    def scrape_article_from_url(self, url: str, category: Optional[str] = None) -> ArticleData
-    def close(self)
-```
-
-### ArticleData
-
-Data model for article information.
-
-```python
-@dataclass
+- **✅ Unit Tests**: Individual component testing
+- **✅ Integration Tests**: End-to-end workflow testing 
+- **✅ Mock Testing**: API and external service mocking
+- **✅ Configuration Tests**: Environment and config validation
 class ArticleData:
     title: Optional[str] = None
     author: Optional[str] = None  
@@ -690,51 +648,57 @@ class ArticleData:
     category: Optional[str] = None
     
     def is_valid(self) -> bool
-    def to_dict(self) -> dict
-    @classmethod
-    def from_dict(cls, data: dict) -> "ArticleData"
-```
+## 📦 API Reference
 
-## Package Structure
+### Main Components
 
-```
-the_data_packet/
-├── __init__.py          # Main package exports
-├── __about__.py         # Version information  
-├── cli.py              # Command-line interface
-├── clients/            # HTTP and RSS clients
-│   ├── __init__.py
-│   ├── http_client.py  # HTTP request handling
-│   └── rss_client.py   # RSS feed parsing
-├── extractors/         # Content extraction
-│   ├── __init__.py
-│   └── wired_extractor.py  # Wired.com content extractor
-├── models/             # Data models
-│   ├── __init__.py
-│   └── article.py      # ArticleData model
-└── scrapers/           # Main scraper logic
-    ├── __init__.py
-    └── wired_scraper.py    # WiredArticleScraper class
-```
-
-## Configuration
-
-The package uses sensible defaults but can be configured:
-
+#### PodcastPipeline
 ```python
-# Custom timeout and User-Agent
-scraper = WiredArticleScraper(
-    timeout=60,
-    user_agent="MyBot/1.0"
-)
+class PodcastPipeline:
+    def __init__(self, config: Config)
+    def run(self) -> PodcastResult
+```
 
-# Access individual components
-from the_data_packet.clients import RSSClient, HTTPClient
-from the_data_packet.extractors import WiredContentExtractor
+#### Configuration
+```python
+def get_config(**overrides) -> Config:
+    """Get configuration with optional overrides"""
 
-rss_client = RSSClient()
-http_client = HTTPClient(timeout=30)
-extractor = WiredContentExtractor()
+class Config:
+    # Core settings
+    show_name: str
+    anthropic_api_key: str
+    elevenlabs_api_key: str
+    
+    # Generation settings  
+    generate_script: bool
+    generate_audio: bool
+    generate_rss: bool
+    
+    # Voice configuration
+    voice_a: str  # ElevenLabs voice ID
+    voice_b: str  # ElevenLabs voice ID
+```
+
+#### Article Sources
+```python
+class WiredSource:
+    def get_articles(self, category: str, limit: int) -> List[Article]
+
+class TechCrunchSource:
+    def get_articles(self, category: str, limit: int) -> List[Article]
+```
+
+#### Generation Components
+```python
+class ScriptGenerator:
+    def generate_script(self, articles: List[Article]) -> str
+
+class AudioGenerator:
+    def generate_audio(self, script: str, output_file: Path) -> AudioResult
+
+class RSSGenerator:
+    def generate_feed(self, episodes: List[Episode]) -> str
 ```
 
 ## Development
@@ -828,13 +792,14 @@ scraper = WiredArticleScraper()
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Changelog
+## 📈 Version History
 
-### Version 1.0.0
+### Version 2.0.0 (Current)
 
-- Initial release
-- Support for security and guide article categories
-- Full CLI interface
-- Docker containerization
-- Comprehensive test suite
-- Complete type annotations
+- ✅ **Complete AI-Powered Pipeline**: Automated podcast generation from article to audio
+- ✅ **ElevenLabs Integration**: High-quality text-to-speech with professional voice models  
+- ✅ **Multi-Source Support**: Wired.com and TechCrunch article collection
+- ✅ **Docker-First Deployment**: GitHub Container Registry with multi-platform support
+- ✅ **Comprehensive Testing**: 231 unit tests with 100% pass rate
+- ✅ **AWS S3 Integration**: Automated hosting and RSS feed generation
+- ✅ **Modular Architecture**: Clean separation of concerns with extensible design

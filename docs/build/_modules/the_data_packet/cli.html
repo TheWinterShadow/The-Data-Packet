@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.09.25 -->
-        <title>the_data_packet.cli - The Data Packet 1.0.0 documentation</title>
+        <title>the_data_packet.cli - The Data Packet 2.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=580074bf" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=8dab3a3b" />
@@ -160,7 +160,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../index.html"><div class="brand">The Data Packet 1.0.0 documentation</div></a>
+      <a href="../../index.html"><div class="brand">The Data Packet 2.0.0 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -181,7 +181,7 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
   
-  <span class="sidebar-brand-text">The Data Packet 1.0.0 documentation</span>
+  <span class="sidebar-brand-text">The Data Packet 2.0.0 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -191,10 +191,11 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">API Documentation:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../api/models.html">Data Models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../api/clients.html">Client Modules</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../api/extractors.html">Content Extractors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../api/scrapers.html">Web Scrapers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/core.html">Core Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/sources.html">Sources Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/generation.html">Generation Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/storage.html">Storage Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/workflows.html">Workflows Module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../api/cli.html">Command Line Interface</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Development:</span></p>
@@ -234,168 +235,244 @@
         </div>
         <article role="main" id="furo-main-content">
           <h1>Source code for the_data_packet.cli</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Command-line interface for the_data_packet.&quot;&quot;&quot;</span>
+<span></span><span class="sd">&quot;&quot;&quot;Command-line interface for The Data Packet.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">argparse</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">the_data_packet.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArticleData</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">the_data_packet.scrapers</span><span class="w"> </span><span class="kn">import</span> <span class="n">WiredArticleScraper</span>
-
-
-<div class="viewcode-block" id="setup_logging">
-<a class="viewcode-back" href="../../api/cli.html#the_data_packet.cli.setup_logging">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">setup_logging</span><span class="p">(</span><span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Set up logging configuration.&quot;&quot;&quot;</span>
-    <span class="n">level</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span> <span class="k">if</span> <span class="n">verbose</span> <span class="k">else</span> <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span>
-    <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span>
-        <span class="n">level</span><span class="o">=</span><span class="n">level</span><span class="p">,</span>
-        <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%(asctime)s</span><span class="s2"> - </span><span class="si">%(name)s</span><span class="s2"> - </span><span class="si">%(levelname)s</span><span class="s2"> - </span><span class="si">%(message)s</span><span class="s2">&quot;</span><span class="p">,</span>
-        <span class="n">datefmt</span><span class="o">=</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">,</span>
-    <span class="p">)</span></div>
-
-
-
-<div class="viewcode-block" id="format_article_output">
-<a class="viewcode-back" href="../../api/cli.html#the_data_packet.cli.format_article_output">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">format_article_output</span><span class="p">(</span><span class="n">article</span><span class="p">:</span> <span class="n">ArticleData</span><span class="p">,</span> <span class="n">format_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;json&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Format article data for output.&quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">format_type</span> <span class="o">==</span> <span class="s2">&quot;json&quot;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">article</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">format_type</span> <span class="o">==</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span>
-        <span class="n">output</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Title: </span><span class="si">{</span><span class="n">article</span><span class="o">.</span><span class="n">title</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">&#39;N/A&#39;</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Author: </span><span class="si">{</span><span class="n">article</span><span class="o">.</span><span class="n">author</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">&#39;N/A&#39;</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Category: </span><span class="si">{</span><span class="n">article</span><span class="o">.</span><span class="n">category</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">&#39;N/A&#39;</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;URL: </span><span class="si">{</span><span class="n">article</span><span class="o">.</span><span class="n">url</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">&#39;N/A&#39;</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Content Length: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">article</span><span class="o">.</span><span class="n">content</span><span class="p">)</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">article</span><span class="o">.</span><span class="n">content</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="mi">0</span><span class="si">}</span><span class="s2"> characters&quot;</span>
-        <span class="p">)</span>
-        <span class="k">if</span> <span class="n">article</span><span class="o">.</span><span class="n">content</span><span class="p">:</span>
-            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">nContent:&quot;</span><span class="p">)</span>
-            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">50</span><span class="p">)</span>
-            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">article</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
-        <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\\</span><span class="s2">n&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported format: </span><span class="si">{</span><span class="n">format_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
-
+<span class="kn">from</span><span class="w"> </span><span class="nn">.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigurationError</span><span class="p">,</span> <span class="n">get_config</span><span class="p">,</span> <span class="n">get_logger</span><span class="p">,</span> <span class="n">setup_logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.workflows</span><span class="w"> </span><span class="kn">import</span> <span class="n">PodcastPipeline</span>
 
 
 <div class="viewcode-block" id="main">
-<a class="viewcode-back" href="../../api/cli.html#the_data_packet.cli.main">[docs]</a>
+<a class="viewcode-back" href="../../api/cli_new.html#the_data_packet.cli.main">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Main CLI function.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Main CLI function for podcast generation.&quot;&quot;&quot;</span>
     <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Scrape articles from Wired.com&quot;</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Generate automated tech news podcasts&quot;</span><span class="p">,</span>
         <span class="n">formatter_class</span><span class="o">=</span><span class="n">argparse</span><span class="o">.</span><span class="n">RawDescriptionHelpFormatter</span><span class="p">,</span>
         <span class="n">epilog</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">Examples:</span>
-<span class="s2">  </span><span class="si">%(prog)s</span><span class="s2"> security                    # Get latest security article</span>
-<span class="s2">  </span><span class="si">%(prog)s</span><span class="s2"> guide                       # Get latest guide article  </span>
-<span class="s2">  </span><span class="si">%(prog)s</span><span class="s2"> both                        # Get both latest articles</span>
-<span class="s2">  </span><span class="si">%(prog)s</span><span class="s2"> security --count 5          # Get 5 security articles</span>
-<span class="s2">  </span><span class="si">%(prog)s</span><span class="s2"> --url https://wired.com/... # Scrape specific URL</span>
-<span class="s2">  </span><span class="si">%(prog)s</span><span class="s2"> security --format text      # Output as text instead of JSON</span>
+<span class="s2">  # Generate complete podcast with environment variables</span>
+<span class="s2">  the-data-packet --output ./episode</span>
+
+<span class="s2">  # Generate script only with custom API keys  </span>
+<span class="s2">  the-data-packet --anthropic-key sk-ant-... --script-only --output ./scripts</span>
+
+<span class="s2">  # Generate with custom show name and voices</span>
+<span class="s2">  the-data-packet --show-name &quot;Tech Brief&quot; --voice-a charon --voice-b aoede</span>
+
+<span class="s2">  # Generate from specific sources and categories</span>
+<span class="s2">  the-data-packet --sources wired techcrunch --categories security ai --output ./multi-source</span>
+
+<span class="s2">Environment Variables:</span>
+<span class="s2">  ANTHROPIC_API_KEY    - Claude API key for script generation</span>
+<span class="s2">  GOOGLE_API_KEY       - Google Cloud API key for TTS audio generation  </span>
+<span class="s2">  S3_BUCKET_NAME       - S3 bucket for uploads (optional)</span>
+<span class="s2">  AWS_ACCESS_KEY_ID    - AWS access key (optional)</span>
+<span class="s2">  AWS_SECRET_ACCESS_KEY - AWS secret key (optional)</span>
 <span class="s2">        &quot;&quot;&quot;</span><span class="p">,</span>
     <span class="p">)</span>
 
+    <span class="c1"># API Keys</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
-        <span class="s2">&quot;category&quot;</span><span class="p">,</span>
-        <span class="n">nargs</span><span class="o">=</span><span class="s2">&quot;?&quot;</span><span class="p">,</span>
-        <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;security&quot;</span><span class="p">,</span> <span class="s2">&quot;guide&quot;</span><span class="p">,</span> <span class="s2">&quot;both&quot;</span><span class="p">],</span>
-        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Article category to fetch (required unless using --url)&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;--anthropic-key&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Anthropic API key (overrides ANTHROPIC_API_KEY env var)&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--google-key&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Google Cloud API key (overrides GOOGLE_API_KEY env var)&quot;</span><span class="p">,</span>
     <span class="p">)</span>
 
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--url&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Specific article URL to scrape&quot;</span><span class="p">)</span>
-
+    <span class="c1"># Content Options</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
-        <span class="s2">&quot;--count&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;--sources&quot;</span><span class="p">,</span>
+        <span class="n">nargs</span><span class="o">=</span><span class="s2">&quot;+&quot;</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;wired&quot;</span><span class="p">],</span>
+        <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;wired&quot;</span><span class="p">,</span> <span class="s2">&quot;techcrunch&quot;</span><span class="p">],</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Article sources to use (default: wired)&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--categories&quot;</span><span class="p">,</span>
+        <span class="n">nargs</span><span class="o">=</span><span class="s2">&quot;+&quot;</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;security&quot;</span><span class="p">,</span> <span class="s2">&quot;ai&quot;</span><span class="p">],</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Article categories to fetch (default: security ai)&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--max-articles&quot;</span><span class="p">,</span>
         <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
         <span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Number of articles to fetch (default: 1, max: 10)&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Maximum articles per source (default: 1)&quot;</span><span class="p">,</span>
     <span class="p">)</span>
 
+    <span class="c1"># Generation Options</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
-        <span class="s2">&quot;--format&quot;</span><span class="p">,</span>
-        <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;json&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">],</span>
-        <span class="n">default</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">,</span>
-        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Output format (default: json)&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;--script-only&quot;</span><span class="p">,</span>
+        <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Generate script only (skip audio)&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--audio-only&quot;</span><span class="p">,</span>
+        <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Generate audio only (requires existing script)&quot;</span><span class="p">,</span>
     <span class="p">)</span>
 
+    <span class="c1"># Audio Settings</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
-        <span class="s2">&quot;--verbose&quot;</span><span class="p">,</span> <span class="s2">&quot;-v&quot;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Enable verbose logging&quot;</span>
+        <span class="s2">&quot;--voice-a&quot;</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="s2">&quot;en-US-Neural2-A&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Voice for first speaker (default: en-US-Neural2-A)&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--voice-b&quot;</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="s2">&quot;en-US-Neural2-B&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Voice for second speaker (default: en-US-Neural2-B)&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Output Settings</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--output&quot;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="n">Path</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;./output&quot;</span><span class="p">),</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Output directory (default: ./output)&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--show-name&quot;</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="s2">&quot;The Data Packet&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Name of your podcast show (default: The Data Packet)&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># S3 Upload</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--s3-bucket&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;S3 bucket for uploads (overrides S3_BUCKET_NAME env var)&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--no-s3&quot;</span><span class="p">,</span>
+        <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Disable S3 uploads even if configured&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Other Options</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--log-level&quot;</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span>
+        <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;DEBUG&quot;</span><span class="p">,</span> <span class="s2">&quot;INFO&quot;</span><span class="p">,</span> <span class="s2">&quot;WARNING&quot;</span><span class="p">,</span> <span class="s2">&quot;ERROR&quot;</span><span class="p">],</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Log level (default: INFO)&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--save-intermediate&quot;</span><span class="p">,</span>
+        <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Save intermediate files&quot;</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
 
-    <span class="c1"># Validate arguments</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">url</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">category</span><span class="p">:</span>
-        <span class="n">parser</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Must specify either category or --url&quot;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">url</span> <span class="ow">and</span> <span class="n">args</span><span class="o">.</span><span class="n">category</span><span class="p">:</span>
-        <span class="n">parser</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Cannot specify both category and --url&quot;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">count</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">args</span><span class="o">.</span><span class="n">count</span> <span class="o">&gt;</span> <span class="mi">10</span><span class="p">:</span>
-        <span class="n">parser</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Count must be between 1 and 10&quot;</span><span class="p">)</span>
+    <span class="c1"># Validate argument combinations</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">script_only</span> <span class="ow">and</span> <span class="n">args</span><span class="o">.</span><span class="n">audio_only</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error: Cannot use both --script-only and --audio-only&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
     <span class="c1"># Set up logging</span>
-    <span class="n">setup_logging</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">verbose</span><span class="p">)</span>
-    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
-
-    <span class="c1"># Initialize scraper</span>
-    <span class="n">scraper</span> <span class="o">=</span> <span class="n">WiredArticleScraper</span><span class="p">()</span>
+    <span class="n">setup_logging</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">log_level</span><span class="p">)</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
     <span class="k">try</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">url</span><span class="p">:</span>
-            <span class="c1"># Scrape specific URL</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Scraping URL: </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">url</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="n">article</span> <span class="o">=</span> <span class="n">scraper</span><span class="o">.</span><span class="n">scrape_article_from_url</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">url</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">format_article_output</span><span class="p">(</span><span class="n">article</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">format</span><span class="p">))</span>
+        <span class="c1"># Build configuration from arguments</span>
+        <span class="n">config_overrides</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;show_name&quot;</span><span class="p">:</span> <span class="n">args</span><span class="o">.</span><span class="n">show_name</span><span class="p">,</span>
+            <span class="s2">&quot;output_directory&quot;</span><span class="p">:</span> <span class="n">args</span><span class="o">.</span><span class="n">output</span><span class="p">,</span>
+            <span class="s2">&quot;article_sources&quot;</span><span class="p">:</span> <span class="n">args</span><span class="o">.</span><span class="n">sources</span><span class="p">,</span>
+            <span class="s2">&quot;article_categories&quot;</span><span class="p">:</span> <span class="n">args</span><span class="o">.</span><span class="n">categories</span><span class="p">,</span>
+            <span class="s2">&quot;max_articles_per_source&quot;</span><span class="p">:</span> <span class="n">args</span><span class="o">.</span><span class="n">max_articles</span><span class="p">,</span>
+            <span class="s2">&quot;voice_a&quot;</span><span class="p">:</span> <span class="n">args</span><span class="o">.</span><span class="n">voice_a</span><span class="p">,</span>
+            <span class="s2">&quot;voice_b&quot;</span><span class="p">:</span> <span class="n">args</span><span class="o">.</span><span class="n">voice_b</span><span class="p">,</span>
+            <span class="s2">&quot;save_intermediate_files&quot;</span><span class="p">:</span> <span class="n">args</span><span class="o">.</span><span class="n">save_intermediate</span><span class="p">,</span>
+            <span class="s2">&quot;log_level&quot;</span><span class="p">:</span> <span class="n">args</span><span class="o">.</span><span class="n">log_level</span><span class="p">,</span>
+        <span class="p">}</span>
 
-        <span class="k">elif</span> <span class="n">args</span><span class="o">.</span><span class="n">category</span> <span class="o">==</span> <span class="s2">&quot;both&quot;</span><span class="p">:</span>
-            <span class="c1"># Get both latest articles</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Fetching both latest articles&quot;</span><span class="p">)</span>
-            <span class="n">both_articles</span> <span class="o">=</span> <span class="n">scraper</span><span class="o">.</span><span class="n">get_both_latest_articles</span><span class="p">()</span>
+        <span class="c1"># API keys</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">anthropic_key</span><span class="p">:</span>
+            <span class="n">config_overrides</span><span class="p">[</span><span class="s2">&quot;anthropic_api_key&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">anthropic_key</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">google_key</span><span class="p">:</span>
+            <span class="n">config_overrides</span><span class="p">[</span><span class="s2">&quot;google_api_key&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">google_key</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">s3_bucket</span><span class="p">:</span>
+            <span class="n">config_overrides</span><span class="p">[</span><span class="s2">&quot;s3_bucket_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">s3_bucket</span>
 
-            <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">format</span> <span class="o">==</span> <span class="s2">&quot;json&quot;</span><span class="p">:</span>
-                <span class="n">both_output</span> <span class="o">=</span> <span class="p">{</span>
-                    <span class="n">category</span><span class="p">:</span> <span class="n">article</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
-                    <span class="k">for</span> <span class="n">category</span><span class="p">,</span> <span class="n">article</span> <span class="ow">in</span> <span class="n">both_articles</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="c1"># Generation options</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">script_only</span><span class="p">:</span>
+            <span class="n">config_overrides</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;generate_script&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                    <span class="s2">&quot;generate_audio&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
                 <span class="p">}</span>
-                <span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">both_output</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">category</span><span class="p">,</span> <span class="n">article</span> <span class="ow">in</span> <span class="n">both_articles</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">n=== </span><span class="si">{</span><span class="n">category</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2"> ARTICLE ===&quot;</span><span class="p">)</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="n">format_article_output</span><span class="p">(</span><span class="n">article</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">))</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">args</span><span class="o">.</span><span class="n">audio_only</span><span class="p">:</span>
+            <span class="n">config_overrides</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;generate_script&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                    <span class="s2">&quot;generate_audio&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">config_overrides</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;generate_script&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                    <span class="s2">&quot;generate_audio&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Disable S3 if requested</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">no_s3</span><span class="p">:</span>
+            <span class="n">config_overrides</span><span class="p">[</span><span class="s2">&quot;s3_bucket_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Get configuration with overrides</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">get_config</span><span class="p">(</span><span class="o">**</span><span class="n">config_overrides</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Starting </span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">show_name</span><span class="si">}</span><span class="s2"> generation&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Sources: </span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">article_sources</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Categories: </span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">article_categories</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Output: </span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">output_directory</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Run pipeline</span>
+        <span class="n">pipeline</span> <span class="o">=</span> <span class="n">PodcastPipeline</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+        <span class="c1"># Report results</span>
+        <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">success</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;✅ Podcast generation completed successfully!&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;⏱️  Execution time: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">execution_time_seconds</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> seconds&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📰 Articles collected: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">articles_collected</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">script_generated</span> <span class="ow">and</span> <span class="n">result</span><span class="o">.</span><span class="n">script_path</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📝 Script saved: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">script_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">s3_script_url</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🔗 Script URL: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">s3_script_url</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">audio_generated</span> <span class="ow">and</span> <span class="n">result</span><span class="o">.</span><span class="n">audio_path</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🎧 Audio saved: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">audio_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">s3_audio_url</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🔗 Audio URL: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">s3_audio_url</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># Get articles from specific category</span>
-            <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">count</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Fetching latest </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">category</span><span class="si">}</span><span class="s2"> article&quot;</span><span class="p">)</span>
-                <span class="n">article</span> <span class="o">=</span> <span class="n">scraper</span><span class="o">.</span><span class="n">get_latest_article</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">category</span><span class="p">)</span>
-                <span class="nb">print</span><span class="p">(</span><span class="n">format_article_output</span><span class="p">(</span><span class="n">article</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">format</span><span class="p">))</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Fetching </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">count</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">category</span><span class="si">}</span><span class="s2"> articles&quot;</span><span class="p">)</span>
-                <span class="n">article_list</span> <span class="o">=</span> <span class="n">scraper</span><span class="o">.</span><span class="n">get_multiple_articles</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">category</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">count</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;❌ Podcast generation failed!&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;⏱️  Execution time: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">execution_time_seconds</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> seconds&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;❗ Error: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">error_message</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
-                <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">format</span> <span class="o">==</span> <span class="s2">&quot;json&quot;</span><span class="p">:</span>
-                    <span class="n">list_output</span> <span class="o">=</span> <span class="p">[</span><span class="n">article</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">article</span> <span class="ow">in</span> <span class="n">article_list</span><span class="p">]</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">list_output</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">article</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">article_list</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
-                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">n=== ARTICLE </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> ===&quot;</span><span class="p">)</span>
-                        <span class="nb">print</span><span class="p">(</span><span class="n">format_article_output</span><span class="p">(</span><span class="n">article</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">))</span>
-
+    <span class="k">except</span> <span class="n">ConfigurationError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Configuration error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;❌ Configuration error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Operation cancelled by user&quot;</span><span class="p">)</span>
-        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Interrupted by user&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">n⏹️  Generation cancelled by user&quot;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">130</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-    <span class="k">finally</span><span class="p">:</span>
-        <span class="n">scraper</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unexpected error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;❌ Unexpected error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
 
 
 
@@ -433,7 +510,7 @@
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=8d563738"></script>
+</div><script src="../../_static/documentation_options.js?v=51b770b3"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>

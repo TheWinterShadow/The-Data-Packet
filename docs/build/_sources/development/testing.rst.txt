@@ -8,12 +8,27 @@ Test Structure
 
 The test suite is organized into several modules, each focusing on a specific component:
 
-- ``test_models.py``: Tests for the ArticleData model
-- ``test_clients.py``: Tests for HTTP and RSS clients  
-- ``test_extractors.py``: Tests for content extraction logic
-- ``test_scrapers.py``: Tests for the main scraper orchestration
-- ``test_integration.py``: End-to-end integration tests
-- ``test_cli.py``: Tests for the command-line interface
+**Core Tests:**
+- ``test_core/test_config.py``: Configuration management tests
+- ``test_core/test_exceptions.py``: Exception handling tests
+- ``test_core/test_logging.py``: Logging system tests
+
+**Generation Tests:**
+- ``test_generation/test_script.py``: AI script generation tests
+- ``test_generation/test_audio.py``: TTS audio generation tests
+- ``test_generation/test_rss.py``: RSS feed generation tests
+
+**Sources Tests:**
+- ``test_sources/test_base.py``: Base article source tests
+- ``test_sources/test_wired.py``: Wired.com source tests  
+- ``test_sources/test_techcrunch.py``: TechCrunch source tests
+
+**Workflow Tests:**
+- ``test_workflows/test_podcast.py``: End-to-end pipeline tests
+
+**Utilities Tests:**
+- ``test_utils/test_s3.py``: AWS S3 storage tests
+- ``test_cli.py``: Command-line interface tests
 
 Test Framework
 --------------
@@ -33,14 +48,14 @@ Using Hatch (Recommended)
 
 .. code-block:: bash
 
-   # Run all tests
-   hatch test
+   # Run all tests  
+   pytest tests/ -v
    
-   # Run specific test file
-   hatch run python -m unittest tests.test_models -v
+   # Run specific test module
+   pytest tests/test_core/ -v
    
    # Run with coverage
-   hatch run test-cov
+   pytest --cov=the_data_packet tests/
 
 Using Python Directly
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -51,20 +66,20 @@ Using Python Directly
    python -m unittest discover tests -v
    
    # Run specific test
-   python -m unittest tests.test_models.TestArticleData.test_initialization -v
+   python -m unittest tests.test_core.test_config.TestConfig.test_initialization -v
 
 Test Coverage
 -------------
 
 The test suite achieves comprehensive coverage:
 
-- **86 Total Tests**: Covering all major functionality
-- **Models**: 12 tests covering data validation and serialization
-- **Clients**: 17 tests covering HTTP/RSS operations and error handling
-- **Extractors**: 18 tests covering content parsing with various inputs
-- **Scrapers**: 20 tests covering orchestration and batch operations  
-- **Integration**: 6 tests covering end-to-end workflows
-- **CLI**: 15 tests covering command parsing and output formatting
+- **231 Total Tests**: Covering all major functionality with 100% pass rate
+- **Core**: 45+ tests covering configuration, exceptions, and logging
+- **Generation**: 60+ tests covering AI script generation, TTS audio, and RSS feeds
+- **Sources**: 50+ tests covering article collection from multiple news sources
+- **Workflows**: 35+ tests covering end-to-end pipeline orchestration
+- **Utilities**: 25+ tests covering S3 storage and HTTP handling
+- **CLI**: 15+ tests covering command-line interface and argument parsing
 
 Key Testing Patterns
 ---------------------

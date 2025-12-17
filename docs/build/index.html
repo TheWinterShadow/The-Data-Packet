@@ -3,10 +3,10 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Data Models" href="api/models.html">
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Core Module" href="api/core.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.09.25 -->
-        <title>The Data Packet 1.0.0 documentation</title>
+        <title>The Data Packet 2.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=580074bf" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="#"><div class="brand">The Data Packet 1.0.0 documentation</div></a>
+      <a href="#"><div class="brand">The Data Packet 2.0.0 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -182,7 +182,7 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="#">
   
-  <span class="sidebar-brand-text">The Data Packet 1.0.0 documentation</span>
+  <span class="sidebar-brand-text">The Data Packet 2.0.0 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -192,10 +192,11 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">API Documentation:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="api/models.html">Data Models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/clients.html">Client Modules</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/extractors.html">Content Extractors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/scrapers.html">Web Scrapers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/core.html">Core Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/sources.html">Sources Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/generation.html">Generation Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/storage.html">Storage Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/workflows.html">Workflows Module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/cli.html">Command Line Interface</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Development:</span></p>
@@ -243,99 +244,130 @@
           <section id="the-data-packet-documentation">
 <h1>The Data Packet Documentation<a class="headerlink" href="#the-data-packet-documentation" title="Link to this heading">¶</a></h1>
 <p>Welcome to The Data Packet’s documentation!</p>
-<p><strong>The Data Packet</strong> is a Python package for scraping and extracting article data from Wired.com. It provides a clean, object-oriented interface for fetching the latest articles from specific categories, extracting content with proper parsing, and outputting structured data.</p>
-<section id="features">
-<h2>Features<a class="headerlink" href="#features" title="Link to this heading">¶</a></h2>
+<p><strong>The Data Packet</strong> is an AI-powered automated podcast generation system that transforms tech news articles into engaging podcast content. It combines web scraping, AI script generation, and text-to-speech to create complete podcast episodes from start to finish.</p>
+<section id="what-it-does">
+<h2>What It Does<a class="headerlink" href="#what-it-does" title="Link to this heading">¶</a></h2>
+<p>The Data Packet automates the entire podcast creation workflow:</p>
+<ol class="arabic simple">
+<li><p><strong>📰 Article Collection</strong>: Scrapes latest tech news from Wired.com and TechCrunch via RSS feeds</p></li>
+<li><p><strong>🤖 Script Generation</strong>: Uses Anthropic Claude AI to create engaging dialogue scripts</p></li>
+<li><p><strong>🎙️ Audio Production</strong>: Generates multi-speaker audio using ElevenLabs TTS</p></li>
+<li><p><strong>📦 Podcast Distribution</strong>: Creates RSS feeds and uploads to AWS S3 for hosting</p></li>
+<li><p><strong>🔄 Complete Automation</strong>: Runs the entire pipeline with a single command</p></li>
+</ol>
+</section>
+<section id="key-features">
+<h2>Key Features<a class="headerlink" href="#key-features" title="Link to this heading">¶</a></h2>
 <ul class="simple">
-<li><p>🔍 <strong>RSS Feed Integration</strong>: Fetch latest article URLs from Wired’s RSS feeds</p></li>
-<li><p>🌐 <strong>Smart Content Extraction</strong>: Extract titles, authors, and content with fallback methods</p></li>
-<li><p>📱 <strong>Multiple Output Formats</strong>: Support for JSON and human-readable text output</p></li>
-<li><p>🛡️ <strong>Robust Error Handling</strong>: Graceful handling of network issues and parsing errors</p></li>
-<li><p>🧪 <strong>Comprehensive Testing</strong>: Full test suite with 86+ tests using unittest framework</p></li>
-<li><p>📋 <strong>Type Safety</strong>: Complete type annotations with mypy compatibility</p></li>
-<li><p>🎯 <strong>CLI Interface</strong>: Command-line tool for easy article fetching</p></li>
+<li><p><strong>🐳 Docker-First Deployment</strong>: Run anywhere with consistent environment</p></li>
+<li><p><strong>🤖 AI-Powered Content</strong>: Claude for natural dialogue, ElevenLabs for professional voices</p></li>
+<li><p><strong>⚙️ Highly Configurable</strong>: Multiple voices, show formats, and content categories</p></li>
+<li><p><strong>🔒 Production Ready</strong>: Robust error handling, logging, and security</p></li>
+<li><p><strong>📊 Monitoring &amp; Analytics</strong>: Comprehensive logging and status tracking</p></li>
+<li><p><strong>🚀 CI/CD Integration</strong>: GitHub Actions for automated builds and releases</p></li>
 </ul>
 </section>
 <section id="quick-start">
 <h2>Quick Start<a class="headerlink" href="#quick-start" title="Link to this heading">¶</a></h2>
-<section id="installation">
-<h3>Installation<a class="headerlink" href="#installation" title="Link to this heading">¶</a></h3>
+<section id="docker-deployment-recommended">
+<h3>Docker Deployment (Recommended)<a class="headerlink" href="#docker-deployment-recommended" title="Link to this heading">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Pull the latest image</span>
+docker<span class="w"> </span>pull<span class="w"> </span>ghcr.io/thewintershadow/the-data-packet:latest
+
+<span class="c1"># Run with your API keys</span>
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span><span class="se">\\</span>
+<span class="w">  </span>-e<span class="w"> </span><span class="nv">ANTHROPIC_API_KEY</span><span class="o">=</span><span class="s2">&quot;your-claude-key&quot;</span><span class="w"> </span><span class="se">\\</span>
+<span class="w">  </span>-e<span class="w"> </span><span class="nv">ELEVENLABS_API_KEY</span><span class="o">=</span><span class="s2">&quot;your-elevenlabs-key&quot;</span><span class="w"> </span><span class="se">\\</span>
+<span class="w">  </span>-v<span class="w"> </span><span class="s2">&quot;</span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span><span class="s2">/output:/app/output&quot;</span><span class="w"> </span><span class="se">\\</span>
+<span class="w">  </span>ghcr.io/thewintershadow/the-data-packet:latest
+</pre></div>
+</div>
+</section>
+<section id="python-installation">
+<h3>Python Installation<a class="headerlink" href="#python-installation" title="Link to this heading">¶</a></h3>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>the-data-packet
 </pre></div>
 </div>
 </section>
 <section id="basic-usage">
 <h3>Basic Usage<a class="headerlink" href="#basic-usage" title="Link to this heading">¶</a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">the_data_packet</span><span class="w"> </span><span class="kn">import</span> <span class="n">WiredArticleScraper</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">the_data_packet</span><span class="w"> </span><span class="kn">import</span> <span class="n">PodcastPipeline</span><span class="p">,</span> <span class="n">get_config</span>
 
-<span class="c1"># Create a scraper instance</span>
-<span class="n">scraper</span> <span class="o">=</span> <span class="n">WiredArticleScraper</span><span class="p">()</span>
+<span class="c1"># Create configuration and run the complete pipeline</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">get_config</span><span class="p">(</span><span class="n">show_name</span><span class="o">=</span><span class="s2">&quot;Tech Brief&quot;</span><span class="p">,</span> <span class="n">max_articles_per_source</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">pipeline</span> <span class="o">=</span> <span class="n">PodcastPipeline</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 
-<span class="c1"># Get the latest security article</span>
-<span class="n">article</span> <span class="o">=</span> <span class="n">scraper</span><span class="o">.</span><span class="n">get_latest_article</span><span class="p">(</span><span class="s2">&quot;security&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Title: </span><span class="si">{</span><span class="n">article</span><span class="o">.</span><span class="n">title</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Author: </span><span class="si">{</span><span class="n">article</span><span class="o">.</span><span class="n">author</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-<span class="c1"># Get both latest articles (security and guide)</span>
-<span class="n">articles</span> <span class="o">=</span> <span class="n">scraper</span><span class="o">.</span><span class="n">get_both_latest_articles</span><span class="p">()</span>
-
-<span class="c1"># Clean up resources</span>
-<span class="n">scraper</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">success</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Podcast generated: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">audio_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">rss_path</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;RSS feed: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">rss_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
 <section id="command-line-interface">
 <h3>Command Line Interface<a class="headerlink" href="#command-line-interface" title="Link to this heading">¶</a></h3>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Get latest security article</span>
-wired-scraper<span class="w"> </span>security
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Generate complete podcast episode</span>
+the-data-packet<span class="w"> </span>--output<span class="w"> </span>./episode
 
-<span class="c1"># Get both latest articles</span>
-wired-scraper<span class="w"> </span>both
+<span class="c1"># Generate script only</span>
+the-data-packet<span class="w"> </span>--script-only<span class="w"> </span>--output<span class="w"> </span>./scripts
 
-<span class="c1"># Get multiple articles</span>
-wired-scraper<span class="w"> </span>security<span class="w"> </span>--count<span class="w"> </span><span class="m">5</span>
-
-<span class="c1"># Scrape specific URL</span>
-wired-scraper<span class="w"> </span>--url<span class="w"> </span><span class="s2">&quot;https://www.wired.com/story/example/&quot;</span>
+<span class="c1"># Custom configuration</span>
+the-data-packet<span class="w"> </span><span class="se">\\</span>
+<span class="w">  </span>--show-name<span class="w"> </span><span class="s2">&quot;Tech Brief&quot;</span><span class="w"> </span><span class="se">\\</span>
+<span class="w">  </span>--voice-a<span class="w"> </span>XrExE9yKIg1WjnnlVkGX<span class="w"> </span><span class="se">\\</span>
+<span class="w">  </span>--voice-b<span class="w"> </span>IKne3meq5aSn9XLyUdCD<span class="w"> </span><span class="se">\\</span>
+<span class="w">  </span>--sources<span class="w"> </span>wired<span class="w"> </span>techcrunch<span class="w"> </span><span class="se">\\</span>
+<span class="w">  </span>--categories<span class="w"> </span>security<span class="w"> </span>ai
 </pre></div>
 </div>
 </section>
+</section>
+<section id="architecture-overview">
+<h2>Architecture Overview<a class="headerlink" href="#architecture-overview" title="Link to this heading">¶</a></h2>
+<p>The Data Packet is built with a modular architecture:</p>
+<ul class="simple">
+<li><p><strong>Core</strong>: Configuration, exceptions, logging</p></li>
+<li><p><strong>Sources</strong>: Article collection from news websites</p></li>
+<li><p><strong>Generation</strong>: AI script and audio generation</p></li>
+<li><p><strong>Storage</strong>: AWS S3 integration for hosting</p></li>
+<li><p><strong>Workflows</strong>: End-to-end pipeline orchestration</p></li>
+<li><p><strong>Utils</strong>: HTTP clients, helper functions</p></li>
+</ul>
 </section>
 <section id="package-structure">
 <h2>Package Structure<a class="headerlink" href="#package-structure" title="Link to this heading">¶</a></h2>
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">API Documentation:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="api/models.html">Data Models</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api/models.html#articledata">ArticleData</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/models.html#module-the_data_packet.models">Module Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/core.html">Core Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/core.html#module-the_data_packet.core.config">Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/core.html#module-the_data_packet.core.exceptions">Exceptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/core.html#module-the_data_packet.core.logging">Logging</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="api/clients.html">Client Modules</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api/clients.html#http-client">HTTP Client</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/clients.html#rss-client">RSS Client</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/clients.html#module-the_data_packet.clients.rss_client">Client Base Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/sources.html">Sources Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/sources.html#module-the_data_packet.sources.base">Base Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/sources.html#module-the_data_packet.sources.wired">Wired Source</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="api/extractors.html">Content Extractors</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api/extractors.html#wired-content-extractor">Wired Content Extractor</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/extractors.html#private-methods">Private Methods</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/extractors.html#module-the_data_packet.extractors.wired_extractor">Module Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/generation.html">Generation Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/generation.html#module-the_data_packet.generation.script">Script Generation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generation.html#module-the_data_packet.generation.audio">Audio Generation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generation.html#module-the_data_packet.generation.rss">RSS Generation</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="api/scrapers.html">Web Scrapers</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api/scrapers.html#wired-article-scraper">Wired Article Scraper</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/scrapers.html#method-details">Method Details</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/scrapers.html#module-the_data_packet.scrapers.wired_scraper">Module Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/storage.html">Storage Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/storage.html#module-the_data_packet.utils.s3">S3 Storage</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/workflows.html">Workflows Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/workflows.html#module-the_data_packet.workflows.podcast">Podcast Pipeline</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="api/cli.html">Command Line Interface</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api/cli.html#main-functions">Main Functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/cli.html#cli-usage-examples">CLI Usage Examples</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/cli.html#command-line-arguments">Command-Line Arguments</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/cli.html#output-formats">Output Formats</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/cli.html#error-handling">Error Handling</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/cli.html#module-the_data_packet.cli">Module Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/cli.html#module-the_data_packet.cli">CLI Module</a></li>
 </ul>
 </li>
 </ul>
@@ -363,12 +395,12 @@ wired-scraper<span class="w"> </span>--url<span class="w"> </span><span class="s
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="api/models.html">
+          <a class="next-page" href="api/core.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Data Models</div>
+                <div class="title">Core Module</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -404,13 +436,16 @@ wired-scraper<span class="w"> </span>--url<span class="w"> </span><span class="s
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">The Data Packet Documentation</a><ul>
-<li><a class="reference internal" href="#features">Features</a></li>
+<li><a class="reference internal" href="#what-it-does">What It Does</a></li>
+<li><a class="reference internal" href="#key-features">Key Features</a></li>
 <li><a class="reference internal" href="#quick-start">Quick Start</a><ul>
-<li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#docker-deployment-recommended">Docker Deployment (Recommended)</a></li>
+<li><a class="reference internal" href="#python-installation">Python Installation</a></li>
 <li><a class="reference internal" href="#basic-usage">Basic Usage</a></li>
 <li><a class="reference internal" href="#command-line-interface">Command Line Interface</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#architecture-overview">Architecture Overview</a></li>
 <li><a class="reference internal" href="#package-structure">Package Structure</a><ul>
 </ul>
 </li>
@@ -426,7 +461,7 @@ wired-scraper<span class="w"> </span>--url<span class="w"> </span><span class="s
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=8d563738"></script>
+</div><script src="_static/documentation_options.js?v=51b770b3"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>

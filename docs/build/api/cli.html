@@ -3,10 +3,10 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Testing" href="../development/testing.html"><link rel="prev" title="Web Scrapers" href="scrapers.html">
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Testing" href="../development/testing.html"><link rel="prev" title="Workflows Module" href="workflows.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.09.25 -->
-        <title>Command Line Interface - The Data Packet 1.0.0 documentation</title>
+        <title>Command Line Interface - The Data Packet 2.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=580074bf" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">The Data Packet 1.0.0 documentation</div></a>
+      <a href="../index.html"><div class="brand">The Data Packet 2.0.0 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -182,7 +182,7 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
   
-  <span class="sidebar-brand-text">The Data Packet 1.0.0 documentation</span>
+  <span class="sidebar-brand-text">The Data Packet 2.0.0 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -192,10 +192,11 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">API Documentation:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="models.html">Data Models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="clients.html">Client Modules</a></li>
-<li class="toctree-l1"><a class="reference internal" href="extractors.html">Content Extractors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="scrapers.html">Web Scrapers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core.html">Core Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sources.html">Sources Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generation.html">Generation Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="storage.html">Storage Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workflows.html">Workflows Module</a></li>
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Command Line Interface</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Development:</span></p>
@@ -242,164 +243,14 @@
         <article role="main" id="furo-main-content">
           <section id="command-line-interface">
 <h1>Command Line Interface<a class="headerlink" href="#command-line-interface" title="Link to this heading">¶</a></h1>
-<p>The CLI module provides a command-line interface for interacting with the scraper functionality.</p>
-<section id="main-functions">
-<h2>Main Functions<a class="headerlink" href="#main-functions" title="Link to this heading">¶</a></h2>
+<p>The CLI module provides the command-line interface for The Data Packet podcast generation.</p>
+<section id="module-the_data_packet.cli">
+<span id="cli-module"></span><h2>CLI Module<a class="headerlink" href="#module-the_data_packet.cli" title="Link to this heading">¶</a></h2>
+<p>Command-line interface for The Data Packet.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="the_data_packet.cli.main">
 <span class="sig-prename descclassname"><span class="pre">the_data_packet.cli.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/the_data_packet/cli.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.cli.main" title="Link to this definition">¶</a></dt>
-<dd><p>Main CLI function.</p>
-<p>The main entry point for the command-line interface. This function handles argument
-parsing, logging setup, and orchestrates the scraping operations based on user input.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="the_data_packet.cli.format_article_output">
-<span class="sig-prename descclassname"><span class="pre">the_data_packet.cli.</span></span><span class="sig-name descname"><span class="pre">format_article_output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">article</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="models.html#id1" title="the_data_packet.models.article.ArticleData"><span class="pre">ArticleData</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">format_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'json'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../_modules/the_data_packet/cli.html#format_article_output"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.cli.format_article_output" title="Link to this definition">¶</a></dt>
-<dd><p>Format article data for output.</p>
-<p>Formats article data for output in either JSON or human-readable text format.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="the_data_packet.cli.setup_logging">
-<span class="sig-prename descclassname"><span class="pre">the_data_packet.cli.</span></span><span class="sig-name descname"><span class="pre">setup_logging</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/the_data_packet/cli.html#setup_logging"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#the_data_packet.cli.setup_logging" title="Link to this definition">¶</a></dt>
-<dd><p>Set up logging configuration.</p>
-<p>Configures logging for the CLI application with optional verbose output.</p>
-</dd></dl>
-
-</section>
-<section id="cli-usage-examples">
-<h2>CLI Usage Examples<a class="headerlink" href="#cli-usage-examples" title="Link to this heading">¶</a></h2>
-<section id="basic-commands">
-<h3>Basic Commands<a class="headerlink" href="#basic-commands" title="Link to this heading">¶</a></h3>
-<p>Get the latest security article:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>wired-scraper<span class="w"> </span>security
-</pre></div>
-</div>
-<p>Get the latest guide article:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>wired-scraper<span class="w"> </span>guide
-</pre></div>
-</div>
-<p>Get both latest articles:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>wired-scraper<span class="w"> </span>both
-</pre></div>
-</div>
-</section>
-<section id="advanced-options">
-<h3>Advanced Options<a class="headerlink" href="#advanced-options" title="Link to this heading">¶</a></h3>
-<p>Get multiple articles from a category:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>wired-scraper<span class="w"> </span>security<span class="w"> </span>--count<span class="w"> </span><span class="m">5</span>
-</pre></div>
-</div>
-<p>Output in text format instead of JSON:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>wired-scraper<span class="w"> </span>security<span class="w"> </span>--format<span class="w"> </span>text
-</pre></div>
-</div>
-<p>Scrape a specific article URL:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>wired-scraper<span class="w"> </span>--url<span class="w"> </span><span class="s2">&quot;https://www.wired.com/story/example-article/&quot;</span>
-</pre></div>
-</div>
-<p>Enable verbose logging:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>wired-scraper<span class="w"> </span>security<span class="w"> </span>--verbose
-</pre></div>
-</div>
-</section>
-</section>
-<section id="command-line-arguments">
-<h2>Command-Line Arguments<a class="headerlink" href="#command-line-arguments" title="Link to this heading">¶</a></h2>
-<section id="positional-arguments">
-<h3>Positional Arguments<a class="headerlink" href="#positional-arguments" title="Link to this heading">¶</a></h3>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">category</span></code>: Article category to fetch (choices: security, guide, both)</p>
-<ul>
-<li><p><strong>security</strong>: Latest cybersecurity and privacy articles</p></li>
-<li><p><strong>guide</strong>: Latest how-to guides and tutorials</p></li>
-<li><p><strong>both</strong>: Both latest security and guide articles</p></li>
-</ul>
-</li>
-</ul>
-</section>
-<section id="optional-arguments">
-<h3>Optional Arguments<a class="headerlink" href="#optional-arguments" title="Link to this heading">¶</a></h3>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">--url</span> <span class="pre">URL</span></code>: Specific article URL to scrape (cannot be used with category)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">--count</span> <span class="pre">COUNT</span></code>: Number of articles to fetch (default: 1, max: 10)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">--format</span> <span class="pre">FORMAT</span></code>: Output format (choices: json, text; default: json)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">--verbose,</span> <span class="pre">-v</span></code>: Enable verbose logging output</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">--help,</span> <span class="pre">-h</span></code>: Show help message and exit</p></li>
-</ul>
-</section>
-</section>
-<section id="output-formats">
-<h2>Output Formats<a class="headerlink" href="#output-formats" title="Link to this heading">¶</a></h2>
-<section id="json-format-default">
-<h3>JSON Format (Default)<a class="headerlink" href="#json-format-default" title="Link to this heading">¶</a></h3>
-<p>The default JSON format provides structured data that can be easily parsed:</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Example Article Title&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;author&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jane Doe&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;content&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Article content here...&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://www.wired.com/story/example/&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;category&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;security&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;published_date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-01-15T10:30:00Z&quot;</span>
-<span class="p">}</span>
-</pre></div>
-</div>
-</section>
-<section id="text-format">
-<h3>Text Format<a class="headerlink" href="#text-format" title="Link to this heading">¶</a></h3>
-<p>The text format provides human-readable output:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Title: Example Article Title
-Author: Jane Doe
-Category: security
-URL: https://www.wired.com/story/example/
-Content Length: 1,234 characters
-
-Content:
---------------------------------------------------
-Article content here...
-</pre></div>
-</div>
-</section>
-</section>
-<section id="error-handling">
-<h2>Error Handling<a class="headerlink" href="#error-handling" title="Link to this heading">¶</a></h2>
-<p>The CLI provides comprehensive error handling:</p>
-<ul class="simple">
-<li><p><strong>Network Errors</strong>: Graceful handling of connection issues</p></li>
-<li><p><strong>Invalid URLs</strong>: Clear error messages for malformed URLs</p></li>
-<li><p><strong>Rate Limiting</strong>: Automatic retries with backoff</p></li>
-<li><p><strong>Invalid Arguments</strong>: Helpful usage messages</p></li>
-<li><p><strong>Keyboard Interrupts</strong>: Clean shutdown on Ctrl+C</p></li>
-</ul>
-<section id="exit-codes">
-<h3>Exit Codes<a class="headerlink" href="#exit-codes" title="Link to this heading">¶</a></h3>
-<ul class="simple">
-<li><p><strong>0</strong>: Success</p></li>
-<li><p><strong>1</strong>: Error occurred during execution</p></li>
-<li><p><strong>2</strong>: Invalid command-line arguments</p></li>
-</ul>
-</section>
-</section>
-<section id="module-the_data_packet.cli">
-<span id="module-reference"></span><h2>Module Reference<a class="headerlink" href="#module-the_data_packet.cli" title="Link to this heading">¶</a></h2>
-<p>Command-line interface for the_data_packet.</p>
-<dl class="py function">
-<dt class="sig sig-object py" id="id0">
-<span class="sig-prename descclassname"><span class="pre">the_data_packet.cli.</span></span><span class="sig-name descname"><span class="pre">setup_logging</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/the_data_packet/cli.html#setup_logging"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id0" title="Link to this definition">¶</a></dt>
-<dd><p>Set up logging configuration.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="id1">
-<span class="sig-prename descclassname"><span class="pre">the_data_packet.cli.</span></span><span class="sig-name descname"><span class="pre">format_article_output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">article</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="models.html#id1" title="the_data_packet.models.article.ArticleData"><span class="pre">ArticleData</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">format_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'json'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../_modules/the_data_packet/cli.html#format_article_output"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id1" title="Link to this definition">¶</a></dt>
-<dd><p>Format article data for output.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="id2">
-<span class="sig-prename descclassname"><span class="pre">the_data_packet.cli.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/the_data_packet/cli.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id2" title="Link to this definition">¶</a></dt>
-<dd><p>Main CLI function.</p>
+<dd><p>Main CLI function for podcast generation.</p>
 </dd></dl>
 
 </section>
@@ -419,14 +270,14 @@ Article content here...
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="scrapers.html">
+          <a class="prev-page" href="workflows.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Web Scrapers</div>
+                <div class="title">Workflows Module</div>
                 
               </div>
             </a>
@@ -461,35 +312,8 @@ Article content here...
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Command Line Interface</a><ul>
-<li><a class="reference internal" href="#main-functions">Main Functions</a><ul>
+<li><a class="reference internal" href="#module-the_data_packet.cli">CLI Module</a><ul>
 <li><a class="reference internal" href="#the_data_packet.cli.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
-<li><a class="reference internal" href="#the_data_packet.cli.format_article_output"><code class="docutils literal notranslate"><span class="pre">format_article_output()</span></code></a></li>
-<li><a class="reference internal" href="#the_data_packet.cli.setup_logging"><code class="docutils literal notranslate"><span class="pre">setup_logging()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#cli-usage-examples">CLI Usage Examples</a><ul>
-<li><a class="reference internal" href="#basic-commands">Basic Commands</a></li>
-<li><a class="reference internal" href="#advanced-options">Advanced Options</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#command-line-arguments">Command-Line Arguments</a><ul>
-<li><a class="reference internal" href="#positional-arguments">Positional Arguments</a></li>
-<li><a class="reference internal" href="#optional-arguments">Optional Arguments</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#output-formats">Output Formats</a><ul>
-<li><a class="reference internal" href="#json-format-default">JSON Format (Default)</a></li>
-<li><a class="reference internal" href="#text-format">Text Format</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#error-handling">Error Handling</a><ul>
-<li><a class="reference internal" href="#exit-codes">Exit Codes</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#module-the_data_packet.cli">Module Reference</a><ul>
-<li><a class="reference internal" href="#id0"><code class="docutils literal notranslate"><span class="pre">setup_logging()</span></code></a></li>
-<li><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">format_article_output()</span></code></a></li>
-<li><a class="reference internal" href="#id2"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -503,7 +327,7 @@ Article content here...
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=8d563738"></script>
+</div><script src="../_static/documentation_options.js?v=51b770b3"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
