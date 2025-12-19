@@ -78,7 +78,6 @@ tests/
 episode_script.txt
 
 # Docker files (for multi-stage builds)
-deploy.sh
 docker-compose.yml
 var/
 wheels/
@@ -94,7 +93,6 @@ htmlcov/
 
 # Documentation
 docs/
-*.md
 
 # IDE files
 .vscode/

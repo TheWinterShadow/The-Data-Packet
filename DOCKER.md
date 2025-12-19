@@ -7,10 +7,9 @@ The Data Packet is now optimized for Docker deployment with a comprehensive CLI 
 ## 📦 What's Included
 
 - **Dockerfile**: Production-ready container with security best practices
-- **docker-compose.yml**: Multi-service orchestration for different use cases
-- **deploy.sh**: Automated deployment script
 - **.env.template**: Environment variable template
 - **CLI Interface**: Full command-line interface for all operations
+- **GitHub Actions**: Automated CI/CD for building and publishing
 
 ## 🚀 Quick Start
 
@@ -25,29 +24,25 @@ cd the_data_packet
 cp .env.template .env
 # Edit .env with your API keys:
 # ANTHROPIC_API_KEY=your-claude-key
-# GOOGLE_API_KEY=your-gemini-key
+# ELEVENLABS_API_KEY=your-elevenlabs-key
 ```
 
-### 2. Deploy with Script
+### 2. Build and Run with Docker
 
 ```bash
 # Build the Docker image
-./deploy.sh build
+docker build -t the-data-packet .
 
-# Generate complete podcast
-./deploy.sh run
-
-# Generate script only
-./deploy.sh script
-
-# Generate audio from existing script
-./deploy.sh audio
-
-# Custom generation
-./deploy.sh custom --show-name "My Podcast" --categories security
+# Run the container
+docker run --rm \
+  --env-file .env \
+  -v "$(pwd)/output:/app/output" \
+  the-data-packet
 ```
 
-### 3. Manual Docker Commands
+### 3. GitHub Actions Deployment
+
+The project includes GitHub Actions for automated building and publishing:
 
 ```bash
 # Complete podcast generation
@@ -117,26 +112,18 @@ Set these in your `.env` file:
 ```env
 # Required
 ANTHROPIC_API_KEY=sk-ant-...
-GOOGLE_API_KEY=AIzaSy...
+ELEVENLABS_API_KEY=sk_...
 
 # Optional
 AWS_ACCESS_KEY_ID=AKIA...
 AWS_SECRET_ACCESS_KEY=...
 AWS_REGION=us-east-1
+S3_BUCKET_NAME=my-podcast-bucket
 ```
 
 ### Docker Compose Services
 
-```bash
-# Default: Complete podcast generation
-docker-compose up podcast-generator
-
-# Script only
-docker-compose --profile script-only up script-only
-
-# Audio only  
-docker-compose --profile audio-only up audio-only
-```
+> **Note**: Docker Compose configuration removed in favor of direct `docker build` and GitHub Actions workflow.
 
 ## 📁 File Structure
 

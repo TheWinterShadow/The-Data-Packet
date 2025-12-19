@@ -78,8 +78,9 @@ class TestInit(unittest.TestCase):
     def test_package_structure(self):
         """Test that expected modules are accessible."""
         # Test that submodules exist
-        import the_data_packet.core
-        import the_data_packet.generation
+        import the_data_packet.core  # noqa: F401
+        import the_data_packet.generation  # noqa: F401
+        import the_data_packet.sources  # noqa: F401
 
         # Note: Not testing sources/utils/workflows as they may have dependencies
 

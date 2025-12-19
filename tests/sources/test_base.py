@@ -1,7 +1,6 @@
 """Unit tests for sources.base module."""
 
 import unittest
-from unittest.mock import Mock
 
 from the_data_packet.core.exceptions import ValidationError
 from the_data_packet.sources.base import Article, ArticleSource
@@ -10,7 +9,7 @@ from the_data_packet.sources.base import Article, ArticleSource
 class TestArticle(unittest.TestCase):
     """Test cases for Article dataclass."""
 
-    def test_article_creation_minimal(self):
+    def test_article_creation_minimal(self) -> None:
         """Test Article creation with minimal required fields."""
         article = Article(title="Test Title", content="Test content for the article")
 
@@ -21,7 +20,7 @@ class TestArticle(unittest.TestCase):
         self.assertIsNone(article.category)
         self.assertIsNone(article.source)
 
-    def test_article_creation_with_all_fields(self):
+    def test_article_creation_with_all_fields(self) -> None:
         """Test Article creation with all fields."""
         article = Article(
             title="Complete Article",
@@ -38,31 +37,31 @@ class TestArticle(unittest.TestCase):
         self.assertEqual(article.category, "technology")
         self.assertEqual(article.source, "example")
 
-    def test_is_valid_with_valid_article(self):
+    def test_is_valid_with_valid_article(self) -> None:
         """Test is_valid returns True for valid articles."""
         article = Article(
             title="Valid Article",
-            content="This is a sufficiently long article content that should pass the validation requirements for the article.",
+            content="This is a sufficiently long article content that should pass the validation requirements for the article.",  # noqa: E501
         )
 
         self.assertTrue(article.is_valid())
 
-    def test_is_valid_with_empty_title(self):
+    def test_is_valid_with_empty_title(self) -> None:
         """Test is_valid returns False for empty title."""
         article = Article(
             title="",
-            content="This is a sufficiently long article content that should pass the validation requirements for the article.",
+            content="This is a sufficiently long article content that should pass the validation requirements for the article.",  # noqa: E501
         )
 
         self.assertFalse(article.is_valid())
 
-    def test_is_valid_with_empty_content(self):
+    def test_is_valid_with_empty_content(self) -> None:
         """Test is_valid returns False for empty content."""
         article = Article(title="Valid Title", content="")
 
         self.assertFalse(article.is_valid())
 
-    def test_is_valid_with_short_content(self):
+    def test_is_valid_with_short_content(self) -> None:
         """Test is_valid returns False for very short content."""
         article = Article(
             title="Valid Title", content="Short"  # Less than 100 characters
@@ -70,13 +69,13 @@ class TestArticle(unittest.TestCase):
 
         self.assertFalse(article.is_valid())
 
-    def test_is_valid_with_whitespace_only_content(self):
+    def test_is_valid_with_whitespace_only_content(self) -> None:
         """Test is_valid handles whitespace-only content correctly."""
         article = Article(title="Valid Title", content="   \n\t   ")  # Only whitespace
 
         self.assertFalse(article.is_valid())
 
-    def test_is_valid_content_length_boundary(self):
+    def test_is_valid_content_length_boundary(self) -> None:
         """Test is_valid with content at the 100-character boundary."""
         # Exactly 100 characters of content (after stripping)
         content_100 = "a" * 100
@@ -88,7 +87,7 @@ class TestArticle(unittest.TestCase):
         article_101 = Article(title="Title", content=content_101)
         self.assertTrue(article_101.is_valid())
 
-    def test_to_dict(self):
+    def test_to_dict(self) -> None:
         """Test conversion to dictionary."""
         article = Article(
             title="Test Article",
@@ -110,7 +109,7 @@ class TestArticle(unittest.TestCase):
 
         self.assertEqual(article.to_dict(), expected_dict)
 
-    def test_to_dict_with_none_values(self):
+    def test_to_dict_with_none_values(self) -> None:
         """Test to_dict with None values."""
         article = Article(title="Test Article", content="Test content")
 
@@ -129,31 +128,37 @@ class TestArticle(unittest.TestCase):
 class ConcreteArticleSource(ArticleSource):
     """Concrete implementation of ArticleSource for testing."""
 
-    def __init__(self, name="test", categories=None):
+    def __init__(self, name: str = "test", categories: list[str] | None = None) -> None:
         self._name = name
         self._categories = categories or ["tech", "science"]
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self._name
 
     @property
-    def supported_categories(self):
+    def supported_categories(self) -> list[str]:
         return self._categories
 
-    def get_latest_article(self, category):
+    def get_latest_article(self, category: str) -> Article:
         return Article(
             title=f"Latest {category} article",
-            content=f"This is the latest article from the {category} category with enough content to be valid.",
+            content=(
+                f"This is the latest article from the {category} category "
+                "with enough content to be valid."
+            ),
             category=category,
             source=self._name,
         )
 
-    def get_multiple_articles(self, category, count):
+    def get_multiple_articles(self, category: str, count: int) -> list[Article]:
         return [
             Article(
                 title=f"{category} article {i}",
-                content=f"This is article {i} from the {category} category with enough content to be valid.",
+                content=(
+                    f"This is article {i} from the {category} category "
+                    "with enough content to be valid."
+                ),
                 category=category,
                 source=self._name,
             )
@@ -164,16 +169,16 @@ class ConcreteArticleSource(ArticleSource):
 class TestArticleSource(unittest.TestCase):
     """Test cases for ArticleSource abstract base class."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test fixtures."""
         self.source = ConcreteArticleSource()
 
-    def test_abstract_properties_implemented(self):
+    def test_abstract_properties_implemented(self) -> None:
         """Test that abstract properties are implemented in concrete class."""
         self.assertEqual(self.source.name, "test")
         self.assertEqual(self.source.supported_categories, ["tech", "science"])
 
-    def test_abstract_methods_implemented(self):
+    def test_abstract_methods_implemented(self) -> None:
         """Test that abstract methods are implemented in concrete class."""
         # Test get_latest_article
         article = self.source.get_latest_article("tech")
@@ -187,13 +192,13 @@ class TestArticleSource(unittest.TestCase):
         self.assertEqual(articles[0].title, "science article 1")
         self.assertEqual(articles[1].title, "science article 2")
 
-    def test_validate_category_valid(self):
+    def test_validate_category_valid(self) -> None:
         """Test validate_category with valid category."""
         # Should not raise any exception
         self.source.validate_category("tech")
         self.source.validate_category("science")
 
-    def test_validate_category_invalid(self):
+    def test_validate_category_invalid(self) -> None:
         """Test validate_category with invalid category."""
         with self.assertRaises(ValidationError) as cm:
             self.source.validate_category("invalid")
@@ -203,7 +208,7 @@ class TestArticleSource(unittest.TestCase):
         self.assertIn("test", error_message)  # Source name
         self.assertIn("tech, science", error_message)  # Supported categories
 
-    def test_validate_category_case_sensitive(self):
+    def test_validate_category_case_sensitive(self) -> None:
         """Test that category validation is case sensitive."""
         with self.assertRaises(ValidationError):
             self.source.validate_category("TECH")  # Wrong case
@@ -211,15 +216,17 @@ class TestArticleSource(unittest.TestCase):
         with self.assertRaises(ValidationError):
             self.source.validate_category("Tech")  # Wrong case
 
-    def test_cannot_instantiate_abstract_class(self):
+    def test_cannot_instantiate_abstract_class(self) -> None:
         """Test that ArticleSource cannot be instantiated directly."""
         with self.assertRaises(TypeError):
             ArticleSource()
 
-    def test_subclass_must_implement_abstract_methods(self):
+    def test_subclass_must_implement_abstract_methods(self) -> None:
         """Test that subclass must implement all abstract methods."""
 
         class IncompleteSource(ArticleSource):
+            """Incomplete source class for testing."""
+
             @property
             def name(self):
                 return "incomplete"
@@ -229,7 +236,7 @@ class TestArticleSource(unittest.TestCase):
         with self.assertRaises(TypeError):
             IncompleteSource()
 
-    def test_custom_source_implementation(self):
+    def test_custom_source_implementation(self) -> None:
         """Test custom source with different categories."""
         custom_source = ConcreteArticleSource(
             name="custom", categories=["ai", "security", "blockchain"]

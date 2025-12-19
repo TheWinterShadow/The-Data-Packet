@@ -190,7 +190,7 @@ class RSSGenerator:
             ET.SubElement(itunes_owner, "itunes:email").text = email
 
         # iTunes category
-        itunes_category = ET.SubElement(channel, "itunes:category", text="Technology")
+        ET.SubElement(channel, "itunes:category", text="Technology")
 
         # Channel image and iTunes cover art
         image_url = channel_image_url or self.config.rss_channel_image_url

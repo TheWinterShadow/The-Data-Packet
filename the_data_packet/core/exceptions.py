@@ -10,7 +10,7 @@ Exception Hierarchy:
     ├── NetworkError (HTTP requests, connectivity issues)
     ├── ScrapingError (Article extraction failures)
     ├── AIGenerationError (Claude API failures, content generation)
-    ├── AudioGenerationError (Gemini TTS failures, audio processing)
+    ├── AudioGenerationError (ElevenLabs TTS failures, audio processing)
     └── ValidationError (Invalid data, missing required fields)
 
 Example:
@@ -120,7 +120,7 @@ class AudioGenerationError(TheDataPacketError):
     """Raised when audio generation fails.
 
     This exception is raised when:
-    - Gemini TTS API returns errors
+    - ElevenLabs TTS API returns errors
     - Audio file generation fails
     - Invalid voice configuration
     - Audio processing or saving fails

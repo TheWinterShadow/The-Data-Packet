@@ -301,7 +301,7 @@ class PodcastPipeline:
                 result.rss_generated = True
                 result.rss_path = rss_result.local_path
                 result.s3_rss_url = rss_result.s3_url
-                logger.info(f"RSS feed updated successfully")
+                logger.info("RSS feed updated successfully")
                 if rss_result.s3_url:
                     logger.info(f"RSS feed URL: {rss_result.s3_url}")
             else:

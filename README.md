@@ -13,7 +13,7 @@ The Data Packet is a complete end-to-end podcast generation system that:
 
 1. **📰 Intelligently Scrapes** the latest tech news from Wired.com across multiple categories
 2. **🤖 AI-Generated Scripts** using Anthropic Claude to create natural, engaging dialogue  
-3. **🎙️ Multi-Speaker Audio** with Google Gemini TTS featuring realistic conversational voices
+3. **🎙️ Multi-Speaker Audio** with ElevenLabs TTS featuring realistic conversational voices
 4. **📻 Complete RSS Feeds** for podcast distribution with metadata and hosting
 5. **☁️ Cloud Integration** with AWS S3 for reliable content hosting and delivery
 6. **🔄 Full Automation** - Generate professional podcast episodes with a single command
@@ -49,13 +49,13 @@ The Data Packet is a complete end-to-end podcast generation system that:
 ### Option 1: Pull from GitHub Container Registry (Recommended)
 
 ```bash
-# Pull the latest image
+# Pull the latest image (automatically built and published via GitHub Actions)
 docker pull ghcr.io/thewintershadow/the-data-packet:latest
 
 # Run with your API keys
 docker run --rm \
   -e ANTHROPIC_API_KEY="your-claude-key" \
-  -e GOOGLE_API_KEY="your-gemini-key" \
+  -e ELEVENLABS_API_KEY="your-elevenlabs-key" \
   -v "$(pwd)/output:/app/output" \
   ghcr.io/thewintershadow/the-data-packet:latest
 ```
@@ -69,7 +69,7 @@ docker build -t the-data-packet .
 
 docker run --rm \
   -e ANTHROPIC_API_KEY="your-key" \
-  -e GOOGLE_API_KEY="your-key" \
+  -e ELEVENLABS_API_KEY="your-key" \
   -v "$(pwd)/output:/app/output" \
   the-data-packet
 ```
@@ -164,7 +164,7 @@ graph LR
     B1[Claude AI] --> B
     B2[Dialogue Templates] --> B
     
-    C1[Gemini TTS] --> C
+    C1[ElevenLabs TTS] --> C
     C2[Multi-Speaker Voices] --> C
 ```
 
@@ -172,7 +172,7 @@ graph LR
 
 **API Keys (Required):**
 - **Anthropic API Key** - For Claude AI script generation
-- **Google API Key** - For Gemini TTS audio generation
+- **ElevenLabs API Key** - For high-quality multi-speaker audio generation
 
 **Docker (Required):**
 - Docker Engine 20.10+
@@ -218,7 +218,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🙏 Acknowledgments
 
 - **Anthropic** for Claude AI capabilities
-- **Google** for Gemini TTS technology
+- **ElevenLabs** for high-quality text-to-speech technology
 - **Wired.com** for excellent tech journalism
 
 ---
@@ -241,8 +241,11 @@ cp .env.template .env
 # Edit .env with your API keys
 
 # 3. Build and run
-./deploy.sh build
-./deploy.sh run
+docker build -t the-data-packet .
+docker run --rm \
+  --env-file .env \
+  -v "$(pwd)/output:/app/output" \
+  the-data-packet
 ```
 
 ### Docker Commands
@@ -446,7 +449,7 @@ graph LR
     B --> B2[Script Templates]
     B --> B3[Multi-speaker Dialogue]
     
-    C --> C1[Gemini TTS]
+    C --> C1[ElevenLabs TTS]
     C --> C2[Voice Selection]
     C --> C3[Audio Processing]
 ```

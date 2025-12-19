@@ -44,7 +44,7 @@ docker build -t the-data-packet:local .
 # Create .env file
 cat > .env << EOF
 ANTHROPIC_API_KEY=sk-ant-api03-your-key-here
-ELEVENLABS_API_KEY=your-elevenlabs-key-here
+ELEVENLABS_API_KEY=sk_your-elevenlabs-key-here
 EOF
 
 # Use with Docker
@@ -235,7 +235,7 @@ services:
   audio-only:
     image: ghcr.io/thewintershadow/the-data-packet:latest
     environment:
-      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - ELEVENLABS_API_KEY=${ELEVENLABS_API_KEY}
     volumes:
       - ./output:/app/output
     command: [
@@ -360,7 +360,7 @@ jobs:
       run: |
         docker run --rm \
           -e ANTHROPIC_API_KEY="${{ secrets.ANTHROPIC_API_KEY }}" \
-          -e GOOGLE_API_KEY="${{ secrets.GOOGLE_API_KEY }}" \
+          -e ELEVENLABS_API_KEY="${{ secrets.ELEVENLABS_API_KEY }}" \
           -v "/tmp/output:/app/output" \
           ghcr.io/thewintershadow/the-data-packet:latest
           

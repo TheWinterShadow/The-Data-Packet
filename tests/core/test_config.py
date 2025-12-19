@@ -83,7 +83,7 @@ class TestConfig(unittest.TestCase):
         """Test that output directory is created if it doesn't exist."""
         with tempfile.TemporaryDirectory() as temp_dir:
             output_path = Path(temp_dir) / "new_output_dir"
-            config = Config(output_directory=output_path)
+            Config(output_directory=output_path)
 
             self.assertTrue(output_path.exists())
             self.assertTrue(output_path.is_dir())

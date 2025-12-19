@@ -4,8 +4,13 @@ import argparse
 import sys
 from pathlib import Path
 
-from .core import ConfigurationError, get_config, get_logger, setup_logging
-from .workflows import PodcastPipeline
+from the_data_packet.core import (
+    ConfigurationError,
+    get_config,
+    get_logger,
+    setup_logging,
+)
+from the_data_packet.workflows import PodcastPipeline
 
 
 def main() -> None:
@@ -18,7 +23,7 @@ Examples:
   # Generate complete podcast with environment variables
   the-data-packet --output ./episode
 
-  # Generate script only with custom API keys  
+  # Generate script only with custom API keys
   the-data-packet --anthropic-key sk-ant-... --script-only --output ./scripts
 
   # Generate with custom show name and voices
@@ -29,7 +34,7 @@ Examples:
 
 Environment Variables:
   ANTHROPIC_API_KEY    - Claude API key for script generation
-  GOOGLE_API_KEY       - Google Cloud API key for TTS audio generation  
+  ELEVENLABS_API_KEY   - ElevenLabs API key for TTS audio generation
   S3_BUCKET_NAME       - S3 bucket for uploads (optional)
   AWS_ACCESS_KEY_ID    - AWS access key (optional)
   AWS_SECRET_ACCESS_KEY - AWS secret key (optional)
@@ -42,8 +47,8 @@ Environment Variables:
         help="Anthropic API key (overrides ANTHROPIC_API_KEY env var)",
     )
     parser.add_argument(
-        "--google-key",
-        help="Google Cloud API key (overrides GOOGLE_API_KEY env var)",
+        "--elevenlabs-key",
+        help="ElevenLabs API key (overrides ELEVENLABS_API_KEY env var)",
     )
 
     # Content Options
@@ -82,13 +87,13 @@ Environment Variables:
     # Audio Settings
     parser.add_argument(
         "--voice-a",
-        default="en-US-Neural2-A",
-        help="Voice for first speaker (default: en-US-Neural2-A)",
+        default="XrExE9yKIg1WjnnlVkGX",
+        help="ElevenLabs voice ID for first speaker (default: XrExE9yKIg1WjnnlVkGX - George)",
     )
     parser.add_argument(
         "--voice-b",
-        default="en-US-Neural2-B",
-        help="Voice for second speaker (default: en-US-Neural2-B)",
+        default="IKne3meq5aSn9XLyUdCD",
+        help="ElevenLabs voice ID for second speaker (default: IKne3meq5aSn9XLyUdCD - Rachel)",
     )
 
     # Output Settings
@@ -156,8 +161,8 @@ Environment Variables:
         # API keys
         if args.anthropic_key:
             config_overrides["anthropic_api_key"] = args.anthropic_key
-        if args.google_key:
-            config_overrides["google_api_key"] = args.google_key
+        if args.elevenlabs_key:
+            config_overrides["elevenlabs_api_key"] = args.elevenlabs_key
         if args.s3_bucket:
             config_overrides["s3_bucket_name"] = args.s3_bucket
 

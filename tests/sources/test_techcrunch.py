@@ -1,8 +1,9 @@
 """Unit tests for sources.techcrunch module."""
 
 import unittest
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, patch
 
+from the_data_packet.core.exceptions import ValidationError
 from the_data_packet.sources.base import Article, ArticleSource
 from the_data_packet.sources.techcrunch import TechCrunchSource
 
@@ -49,8 +50,6 @@ class TestTechCrunchSource(unittest.TestCase):
 
     def test_validate_category_unsupported(self):
         """Test validate_category with unsupported category."""
-        from the_data_packet.core.exceptions import ValidationError
-
         with self.assertRaises(ValidationError) as cm:
             self.source.validate_category("unsupported_category")
 
@@ -60,12 +59,19 @@ class TestTechCrunchSource(unittest.TestCase):
 
     @patch.object(TechCrunchSource, "_extract_article")
     @patch.object(TechCrunchSource, "_get_latest_url_from_rss")
-    def test_get_latest_article_structure(self, mock_get_url, mock_extract):
+    def test_get_latest_article_structure(
+        self, mock_get_url: MagicMock, mock_extract: MagicMock
+    ):
         """Test get_latest_article method structure (mocked)."""
         mock_get_url.return_value = "https://techcrunch.com/test"
         mock_extract.return_value = Article(
             title="Test TechCrunch Article",
-            content="This is test content with sufficient length to meet requirements for validation and processing. The content must be longer than 100 characters to pass the validation checks in the Article.is_valid() method. This should now be sufficient length.",
+            content=(
+                "This is test content with sufficient length to meet requirements for "
+                "validation and processing. The content must be longer than 100 characters "
+                "to pass the validation checks in the Article.is_valid() method. "
+                "This should now be sufficient length."
+            ),
             url="https://techcrunch.com/test",
             author="Test Author",
             category="ai",
@@ -80,7 +86,9 @@ class TestTechCrunchSource(unittest.TestCase):
 
     @patch.object(TechCrunchSource, "_extract_article")
     @patch.object(TechCrunchSource, "_get_urls_from_rss")
-    def test_get_multiple_articles_structure(self, mock_get_urls, mock_extract):
+    def test_get_multiple_articles_structure(
+        self, mock_get_urls: MagicMock, mock_extract: MagicMock
+    ):
         """Test get_multiple_articles method structure (mocked)."""
         mock_get_urls.return_value = [
             "https://techcrunch.com/test1",
@@ -89,7 +97,10 @@ class TestTechCrunchSource(unittest.TestCase):
         mock_extract.side_effect = [
             Article(
                 title="TechCrunch Article 1",
-                content="Content for article 1 with sufficient character length to be considered valid for processing and validation checks.",
+                content=(
+                    "Content for article 1 with sufficient character length to be "
+                    "considered valid for processing and validation checks."
+                ),
                 url="https://techcrunch.com/test1",
                 author="Test Author",
                 category="ai",
@@ -97,7 +108,10 @@ class TestTechCrunchSource(unittest.TestCase):
             ),
             Article(
                 title="TechCrunch Article 2",
-                content="Content for article 2 with sufficient character length to be considered valid for processing and validation checks.",
+                content=(
+                    "Content for article 2 with sufficient character length to be "
+                    "considered valid for processing and validation checks."
+                ),
                 url="https://techcrunch.com/test2",
                 author="Test Author",
                 category="ai",

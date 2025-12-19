@@ -4,10 +4,9 @@ import unittest
 from pathlib import Path
 from unittest.mock import Mock, patch
 
-import boto3
 from botocore.exceptions import ClientError, NoCredentialsError
 
-from the_data_packet.core.exceptions import ConfigurationError, NetworkError
+from the_data_packet.core.exceptions import ConfigurationError
 from the_data_packet.utils.s3 import S3Storage, S3UploadResult
 
 

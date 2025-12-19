@@ -1,12 +1,9 @@
 """Audio generation using ElevenLabs Text-to-Speech."""
 
-import io
-import os
-import time
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 
 from elevenlabs import VoiceSettings
 from elevenlabs.client import ElevenLabs
@@ -95,7 +92,7 @@ class AudioGenerator:
         self._validate_voices()
 
         logger.info(
-            f"Initialized ElevenLabs audio generator with model {self.model_id} and voices: {self.voice_a}, {self.voice_b}"
+            f"Initialized ElevenLabs audio generator with model {self.model_id} and voices: {self.voice_a}, {self.voice_b}"  # noqa: E501
         )
 
     def _validate_voices(self) -> None:
@@ -178,10 +175,10 @@ class AudioGenerator:
                 raise
             raise AudioGenerationError(f"Audio generation failed: {e}")
 
-    def _parse_script_for_speakers(self, script: str) -> List[Dict[str, Any]]:
+    def _parse_script_for_speakers(self, script: str) -> List[Dict[str, str]]:
         """Parse script and identify speaker segments."""
         lines = script.split("\n")
-        segments = []
+        segments: List[Dict[str, str]] = []
 
         for line in lines:
             line = line.strip()
@@ -210,9 +207,9 @@ class AudioGenerator:
 
         return segments
 
-    def _generate_with_individual_voices(self, segments: List[Dict[str, Any]]) -> bytes:
+    def _generate_with_individual_voices(self, segments: List[Dict[str, str]]) -> bytes:
         """Generate audio using ElevenLabs individual voice synthesis and combine."""
-        audio_chunks = []
+        audio_chunks: List[bytes] = []
 
         for i, segment in enumerate(segments):
             try:

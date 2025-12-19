@@ -1,7 +1,7 @@
 """Simple unit tests for sources.techcrunch module."""
 
 import unittest
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, patch
 
 from the_data_packet.sources.base import Article, ArticleSource
 from the_data_packet.sources.techcrunch import TechCrunchSource
@@ -37,12 +37,17 @@ class TestTechCrunchSourceSimple(unittest.TestCase):
 
     @patch.object(TechCrunchSource, "_extract_article")
     @patch.object(TechCrunchSource, "_get_latest_url_from_rss")
-    def test_get_latest_article_mocked(self, mock_get_url, mock_extract):
+    def test_get_latest_article_mocked(
+        self, mock_get_url: MagicMock, mock_extract: MagicMock
+    ):
         """Test get_latest_article method with mocking."""
         mock_get_url.return_value = "https://techcrunch.com/test"
         mock_extract.return_value = Article(
             title="Test TechCrunch Article",
-            content="This is test content with sufficient length to meet the minimum requirements for article validation and processing.",
+            content=(
+                "This is test content with sufficient length to meet the minimum "
+                "requirements for article validation and processing."
+            ),
             url="https://techcrunch.com/test",
             category="ai",
             source="techcrunch",

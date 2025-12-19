@@ -1,7 +1,7 @@
 """Script generation using Anthropic Claude."""
 
 import re
-from typing import Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 from anthropic import Anthropic, APIError, RateLimitError
 from tenacity import (
@@ -67,9 +67,9 @@ class ScriptGenerator:
 
         try:
             # Step 1: Generate individual segments
-            segments = []
-            summaries = []
-            processed_articles = []
+            segments: List[str] = []
+            summaries: List[str] = []
+            processed_articles: List[Article] = []
 
             for i, article in enumerate(valid_articles, 1):
                 logger.info(
@@ -293,7 +293,7 @@ class ScriptGenerator:
 
         return "\n".join(parts)
 
-    def _parse_framework(self, framework: str) -> dict:
+    def _parse_framework(self, framework: str) -> Dict[str, str]:
         """Parse framework response into sections."""
         sections = {}
         lines = framework.split("\n")
@@ -530,9 +530,8 @@ class ScriptGenerator:
 
 
 # Prompts (simplified versions of the original prompts)
-ARTICLE_TO_SEGMENT_PROMPT = """You are writing ONE story segment for a daily tech news podcast. Convert the provided article into a focused news discussion segment between two hosts (Alex and Sam).
-
-IMPORTANT: If the article is NOT about technology (e.g., lifestyle, shopping, health, sports, etc.), respond with: "NON_TECH_CONTENT: This article is not appropriate for a tech news podcast as it covers [category] rather than technology."
+ARTICLE_TO_SEGMENT_PROMPT = """You are writing ONE story segment for a daily tech news podcast.
+Convert the provided article into a focused news discussion segment between two hosts (Alex and Sam).
 
 ## REQUIREMENTS
 - 3-4 minutes of dialogue (450-650 words)
@@ -542,7 +541,8 @@ IMPORTANT: If the article is NOT about technology (e.g., lifestyle, shopping, he
 - Include core news, key players, impact, and next steps
 
 ## WRITING FOR AUDIO
-- Use full words instead of abbreviations when possible (write "artificial intelligence" instead of "AI" when it flows better)
+- Use full words instead of abbreviations when possible
+    (write "artificial intelligence" instead of "AI" when it flows better)
 - Write out numbers naturally ("fifty million" instead of "50M")
 - Use natural speech patterns with contractions ("don't", "we're", "it's")
 - Add natural conversation fillers occasionally ("you know", "I mean", "actually")
@@ -563,7 +563,8 @@ Sam: [dialogue]
 ## ARTICLE TO CONVERT
 {article_text}"""
 
-SUMMARIES_TO_FRAMEWORK_PROMPT = """You are producing the framing elements of a daily news podcast episode. Create show opening, transitions between segments, and show closing.
+SUMMARIES_TO_FRAMEWORK_PROMPT = """You are producing the framing elements of a daily news podcast episode.
+Create show opening, transitions between segments, and show closing.
 
 ## SHOW INFO
 **Show Name**: {show_name}

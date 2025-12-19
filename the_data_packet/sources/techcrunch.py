@@ -116,7 +116,7 @@ class TechCrunchSource(ArticleSource):
             article = self._extract_article(url, category)
 
             if not article.is_valid():
-                raise ScrapingError(f"Extracted article is not valid: missing content")
+                raise ScrapingError("Extracted article is not valid: missing content")
 
             logger.info(f"Successfully extracted article: {article.title}")
             return article

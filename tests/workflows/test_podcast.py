@@ -1,11 +1,9 @@
 """Unit tests for workflows.podcast module."""
 
 import unittest
-from datetime import datetime
 from pathlib import Path
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, Mock, patch
 
-from the_data_packet.core.exceptions import TheDataPacketError, ValidationError
 from the_data_packet.sources.base import Article
 from the_data_packet.workflows.podcast import PodcastPipeline, PodcastResult
 
@@ -89,7 +87,12 @@ class TestPodcastPipeline(unittest.TestCase):
 
         self.sample_article = Article(
             title="Test Security Article",
-            content="This is a test article about cybersecurity with sufficient content length to be valid for processing. The content needs to be longer than 100 characters to pass the Article.is_valid() method validation checks which are applied in the workflow.",
+            content=(
+                "This is a test article about cybersecurity with sufficient content "
+                "length to be valid for processing. The content needs to be longer than "
+                "100 characters to pass the Article.is_valid() method validation checks "
+                "which are applied in the workflow."
+            ),
             author="Test Author",
             url="https://example.com/article",
             category="security",
@@ -103,11 +106,11 @@ class TestPodcastPipeline(unittest.TestCase):
         self.assertIn("techcrunch", PodcastPipeline.SOURCES)
 
         # Should be importable classes
-        for source_name, source_class in PodcastPipeline.SOURCES.items():
+        for source_class in PodcastPipeline.SOURCES.values():
             self.assertTrue(callable(source_class))
 
     @patch("the_data_packet.workflows.podcast.get_config")
-    def test_init_with_default_config(self, mock_get_config):
+    def test_init_with_default_config(self, mock_get_config: MagicMock):
         """Test PodcastPipeline initialization with default config."""
         mock_get_config.return_value = self.mock_config
 
@@ -130,7 +133,7 @@ class TestPodcastPipeline(unittest.TestCase):
             self.assertEqual(pipeline.config, custom_config)
 
     @patch("the_data_packet.workflows.podcast.get_config")
-    def test_validate_config_called(self, mock_get_config):
+    def test_validate_config_called(self, mock_get_config: MagicMock):
         """Test that _validate_config is called during initialization."""
         mock_get_config.return_value = self.mock_config
 
@@ -142,7 +145,10 @@ class TestPodcastPipeline(unittest.TestCase):
     @patch.object(PodcastPipeline, "_validate_config")
     @patch.object(PodcastPipeline, "_collect_articles")
     def test_run_no_articles_collected(
-        self, mock_collect, mock_validate, mock_get_config
+        self,
+        mock_collect: MagicMock,
+        mock_validate: MagicMock,
+        mock_get_config: MagicMock,
     ):
         """Test pipeline run when no articles are collected."""
         mock_get_config.return_value = self.mock_config
@@ -162,11 +168,11 @@ class TestPodcastPipeline(unittest.TestCase):
     @patch.object(PodcastPipeline, "_save_script")
     def test_run_script_only_mode(
         self,
-        mock_save_script,
-        mock_generate_script,
-        mock_collect,
-        mock_validate,
-        mock_get_config,
+        mock_save_script: MagicMock,
+        mock_generate_script: MagicMock,
+        mock_collect: MagicMock,
+        mock_validate: MagicMock,
+        mock_get_config: MagicMock,
     ):
         """Test pipeline run in script-only mode."""
         # Configure for script-only mode
@@ -201,7 +207,12 @@ class TestPodcastPipeline(unittest.TestCase):
     @patch("the_data_packet.workflows.podcast.get_config")
     @patch.object(PodcastPipeline, "_validate_config")
     @patch.object(PodcastPipeline, "_collect_articles")
-    def test_run_exception_handling(self, mock_collect, mock_validate, mock_get_config):
+    def test_run_exception_handling(
+        self,
+        mock_collect: MagicMock,
+        mock_validate: MagicMock,
+        mock_get_config: MagicMock,
+    ):
         """Test pipeline run exception handling."""
         mock_get_config.return_value = self.mock_config
         mock_collect.side_effect = Exception("Collection failed")
@@ -215,7 +226,9 @@ class TestPodcastPipeline(unittest.TestCase):
 
     @patch("the_data_packet.workflows.podcast.get_config")
     @patch.object(PodcastPipeline, "_validate_config")
-    def test_collect_articles_integration(self, mock_validate, mock_get_config):
+    def test_collect_articles_integration(
+        self, mock_validate: MagicMock, mock_get_config: MagicMock
+    ):
         """Test _collect_articles method integration."""
         mock_get_config.return_value = self.mock_config
 
@@ -238,7 +251,9 @@ class TestPodcastPipeline(unittest.TestCase):
 
     @patch("the_data_packet.workflows.podcast.get_config")
     @patch.object(PodcastPipeline, "_validate_config")
-    def test_collect_articles_unknown_source(self, mock_validate, mock_get_config):
+    def test_collect_articles_unknown_source(
+        self, mock_validate: MagicMock, mock_get_config: MagicMock
+    ):
         """Test _collect_articles with unknown source."""
         config_unknown_source = Mock()
         config_unknown_source.article_sources = ["unknown_source"]
@@ -257,7 +272,10 @@ class TestPodcastPipeline(unittest.TestCase):
     @patch.object(PodcastPipeline, "_validate_config")
     @patch("the_data_packet.workflows.podcast.ScriptGenerator")
     def test_generate_script_lazy_loading(
-        self, mock_script_generator_class, mock_validate, mock_get_config
+        self,
+        mock_script_generator_class: MagicMock,
+        mock_validate: MagicMock,
+        mock_get_config: MagicMock,
     ):
         """Test script generator lazy loading."""
         mock_get_config.return_value = self.mock_config
@@ -276,7 +294,10 @@ class TestPodcastPipeline(unittest.TestCase):
     @patch.object(PodcastPipeline, "_validate_config")
     @patch("the_data_packet.workflows.podcast.AudioGenerator")
     def test_generate_audio_lazy_loading(
-        self, mock_audio_generator_class, mock_validate, mock_get_config
+        self,
+        mock_audio_generator_class: MagicMock,
+        mock_validate: MagicMock,
+        mock_get_config: MagicMock,
     ):
         """Test audio generator lazy loading."""
         mock_get_config.return_value = self.mock_config
@@ -295,7 +316,7 @@ class TestPodcastPipeline(unittest.TestCase):
 
     @patch("the_data_packet.workflows.podcast.get_config")
     @patch.object(PodcastPipeline, "_validate_config")
-    def test_save_script(self, mock_validate, mock_get_config):
+    def test_save_script(self, mock_validate: MagicMock, mock_get_config: MagicMock):
         """Test script saving."""
         mock_get_config.return_value = self.mock_config
 
@@ -322,7 +343,9 @@ class TestPodcastPipeline(unittest.TestCase):
 
     @patch("the_data_packet.workflows.podcast.get_config")
     @patch.object(PodcastPipeline, "_validate_config")
-    def test_should_use_s3_true(self, mock_validate, mock_get_config):
+    def test_should_use_s3_true(
+        self, mock_validate: MagicMock, mock_get_config: MagicMock
+    ):
         """Test S3 usage detection when properly configured."""
         mock_get_config.return_value = self.mock_config
 
@@ -331,7 +354,9 @@ class TestPodcastPipeline(unittest.TestCase):
 
     @patch("the_data_packet.workflows.podcast.get_config")
     @patch.object(PodcastPipeline, "_validate_config")
-    def test_should_use_s3_false(self, mock_validate, mock_get_config):
+    def test_should_use_s3_false(
+        self, mock_validate: MagicMock, mock_get_config: MagicMock
+    ):
         """Test S3 usage detection when not configured."""
         config_no_s3 = Mock()
         config_no_s3.s3_bucket_name = None

@@ -1,10 +1,9 @@
 """Unit tests for cli.py module."""
 
 import argparse
-import sys
 import unittest
 from pathlib import Path
-from unittest.mock import Mock, call, patch
+from unittest.mock import Mock, patch
 
 from the_data_packet import cli
 from the_data_packet.core import ConfigurationError

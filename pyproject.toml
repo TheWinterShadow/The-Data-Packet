@@ -32,7 +32,6 @@ classifiers = [
   "License :: OSI Approved :: MIT License",
   "Operating System :: OS Independent",
   "Programming Language :: Python",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
@@ -50,6 +49,7 @@ Changelog = "https://github.com/TheWinterShadow/the_data_packet/blob/main/CHANGE
 
 [project.scripts]
 the-data-packet = "the_data_packet.cli:main"
+simple-podcast-generator = "the_data_packet.simple_cli:main"
 
 [project.optional-dependencies]
 
@@ -162,6 +162,7 @@ dependencies = [
   "pytest>=7.0.0",
   "pytest-cov>=4.0.0",
   "bandit>=1.7.0",
+  "flake8-pyproject>=0.18.0",
 ]
 
 [tool.hatch.envs.docs]
@@ -190,6 +191,7 @@ format = [
 format-check = [
   "isort --check the_data_packet tests",
   "black --check the_data_packet tests",
+  "flake8 the_data_packet tests",
 ]
 
 # Type checking
@@ -236,7 +238,7 @@ bb = [
 ]
 
 [[tool.hatch.envs.all.matrix]]
-python = ["3.9", "3.10", "3.11", "3.12", "3.13"]
+python = ["3.10", "3.11", "3.12", "3.13"]
 
 # ==============================================================================
 # TOOL CONFIGURATION
