@@ -43,7 +43,6 @@ jobs:
   codeBuild:
     name: 'Build Code with Hatch'
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
