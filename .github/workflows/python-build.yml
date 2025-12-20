@@ -11,7 +11,7 @@ env:
   TERRAFORM_VERSION: "1.6.0"
 
 jobs:
-  test:
+  readiness-test:
     runs-on: ubuntu-latest
 
     steps:
@@ -45,10 +45,8 @@ jobs:
           python -m build
 
   terraform-deploy:
-    needs: test
+    needs: readiness-test
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-
     defaults:
       run:
         working-directory: ./infra
