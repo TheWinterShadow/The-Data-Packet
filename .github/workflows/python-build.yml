@@ -2,7 +2,7 @@ name: Python Build and Terraform Deploy
 
 on:
   workflow_run:
-    workflows: ["Deploy Documentation"]
+    workflows: ["Build and Publish Docker Image"]
     types:
       - completed
 
