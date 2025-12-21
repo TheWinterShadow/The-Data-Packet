@@ -103,6 +103,183 @@ docker run --rm \
 --google-key KEY              Google API key
 ```
 
+## 🚀 Running with Configuration Variables
+
+### Method 1: Using Environment File (Recommended)
+
+Create a `.env` file with your API keys:
+
+```env
+ANTHROPIC_API_KEY=sk-ant-api03-your-key-here
+ELEVENLABS_API_KEY=sk_your-elevenlabs-key-here
+AWS_ACCESS_KEY_ID=AKIA...
+AWS_SECRET_ACCESS_KEY=your-aws-secret-key
+AWS_REGION=us-west-2
+S3_BUCKET_NAME=your-bucket-name
+```
+
+**Set up the output directory with proper permissions:**
+
+```bash
+# Create output directory and set permissions for the container user (UID 1000)
+mkdir -p output
+sudo chown -R 1000:1000 output
+
+# Or if you don't want to use sudo, make it writable for everyone
+mkdir -p output
+chmod 777 output
+```
+
+Then run with the environment file:
+
+```bash
+# Build the image first
+docker build -t the-data-packet .
+
+# Run full pipeline (note: you need to specify at least output directory to avoid help message)
+docker run --rm \
+  --env-file .env \
+  -v "$(pwd)/output:/app/output" \
+  the-data-packet \
+  --output /app/output
+
+# Or use the published image
+docker run --rm \
+  --env-file .env \
+  -v "$(pwd)/output:/app/output" \
+  thewintershadow/the-data-packet:latest \
+  --output /app/output
+```
+
+### Method 2: Direct Environment Variables
+
+**First, set up the output directory permissions:**
+
+```bash
+mkdir -p output
+sudo chown -R 1000:1000 output
+# Or alternatively: chmod 777 output
+```
+
+```bash
+docker run --rm \
+  -e ANTHROPIC_API_KEY='your-anthropic-key' \
+  -e ELEVENLABS_API_KEY='your-elevenlabs-key' \
+  -e AWS_ACCESS_KEY_ID='your-aws-access-key' \
+  -e AWS_SECRET_ACCESS_KEY='your-aws-secret-key' \
+  -e AWS_REGION='us-west-2' \
+  -e S3_BUCKET_NAME='your-bucket-name' \
+  -v "$(pwd)/output:/app/output" \
+  the-data-packet \
+  --output /app/output
+```
+
+### Method 3: Using CLI Arguments
+
+Pass additional configuration via CLI arguments:
+
+```bash
+docker run --rm \
+  --env-file .env \
+  -v "$(pwd)/output:/app/output" \
+  the-data-packet \
+  --show-name "Daily Tech Brief" \
+  --sources wired techcrunch \
+  --categories security ai guide \
+  --max-articles 2 \
+  --log-level INFO \
+  --save-intermediate
+```
+
+## 📋 Common Usage Examples
+
+### Complete Podcast Generation
+```bash
+# Using published image
+docker run --rm \
+  --env-file .env \
+  -v "$(pwd)/output:/app/output" \
+  thewintershadow/the-data-packet:latest \
+  --output /app/output \
+  --show-name "The Data Packet" \
+  --sources wired techcrunch \
+  --categories security ai \
+  --max-articles 1
+```
+
+### Script Only Generation
+```bash
+docker run --rm \
+  --env-file .env \
+  -v "$(pwd)/output:/app/output" \
+  thewintershadow/the-data-packet:latest \
+  --script-only \
+  --output /app/output
+```
+
+### Audio Only from Existing Script
+```bash
+docker run --rm \
+  --env-file .env \
+  -v "$(pwd)/output:/app/output" \
+  thewintershadow/the-data-packet:latest \
+  --audio-only \
+  --script-file /app/output/episode_script.txt
+```
+
+### Custom Voices and Settings
+```bash
+docker run --rm \
+  --env-file .env \
+  -v "$(pwd)/output:/app/output" \
+  thewintershadow/the-data-packet:latest \
+  --output /app/output \
+  --voice-a XrExE9yKIg1WjnnlVkGX \
+  --voice-b IKne3meq5aSn9XLyUdCD \
+  --show-name "Custom Tech News" \
+  --log-level DEBUG \
+  --save-intermediate
+```
+
+### Disable S3 Uploads
+```bash
+docker run --rm \
+  --env-file .env \
+  -v "$(pwd)/output:/app/output" \
+  thewintershadow/the-data-packet:latest \
+  --output /app/output \
+  --no-s3
+```
+
+## ⚠️ Important Notes
+
+- **Always specify `--output /app/output`** to avoid the help message and ensure proper output directory mapping
+- **Set correct permissions** on the output directory: `sudo chown -R 1000:1000 output` or `chmod 777 output`
+- The container defaults to showing help when no arguments are provided
+- The container runs as non-root user (UID 1000) for security
+- Use `thewintershadow/the-data-packet:latest` for the published image or build locally with `docker build -t the-data-packet .`
+- The `.env` file must be in your current directory when using `--env-file .env`
+
+## 🔧 Troubleshooting Permission Issues
+
+If you get permission denied errors:
+
+```bash
+# Option 1: Set ownership to container user (UID 1000)
+sudo chown -R 1000:1000 output
+
+# Option 2: Make directory writable by all (less secure)
+chmod 777 output
+
+# Option 3: Run container as current user (may have other implications)
+docker run --rm \
+  --user $(id -u):$(id -g) \
+  --env-file .env \
+  -v "$(pwd)/output:/app/output" \
+  thewintershadow/the-data-packet:latest \
+  --output /app/output
+```
+
 ## 🔧 Configuration
 
 ### Environment Variables
