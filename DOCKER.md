@@ -29,6 +29,8 @@ cp .env.template .env
 
 ### 2. Build and Run with Docker
 
+#### Single Platform Build (Local)
+
 ```bash
 # Build the Docker image
 docker build -t the-data-packet .
@@ -38,6 +40,27 @@ docker run --rm \
   --env-file .env \
   -v "$(pwd)/output:/app/output" \
   the-data-packet
+```
+
+#### Multi-Platform Build (AMD64 + ARM64)
+
+For Raspberry Pi and other ARM64 devices, build multi-platform images:
+
+```bash
+# Create a new buildx builder (one-time setup)
+docker buildx create --name multiplatform --bootstrap --use
+
+# Build and push multi-platform image
+docker buildx build \
+  --platform linux/amd64,linux/arm64 \
+  -t your-registry/the-data-packet:latest \
+  --push .
+
+# Or build locally for specific platform
+docker buildx build \
+  --platform linux/arm64 \
+  -t the-data-packet:arm64 \
+  --load .
 ```
 
 ### 3. GitHub Actions Deployment
@@ -326,6 +349,49 @@ S3_BUCKET_NAME=my-podcast-bucket
 - **Health checks**: Container health monitoring
 
 ## 🔍 Troubleshooting
+
+### ARM64/Raspberry Pi Platform Issues
+
+If you see this error on Raspberry Pi or ARM64 devices:
+```
+WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8)
+exec /usr/local/bin/python: exec format error
+```
+
+**Solution 1: Pull ARM64 image (if available)**
+```bash
+docker run --platform linux/arm64 --rm \
+  --env-file .env \
+  -v "$(pwd)/output:/app/output" \
+  thewintershadow/the-data-packet:latest \
+  --script-only
+```
+
+**Solution 2: Build locally for ARM64**
+```bash
+# Build specifically for ARM64
+docker buildx build --platform linux/arm64 -t the-data-packet:arm64 --load .
+
+# Run the ARM64 image
+docker run --rm \
+  --env-file .env \
+  -v "$(pwd)/output:/app/output" \
+  the-data-packet:arm64 \
+  --script-only
+```
+
+**Solution 3: Use Docker Compose with platform specification**
+```yaml
+# docker-compose.yml
+version: '3.8'
+services:
+  podcast-generator:
+    build: .
+    platform: linux/arm64
+    env_file: .env
+    volumes:
+      - ./output:/app/output
+```
 
 ### Check Container Status
 ```bash

@@ -34,6 +34,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          platforms: linux/amd64,linux/arm64
+
       - name: Generate version number
         id: version
         run: |
@@ -63,16 +68,23 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Output deployment info
         run: |
-          echo "🚀 Successfully deployed Docker image with tags:"
+          echo "🚀 Successfully deployed multi-platform Docker image with tags:"
           echo "- ${{ secrets.DOCKERHUB_USERNAME }}/the-data-packet:latest"
           echo "- ${{ secrets.DOCKERHUB_USERNAME }}/the-data-packet:${{ steps.version.outputs.VERSION }}"
           echo "- SHA-based tag for this commit"
+          echo ""
+          echo "📱 Supported platforms:"
+          echo "- linux/amd64 (Intel/AMD x86_64)"
+          echo "- linux/arm64 (ARM64/AArch64 - Raspberry Pi, Apple Silicon)"
 
       - name: Update Docker Hub Description
         uses: peter-evans/dockerhub-description@v4
