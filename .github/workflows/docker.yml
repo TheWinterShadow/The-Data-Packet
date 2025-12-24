@@ -1,6 +1,5 @@
 name: Build and Publish Docker Image
 
-
 on:
   workflow_run:
     workflows: ["Deploy Documentation"]
