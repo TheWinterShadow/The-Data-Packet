@@ -31,10 +31,7 @@ class MongoDBClient:
             password (str): The password for MongoDB authentication.
         """
         # Determine MongoDB host - use host.docker.internal in Docker, localhost otherwise
-        mongodb_host = os.getenv("MONGODB_HOST", "localhost")
-        if os.path.exists("/.dockerenv"):
-            logger.info("Running in Docker container, checking for host network access")
-            mongodb_host = os.getenv("MONGODB_HOST", "host.docker.internal")
+        mongodb_host = os.getenv("MONGODB_HOST", "127.0.0.1")
 
         connection_string = f"mongodb://{username}:{password}@{mongodb_host}:27017/the_data_packet?authSource=admin"
         logger.info(
