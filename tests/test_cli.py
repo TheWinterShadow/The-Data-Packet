@@ -286,6 +286,129 @@ class TestCLI(unittest.TestCase):
         self.assertTrue(hasattr(cli, "main"))
         self.assertTrue(callable(cli.main))
 
+    @patch("argparse.ArgumentParser.parse_args")
+    @patch("the_data_packet.cli.get_config")
+    @patch("the_data_packet.cli.PodcastPipeline")
+    def test_mongodb_arguments_parsed_correctly(
+        self, mock_pipeline_class, mock_get_config, mock_parse_args
+    ):
+        """Test that MongoDB arguments are parsed and passed to configuration."""
+        # Setup mock arguments with MongoDB credentials
+        mock_parse_args.return_value = Mock(
+            anthropic_key=None,
+            elevenlabs_key=None,
+            mongodb_username="test_user",
+            mongodb_password="test_password",
+            sources=["wired"],
+            categories=["security"],
+            max_articles=1,
+            script_only=False,
+            audio_only=False,
+            voice_a="en-US-Neural2-A",
+            voice_b="en-US-Neural2-B",
+            output=Path("./output"),
+            show_name="The Data Packet",
+            s3_bucket=None,
+            no_s3=False,
+            log_level="INFO",
+            save_intermediate=False,
+        )
+
+        # Setup mocks
+        mock_config = Mock()
+        mock_get_config.return_value = mock_config
+        mock_pipeline = Mock()
+        result_mock = Mock()
+        result_mock.success = True
+        result_mock.execution_time_seconds = 45.0
+        result_mock.number_of_articles_collected = 2
+        result_mock.script_generated = False
+        result_mock.audio_generated = False
+        mock_pipeline.run.return_value = result_mock
+        mock_pipeline_class.return_value = mock_pipeline
+
+        cli.main()
+
+        # Verify get_config was called with MongoDB overrides
+        call_args = mock_get_config.call_args
+        config_overrides = call_args[1] if call_args else {}
+
+        self.assertIn("mongodb_username", config_overrides)
+        self.assertIn("mongodb_password", config_overrides)
+        self.assertEqual(config_overrides["mongodb_username"], "test_user")
+        self.assertEqual(config_overrides["mongodb_password"], "test_password")
+
+    @patch("argparse.ArgumentParser.parse_args")
+    @patch("the_data_packet.cli.get_config")
+    @patch("the_data_packet.cli.PodcastPipeline")
+    def test_mongodb_arguments_none_when_not_provided(
+        self, mock_pipeline_class, mock_get_config, mock_parse_args
+    ):
+        """Test that MongoDB arguments are not in overrides when not provided."""
+        # Setup mock arguments without MongoDB credentials
+        mock_parse_args.return_value = Mock(
+            anthropic_key=None,
+            elevenlabs_key=None,
+            mongodb_username=None,
+            mongodb_password=None,
+            sources=["wired"],
+            categories=["security"],
+            max_articles=1,
+            script_only=False,
+            audio_only=False,
+            voice_a="en-US-Neural2-A",
+            voice_b="en-US-Neural2-B",
+            output=Path("./output"),
+            show_name="The Data Packet",
+            s3_bucket=None,
+            no_s3=False,
+            log_level="INFO",
+            save_intermediate=False,
+        )
+
+        # Setup mocks
+        mock_config = Mock()
+        mock_get_config.return_value = mock_config
+        mock_pipeline = Mock()
+        result_mock = Mock()
+        result_mock.success = True
+        result_mock.execution_time_seconds = 30.0
+        result_mock.number_of_articles_collected = 1
+        result_mock.script_generated = False
+        result_mock.audio_generated = False
+        mock_pipeline.run.return_value = result_mock
+        mock_pipeline_class.return_value = mock_pipeline
+
+        cli.main()
+
+        # Verify get_config was called but MongoDB overrides are not present
+        call_args = mock_get_config.call_args
+        config_overrides = call_args[1] if call_args else {}
+
+        self.assertNotIn("mongodb_username", config_overrides)
+        self.assertNotIn("mongodb_password", config_overrides)
+
+    def test_argument_parser_includes_mongodb_options(self):
+        """Test that argument parser includes MongoDB options."""
+        parser = argparse.ArgumentParser()
+
+        # Add MongoDB arguments as in cli.py
+        parser.add_argument("--mongodb-username", help="MongoDB username")
+        parser.add_argument("--mongodb-password", help="MongoDB password")
+
+        # Test parsing MongoDB arguments
+        args = parser.parse_args(
+            ["--mongodb-username", "test_user", "--mongodb-password", "test_password"]
+        )
+
+        self.assertEqual(args.mongodb_username, "test_user")
+        self.assertEqual(args.mongodb_password, "test_password")
+
+        # Test parsing without MongoDB arguments
+        args_empty = parser.parse_args([])
+        self.assertIsNone(args_empty.mongodb_username)
+        self.assertIsNone(args_empty.mongodb_password)
+
 
 if __name__ == "__main__":
     unittest.main()

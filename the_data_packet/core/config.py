@@ -71,6 +71,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from the_data_packet.core.exceptions import ConfigurationError
+
 
 @dataclass
 class Config:
@@ -87,6 +89,10 @@ class Config:
                               Required for script generation. Loaded from ANTHROPIC_API_KEY.
             elevenlabs_api_key: ElevenLabs API key for TTS audio generation.
                                Required for audio generation. Loaded from ELEVENLABS_API_KEY.
+            mongodb_username: MongoDB username for episode tracking and article deduplication.
+                             Optional. Loaded from MONGODB_USERNAME.
+            mongodb_password: MongoDB password for episode tracking and article deduplication.
+                             Optional. Loaded from MONGODB_PASSWORD.
 
         AWS Configuration:
             aws_access_key_id: AWS access key for S3 uploads. Loaded from AWS_ACCESS_KEY_ID.
@@ -156,6 +162,8 @@ class Config:
     # API Keys
     anthropic_api_key: Optional[str] = None
     elevenlabs_api_key: Optional[str] = None
+    mongodb_username: Optional[str] = None
+    mongodb_password: Optional[str] = None
 
     # AWS Configuration
     aws_access_key_id: Optional[str] = None
@@ -231,6 +239,8 @@ class Config:
         self.elevenlabs_api_key = self.elevenlabs_api_key or os.getenv(
             "ELEVENLABS_API_KEY"
         )
+        self.mongodb_username = self.mongodb_username or os.getenv("MONGODB_USERNAME")
+        self.mongodb_password = self.mongodb_password or os.getenv("MONGODB_PASSWORD")
 
         # AWS
         self.aws_access_key_id = self.aws_access_key_id or os.getenv(
@@ -315,8 +325,6 @@ class Config:
                         )
 
         if errors:
-            from .exceptions import ConfigurationError
-
             raise ConfigurationError(
                 f"Configuration validation failed: {'; '.join(errors)}"
             )

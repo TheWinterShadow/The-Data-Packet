@@ -20,3 +20,4 @@ infra/.terraform.lock.hcl
 infra/terraform.tfstate
 infra/.terraform/
 docs/build/
+.coverage

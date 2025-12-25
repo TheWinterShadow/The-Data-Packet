@@ -13,8 +13,9 @@ The Data Packet automates the entire podcast creation workflow:
 1. **📰 Article Collection**: Scrapes latest tech news from Wired.com and TechCrunch via RSS feeds
 2. **🤖 Script Generation**: Uses Anthropic Claude AI to create engaging dialogue scripts 
 3. **🎙️ Audio Production**: Generates multi-speaker audio using ElevenLabs TTS
-4. **📦 Podcast Distribution**: Creates RSS feeds and uploads to AWS S3 for hosting
-5. **🔄 Complete Automation**: Runs the entire pipeline with a single command
+4. **�️ Episode Tracking**: Optional MongoDB integration for article deduplication and episode metadata
+5. **📦 Podcast Distribution**: Creates RSS feeds and uploads to AWS S3 for hosting
+6. **🔄 Complete Automation**: Runs the entire pipeline with a single command
 
 Key Features
 ------------
@@ -95,9 +96,8 @@ The Data Packet is built with a modular architecture:
 - **Core**: Configuration, exceptions, logging
 - **Sources**: Article collection from news websites  
 - **Generation**: AI script and audio generation
-- **Storage**: AWS S3 integration for hosting
+- **Utils**: MongoDB integration, S3 storage, HTTP clients
 - **Workflows**: End-to-end pipeline orchestration
-- **Utils**: HTTP clients, helper functions
 
 Package Structure
 -----------------
@@ -109,7 +109,7 @@ Package Structure
    api/core
    api/sources  
    api/generation
-   api/storage
+   api/utils
    api/workflows
    api/cli
 

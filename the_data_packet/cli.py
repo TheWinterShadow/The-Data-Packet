@@ -38,6 +38,8 @@ Environment Variables:
   S3_BUCKET_NAME       - S3 bucket for uploads (optional)
   AWS_ACCESS_KEY_ID    - AWS access key (optional)
   AWS_SECRET_ACCESS_KEY - AWS secret key (optional)
+  MONGODB_USERNAME     - MongoDB username for episode tracking (optional)
+  MONGODB_PASSWORD     - MongoDB password for episode tracking (optional)
         """,
     )
 
@@ -49,6 +51,14 @@ Environment Variables:
     parser.add_argument(
         "--elevenlabs-key",
         help="ElevenLabs API key (overrides ELEVENLABS_API_KEY env var)",
+    )
+    parser.add_argument(
+        "--mongodb-username",
+        help="MongoDB username for episode tracking and article deduplication (overrides MONGODB_USERNAME env var)",
+    )
+    parser.add_argument(
+        "--mongodb-password",
+        help="MongoDB password for episode tracking and article deduplication (overrides MONGODB_PASSWORD env var)",
     )
 
     # Content Options
@@ -163,6 +173,10 @@ Environment Variables:
             config_overrides["anthropic_api_key"] = args.anthropic_key
         if args.elevenlabs_key:
             config_overrides["elevenlabs_api_key"] = args.elevenlabs_key
+        if args.mongodb_username:
+            config_overrides["mongodb_username"] = args.mongodb_username
+        if args.mongodb_password:
+            config_overrides["mongodb_password"] = args.mongodb_password
         if args.s3_bucket:
             config_overrides["s3_bucket_name"] = args.s3_bucket
 

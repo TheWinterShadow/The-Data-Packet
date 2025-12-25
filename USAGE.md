@@ -45,6 +45,15 @@ docker build -t the-data-packet:local .
 cat > .env << EOF
 ANTHROPIC_API_KEY=sk-ant-api03-your-key-here
 ELEVENLABS_API_KEY=sk_your-elevenlabs-key-here
+
+# Optional: MongoDB for episode tracking and article deduplication
+MONGODB_USERNAME=admin
+MONGODB_PASSWORD=your-mongodb-password
+
+# Optional: AWS S3 for file hosting
+S3_BUCKET_NAME=your-bucket-name
+AWS_ACCESS_KEY_ID=your-aws-access-key
+AWS_SECRET_ACCESS_KEY=your-aws-secret-key
 EOF
 
 # Use with Docker
@@ -104,6 +113,42 @@ docker run --rm \
 ```
 
 ## 🎛️ Advanced Configuration
+
+### MongoDB Episode Tracking
+
+The Data Packet can use MongoDB to track episodes and prevent reusing articles. This ensures each podcast episode contains fresh content.
+
+**Setup MongoDB (using provided script):**
+```bash
+# Start MongoDB container
+./mongodb.sh start
+
+# Verify MongoDB is running
+./mongodb.sh status
+
+# Access MongoDB shell (optional)
+./mongodb.sh shell
+```
+
+**Using with The Data Packet:**
+```bash
+# Configure MongoDB credentials
+export MONGODB_USERNAME=admin
+export MONGODB_PASSWORD=your-password
+
+# Run podcast generation with episode tracking
+docker run --rm \
+  --env-file .env \
+  -e MONGODB_USERNAME=admin \
+  -e MONGODB_PASSWORD=your-password \
+  -v "$(pwd)/output:/app/output" \
+  ghcr.io/thewintershadow/the-data-packet:latest
+```
+
+**What MongoDB tracks:**
+- **Articles used**: Prevents reusing the same articles in future episodes
+- **Episode metadata**: Stores episode information, execution time, success status
+- **Generation history**: Complete audit trail of podcast creation
 
 ### Custom Show Configuration
 

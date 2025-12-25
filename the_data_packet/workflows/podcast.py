@@ -1,7 +1,7 @@
 """Main podcast generation workflow."""
 
 import traceback
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 from typing import List, Optional
@@ -15,6 +15,7 @@ from the_data_packet.generation.script import ScriptGenerator
 from the_data_packet.sources.base import Article
 from the_data_packet.sources.techcrunch import TechCrunchSource
 from the_data_packet.sources.wired import WiredSource
+from the_data_packet.utils.mongodb import MongoDBClient
 from the_data_packet.utils.s3 import S3Storage, S3UploadResult
 
 logger = get_logger(__name__)
@@ -25,7 +26,8 @@ class PodcastResult:
     """Result of podcast generation workflow."""
 
     success: bool = False
-    articles_collected: int = 0
+    number_of_articles_collected: int = 0
+    articles_collected: List[Article] = field(default_factory=list)
     script_generated: bool = False
     audio_generated: bool = False
     rss_generated: bool = False
@@ -86,10 +88,15 @@ class PodcastPipeline:
         try:
             # Step 1: Collect articles
             articles = self._collect_articles()
-            result.articles_collected = len(articles)
+            new_articles = self._remove_already_used_articles(articles)
+            result.number_of_articles_collected = len(new_articles)
+            result.articles_collected = new_articles
 
-            if not articles:
-                raise TheDataPacketError("No articles were collected")
+            if not new_articles:
+                raise TheDataPacketError("No new articles were collected")
+
+            # Add used articles to database
+            self._add_article_to_db(new_articles)
 
             # Step 2: Generate script (if enabled)
             script_content = None
@@ -139,6 +146,8 @@ class PodcastPipeline:
             logger.info(
                 f"Pipeline completed successfully in {result.execution_time_seconds:.1f} seconds"
             )
+
+            self._save_episode_metadata(result)
 
             return result
 
@@ -202,6 +211,69 @@ class PodcastPipeline:
         )
 
         return valid_articles
+
+    def _remove_already_used_articles(self, articles: List[Article]) -> List[Article]:
+        """Check if the article has already been used in previous episodes.
+
+        This prevents content duplication by checking the MongoDB 'articles' collection
+        for any articles that have been used in previous podcast episodes.
+
+        Args:
+            articles: List of articles to check for duplication
+
+        Returns:
+            List of articles that have not been used before
+        """
+        if not self.config.mongodb_username or not self.config.mongodb_password:
+            logger.warning(
+                "MongoDB credentials are not configured, skipping deduplication"
+            )
+            return articles
+
+        mongo_client = MongoDBClient(
+            username=self.config.mongodb_username,
+            password=self.config.mongodb_password,
+        )
+
+        new_articles = []
+
+        for article in articles:
+            # Check if article URL already exists in the database
+            existing = mongo_client.find_documents("articles", {"url": article.url})
+            if len(list(existing)) > 0:
+                logger.info(
+                    f"Article already used in previous episode: {article.title}"
+                )
+                continue
+            new_articles.append(article)
+
+        return new_articles
+
+    def _add_article_to_db(self, articles: List[Article]) -> None:
+        """Add used articles to the MongoDB database for future deduplication.
+
+        Stores article information to prevent reuse in future episodes.
+        This ensures that each podcast episode contains unique content.
+
+        Args:
+            articles: List of Article objects to store in the database
+        """
+        if not self.config.mongodb_username or not self.config.mongodb_password:
+            logger.warning(
+                "MongoDB credentials are not configured, skipping article storage"
+            )
+            return
+
+        mongo_client = MongoDBClient(
+            username=self.config.mongodb_username,
+            password=self.config.mongodb_password,
+        )
+
+        article_docs = [article.to_dict() for article in articles]
+
+        for article in article_docs:
+            mongo_client.insert_document("articles", article)
+            logger.info("Added episode articles to MongoDB database")
 
     def _generate_script(self, articles: List[Article]) -> str:
         """Generate podcast script from articles."""
@@ -330,3 +402,47 @@ class PodcastPipeline:
             raise ValidationError(
                 f"Configuration validation failed: {'; '.join(errors)}"
             )
+
+    def _save_episode_metadata(self, episode_data: PodcastResult) -> None:
+        """Save episode metadata to MongoDB for tracking and analytics.
+
+        Stores comprehensive episode information including:
+        - Episode success status and execution time
+        - List of articles used (without full content to save space)
+        - Generated file paths
+        - Timestamps and other metadata
+
+        Args:
+            episode_data: PodcastResult containing episode information to save
+        """
+        if not self.config.mongodb_username or not self.config.mongodb_password:
+            logger.warning(
+                "MongoDB credentials are not configured, skipping metadata save"
+            )
+            return
+
+        mongo_client = MongoDBClient(
+            username=self.config.mongodb_username,
+            password=self.config.mongodb_password,
+        )
+
+        # Convert the episode data to a dictionary, converting Article objects to dicts
+        episode_dict = episode_data.__dict__.copy()
+        episode_dict["articles_collected"] = [
+            article.to_dict() for article in episode_data.articles_collected
+        ]
+
+        # Convert Path objects to strings for MongoDB compatibility
+        if episode_dict.get("script_path"):
+            episode_dict["script_path"] = str(episode_dict["script_path"])
+        if episode_dict.get("audio_path"):
+            episode_dict["audio_path"] = str(episode_dict["audio_path"])
+        if episode_dict.get("rss_path"):
+            episode_dict["rss_path"] = str(episode_dict["rss_path"])
+
+        # Remove article content to save space in database
+        for article in episode_dict["articles_collected"]:
+            article.pop("content", None)
+
+        mongo_client.insert_document("episodes", episode_dict)
+        logger.info("Added episode metadata to MongoDB database")

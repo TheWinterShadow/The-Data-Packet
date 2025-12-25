@@ -104,7 +104,4 @@ __all__ = [
     # Workflows
     "PodcastPipeline",
     "PodcastResult",
-    # Simplified interface
-    "SimplePodcastGenerator",
-    "SimplePodcastResult",
 ]

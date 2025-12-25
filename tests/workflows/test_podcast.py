@@ -16,7 +16,8 @@ class TestPodcastResult(unittest.TestCase):
         result = PodcastResult()
 
         self.assertFalse(result.success)
-        self.assertEqual(result.articles_collected, 0)
+        self.assertEqual(result.number_of_articles_collected, 0)
+        self.assertEqual(result.articles_collected, [])
         self.assertFalse(result.script_generated)
         self.assertFalse(result.audio_generated)
         self.assertFalse(result.rss_generated)
@@ -158,8 +159,9 @@ class TestPodcastPipeline(unittest.TestCase):
         result = pipeline.run()
 
         self.assertFalse(result.success)
-        self.assertEqual(result.articles_collected, 0)
-        self.assertIn("No articles were collected", result.error_message)
+        self.assertEqual(result.number_of_articles_collected, 0)
+        self.assertEqual(result.articles_collected, [])
+        self.assertIn("No new articles were collected", result.error_message)
 
     @patch("the_data_packet.workflows.podcast.get_config")
     @patch.object(PodcastPipeline, "_validate_config")
@@ -185,6 +187,8 @@ class TestPodcastPipeline(unittest.TestCase):
         script_only_config.generate_audio = False
         script_only_config.generate_rss = False
         script_only_config.anthropic_api_key = "test-key"
+        script_only_config.mongodb_username = None
+        script_only_config.mongodb_password = None
         script_only_config.s3_bucket_name = None  # No S3 for script-only mode
         script_only_config.aws_access_key_id = None
         script_only_config.validate_for_script_generation = Mock()
@@ -198,7 +202,8 @@ class TestPodcastPipeline(unittest.TestCase):
         result = pipeline.run()
 
         self.assertTrue(result.success)
-        self.assertEqual(result.articles_collected, 1)
+        self.assertEqual(result.number_of_articles_collected, 1)
+        self.assertEqual(result.articles_collected, [self.sample_article])
         self.assertTrue(result.script_generated)
         self.assertFalse(result.audio_generated)
         self.assertFalse(result.rss_generated)
@@ -365,6 +370,210 @@ class TestPodcastPipeline(unittest.TestCase):
 
         pipeline = PodcastPipeline()
         self.assertFalse(pipeline._should_use_s3())
+
+    @patch("the_data_packet.workflows.podcast.get_config")
+    @patch("the_data_packet.workflows.podcast.MongoDBClient")
+    @patch.object(PodcastPipeline, "_validate_config")
+    def test_remove_already_used_articles_with_mongodb(
+        self,
+        mock_validate: MagicMock,
+        mock_mongodb_client: Mock,
+        mock_get_config: MagicMock,
+    ):
+        """Test article deduplication with MongoDB integration."""
+        # Setup config with MongoDB credentials
+        config_with_mongo = Mock()
+        config_with_mongo.mongodb_username = "test_user"
+        config_with_mongo.mongodb_password = "test_password"
+        mock_get_config.return_value = config_with_mongo
+
+        # Setup MongoDB client mock
+        mock_client_instance = Mock()
+        mock_mongodb_client.return_value = mock_client_instance
+
+        # Mock one article as existing, one as new
+        existing_article = Article(
+            title="Existing Article",
+            url="https://example.com/existing",
+            content="This article already exists",
+            source="test",
+            category="test",
+        )
+        new_article = Article(
+            title="New Article",
+            url="https://example.com/new",
+            content="This is a new article",
+            source="test",
+            category="test",
+        )
+
+        # Mock MongoDB responses
+        def mock_find_documents(collection, query):
+            if query["url"] == "https://example.com/existing":
+                # Article exists
+                return [{"url": "https://example.com/existing"}]
+            return []  # Article doesn't exist
+
+        mock_client_instance.find_documents.side_effect = mock_find_documents
+
+        pipeline = PodcastPipeline()
+        articles = [existing_article, new_article]
+        result = pipeline._remove_already_used_articles(articles)
+
+        # Should only return new article
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0].title, "New Article")
+
+        # Verify MongoDB client was created and called correctly
+        mock_mongodb_client.assert_called_once_with(
+            username="test_user", password="test_password"
+        )
+        self.assertEqual(mock_client_instance.find_documents.call_count, 2)
+
+    @patch("the_data_packet.workflows.podcast.get_config")
+    @patch.object(PodcastPipeline, "_validate_config")
+    def test_remove_already_used_articles_no_mongodb_credentials(
+        self, mock_validate: MagicMock, mock_get_config: MagicMock
+    ):
+        """Test article deduplication without MongoDB credentials."""
+        # Setup config without MongoDB credentials
+        config_no_mongo = Mock()
+        config_no_mongo.mongodb_username = None
+        config_no_mongo.mongodb_password = None
+        mock_get_config.return_value = config_no_mongo
+
+        pipeline = PodcastPipeline()
+        articles = [self.sample_article]
+        result = pipeline._remove_already_used_articles(articles)
+
+        # Should return all articles when MongoDB is not configured
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0], self.sample_article)
+
+    @patch("the_data_packet.workflows.podcast.get_config")
+    @patch("the_data_packet.workflows.podcast.MongoDBClient")
+    @patch.object(PodcastPipeline, "_validate_config")
+    def test_add_article_to_db_with_mongodb(
+        self,
+        mock_validate: MagicMock,
+        mock_mongodb_client: Mock,
+        mock_get_config: MagicMock,
+    ):
+        """Test adding articles to MongoDB database."""
+        # Setup config with MongoDB credentials
+        config_with_mongo = Mock()
+        config_with_mongo.mongodb_username = "test_user"
+        config_with_mongo.mongodb_password = "test_password"
+        mock_get_config.return_value = config_with_mongo
+
+        # Setup MongoDB client mock
+        mock_client_instance = Mock()
+        mock_mongodb_client.return_value = mock_client_instance
+
+        pipeline = PodcastPipeline()
+        articles = [self.sample_article]
+        pipeline._add_article_to_db(articles)
+
+        # Verify MongoDB client was created and insert was called
+        mock_mongodb_client.assert_called_once_with(
+            username="test_user", password="test_password"
+        )
+        mock_client_instance.insert_document.assert_called_once_with(
+            "articles", self.sample_article.to_dict()
+        )
+
+    @patch("the_data_packet.workflows.podcast.get_config")
+    @patch.object(PodcastPipeline, "_validate_config")
+    def test_add_article_to_db_no_mongodb_credentials(
+        self, mock_validate: MagicMock, mock_get_config: MagicMock
+    ):
+        """Test adding articles to database without MongoDB credentials."""
+        # Setup config without MongoDB credentials
+        config_no_mongo = Mock()
+        config_no_mongo.mongodb_username = None
+        config_no_mongo.mongodb_password = None
+        mock_get_config.return_value = config_no_mongo
+
+        pipeline = PodcastPipeline()
+        articles = [self.sample_article]
+
+        # Should not raise an error, just log warning and return
+        pipeline._add_article_to_db(articles)
+        # No assertions needed, just ensuring no exceptions
+
+    @patch("the_data_packet.workflows.podcast.get_config")
+    @patch("the_data_packet.workflows.podcast.MongoDBClient")
+    @patch.object(PodcastPipeline, "_validate_config")
+    def test_save_episode_metadata_with_mongodb(
+        self,
+        mock_validate: MagicMock,
+        mock_mongodb_client: Mock,
+        mock_get_config: MagicMock,
+    ):
+        """Test saving episode metadata to MongoDB."""
+        # Setup config with MongoDB credentials
+        config_with_mongo = Mock()
+        config_with_mongo.mongodb_username = "test_user"
+        config_with_mongo.mongodb_password = "test_password"
+        mock_get_config.return_value = config_with_mongo
+
+        # Setup MongoDB client mock
+        mock_client_instance = Mock()
+        mock_mongodb_client.return_value = mock_client_instance
+
+        # Create episode result with Path objects
+        episode_result = PodcastResult(
+            success=True,
+            articles_collected=[self.sample_article],
+            script_path=Path("/tmp/script.txt"),
+            audio_path=Path("/tmp/audio.wav"),
+            rss_path=Path("/tmp/feed.xml"),
+            execution_time_seconds=45.0,
+        )
+
+        pipeline = PodcastPipeline()
+        pipeline._save_episode_metadata(episode_result)
+
+        # Verify MongoDB client was created and insert was called
+        mock_mongodb_client.assert_called_once_with(
+            username="test_user", password="test_password"
+        )
+
+        # Verify insert was called once with episode metadata
+        self.assertEqual(mock_client_instance.insert_document.call_count, 1)
+        call_args = mock_client_instance.insert_document.call_args
+        collection_name = call_args[0][0]
+        episode_dict = call_args[0][1]
+
+        self.assertEqual(collection_name, "episodes")
+        self.assertTrue(episode_dict["success"])
+        self.assertEqual(episode_dict["script_path"], "/tmp/script.txt")
+        self.assertEqual(episode_dict["audio_path"], "/tmp/audio.wav")
+        self.assertEqual(episode_dict["rss_path"], "/tmp/feed.xml")
+        self.assertEqual(episode_dict["execution_time_seconds"], 45.0)
+
+        # Verify article content was removed to save space
+        article_dict = episode_dict["articles_collected"][0]
+        self.assertNotIn("content", article_dict)
+
+    @patch("the_data_packet.workflows.podcast.get_config")
+    @patch.object(PodcastPipeline, "_validate_config")
+    def test_save_episode_metadata_no_mongodb_credentials(
+        self, mock_validate: MagicMock, mock_get_config: MagicMock
+    ):
+        """Test saving episode metadata without MongoDB credentials."""
+        # Setup config without MongoDB credentials
+        config_no_mongo = Mock()
+        config_no_mongo.mongodb_username = None
+        config_no_mongo.mongodb_password = None
+        mock_get_config.return_value = config_no_mongo
+
+        episode_result = PodcastResult(success=True)
+        pipeline = PodcastPipeline()
+
+        # Should not raise an error, just log warning and return
+        pipeline._save_episode_metadata(episode_result)
+        # No assertions needed, just ensuring no exceptions
 
 
 if __name__ == "__main__":

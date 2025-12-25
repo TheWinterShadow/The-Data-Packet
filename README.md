@@ -16,7 +16,8 @@ The Data Packet is a complete end-to-end podcast generation system that:
 3. **🎙️ Multi-Speaker Audio** with ElevenLabs TTS featuring realistic conversational voices
 4. **📻 Complete RSS Feeds** for podcast distribution with metadata and hosting
 5. **☁️ Cloud Integration** with AWS S3 for reliable content hosting and delivery
-6. **🔄 Full Automation** - Generate professional podcast episodes with a single command
+6. **�️ MongoDB Integration** for episode tracking and article deduplication
+7. **�🔄 Full Automation** - Generate professional podcast episodes with a single command
 
 ## ✨ Key Features
 
@@ -29,6 +30,7 @@ The Data Packet is a complete end-to-end podcast generation system that:
 ### 🐳 Production-Ready Infrastructure  
 - **Docker-First Design**: Consistent deployment across environments
 - **GitHub Container Registry**: Automated builds and version management
+- **MongoDB Integration**: Episode tracking and article deduplication
 - **Robust Error Handling**: Graceful degradation and comprehensive logging
 - **Health Monitoring**: Built-in status checks and performance metrics
 
@@ -76,9 +78,9 @@ docker run --rm \
 
 ## 📖 Documentation
 
-- **[SIMPLE_USAGE.md](SIMPLE_USAGE.md)** - **NEW**: Simplified interface with S3 upload
 - **[USAGE.md](USAGE.md)** - Complete usage guide and examples  
 - **[DOCKER.md](DOCKER.md)** - Docker deployment and configuration
+- **[MONGODB.md](MONGODB.md)** - MongoDB setup and configuration
 - **[docs/](docs/)** - API documentation and development guides
 
 ## 📖 Full Documentation
@@ -437,6 +439,10 @@ ANTHROPIC_API_KEY=your-claude-api-key
 
 # Required for audio generation  
 ELEVENLABS_API_KEY=your-elevenlabs-api-key
+
+# Optional MongoDB configuration for episode tracking
+MONGODB_USERNAME=admin
+MONGODB_PASSWORD=your-mongodb-password
 
 # Optional AWS S3 configuration
 S3_BUCKET_NAME=your-bucket-name
