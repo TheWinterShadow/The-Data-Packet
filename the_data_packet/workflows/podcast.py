@@ -230,22 +230,43 @@ class PodcastPipeline:
             )
             return articles
 
-        mongo_client = MongoDBClient(
-            username=self.config.mongodb_username,
-            password=self.config.mongodb_password,
+        logger.info(
+            f"Attempting MongoDB connection for deduplication with username: {self.config.mongodb_username}"
         )
+        try:
+            mongo_client = MongoDBClient(
+                username=self.config.mongodb_username,
+                password=self.config.mongodb_password,
+            )
+            logger.info("MongoDB client created successfully for deduplication")
+        except Exception as e:
+            logger.error(f"Failed to create MongoDB client for deduplication: {e}")
+            logger.warning("Proceeding without deduplication")
+            return articles
 
         new_articles = []
 
-        for article in articles:
-            # Check if article URL already exists in the database
-            existing = mongo_client.find_documents("articles", {"url": article.url})
-            if len(list(existing)) > 0:
-                logger.info(
-                    f"Article already used in previous episode: {article.title}"
-                )
-                continue
-            new_articles.append(article)
+        try:
+            for article in articles:
+                # Check if article URL already exists in the database
+                logger.debug(f"Checking if article already exists: {article.title}")
+                existing = mongo_client.find_documents("articles", {"url": article.url})
+                if len(list(existing)) > 0:
+                    logger.info(
+                        f"Article already used in previous episode: {article.title}"
+                    )
+                    continue
+                new_articles.append(article)
+
+            logger.info(
+                f"Deduplication complete: {len(new_articles)}/{len(articles)} articles are new"
+            )
+        except Exception as e:
+            logger.error(f"Error during deduplication: {e}")
+            logger.warning("Proceeding with all articles (deduplication failed)")
+            new_articles = articles
+        finally:
+            mongo_client.close()
 
         return new_articles
 
@@ -264,16 +285,36 @@ class PodcastPipeline:
             )
             return
 
-        mongo_client = MongoDBClient(
-            username=self.config.mongodb_username,
-            password=self.config.mongodb_password,
+        logger.info(
+            f"Attempting MongoDB connection for article storage with username: {self.config.mongodb_username}"
         )
+        try:
+            mongo_client = MongoDBClient(
+                username=self.config.mongodb_username,
+                password=self.config.mongodb_password,
+            )
+            logger.info("MongoDB client created successfully for article storage")
+        except Exception as e:
+            logger.error(f"Failed to create MongoDB client for article storage: {e}")
+            logger.warning("Proceeding without storing articles")
+            return
 
         article_docs = [article.to_dict() for article in articles]
+        logger.info(f"Storing {len(article_docs)} articles to MongoDB")
 
-        for article in article_docs:
-            mongo_client.insert_document("articles", article)
-            logger.info("Added episode articles to MongoDB database")
+        try:
+            for i, article in enumerate(article_docs):
+                logger.debug(
+                    f"Storing article {i+1}/{len(article_docs)}: {article.get('title', 'Unknown')}"
+                )
+                mongo_client.insert_document("articles", article)
+            logger.info(
+                f"Successfully stored {len(article_docs)} articles to MongoDB database"
+            )
+        except Exception as e:
+            logger.error(f"Failed to store articles to MongoDB: {e}")
+        finally:
+            mongo_client.close()
 
     def _generate_script(self, articles: List[Article]) -> str:
         """Generate podcast script from articles."""

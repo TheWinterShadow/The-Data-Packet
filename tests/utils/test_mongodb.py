@@ -26,12 +26,14 @@ class TestMongoDBClient(unittest.TestCase):
 
         client = MongoDBClient(self.username, self.password)
 
-        # Verify MongoClient was called with correct connection string
+        # Verify MongoClient was called with correct connection string and timeout
         expected_connection_string = (
             f"mongodb://{self.username}:{self.password}@localhost:27017/"
             f"the_data_packet?authSource=admin"
         )
-        mock_mongo_client.assert_called_once_with(expected_connection_string)
+        mock_mongo_client.assert_called_once_with(
+            expected_connection_string, serverSelectionTimeoutMS=5000
+        )
 
         # Verify client and database are set correctly
         self.assertEqual(client.client, mock_client_instance)
@@ -169,7 +171,9 @@ class TestMongoDBClient(unittest.TestCase):
             f"mongodb://{special_username}:{special_password}@localhost:27017/"
             f"the_data_packet?authSource=admin"
         )
-        mock_mongo_client.assert_called_once_with(expected_connection_string)
+        mock_mongo_client.assert_called_once_with(
+            expected_connection_string, serverSelectionTimeoutMS=5000
+        )
 
     @patch("the_data_packet.utils.mongodb.MongoClient")
     def test_database_name_consistency(self, mock_mongo_client):
