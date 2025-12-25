@@ -223,7 +223,7 @@ Environment Variables:
         if result.success:
             print("✅ Podcast generation completed successfully!")
             print(f"⏱️  Execution time: {result.execution_time_seconds:.1f} seconds")
-            print(f"📰 Articles collected: {result.articles_collected}")
+            print(f"📰 Articles collected: {result.number_of_articles_collected}")
 
             if result.script_generated and result.script_path:
                 print(f"📝 Script saved: {result.script_path}")
