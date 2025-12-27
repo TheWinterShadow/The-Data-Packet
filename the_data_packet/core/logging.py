@@ -345,7 +345,8 @@ def setup_logging(
                     _s3_uploader.stop()
 
                 upload_interval = getattr(config, "log_upload_interval", 3600)
-                remove_after_upload = getattr(config, "remove_logs_after_upload", False)
+                remove_after_upload = getattr(
+                    config, "remove_logs_after_upload", False)
 
                 # Ensure numeric values for thread safety
                 if not isinstance(upload_interval, int):
@@ -474,7 +475,7 @@ def upload_current_day_log(show_name: str) -> None:
             return
 
         today = datetime.now().strftime("%Y-%m-%d")
-        log_file = log_dir / f"logs-{today}.jsonl"
+        log_file = log_dir / f"the-data-packet-{today}.jsonl"
 
         if not log_file.exists():
             logger.warning(f"Today's log file not found: {log_file}")
@@ -489,7 +490,8 @@ def upload_current_day_log(show_name: str) -> None:
         )
 
         if result.success:
-            logger.info(f"Uploaded current day's log file to S3: {result.s3_url}")
+            logger.info(
+                f"Uploaded current day's log file to S3: {result.s3_url}")
         else:
             logger.error(
                 f"Failed to upload current day's log file: {result.error_message}"
