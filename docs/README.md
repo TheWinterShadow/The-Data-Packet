@@ -1,23 +1,44 @@
-# Documentation
+# The Data Packet - Documentation
 
-This directory contains the Sphinx documentation.
+This directory contains comprehensive documentation for The Data Packet project.
 
-## Building Documentation
+## 📚 Documentation Index
 
-To build the documentation:
+### Quick Start Guides
+- **[Usage Guide](USAGE.md)** - Complete usage instructions, CLI commands, and examples
+- **[Docker Setup](DOCKER.md)** - Docker installation, configuration, and deployment
+- **[MongoDB Configuration](MONGODB.md)** - Database setup and connection details
+
+### Advanced Configuration  
+- **[Enhanced Logging](LOGGING.md)** - JSONL logging with S3 upload capabilities
+
+## 🚀 Quick Links
+
+| Topic | File | Description |
+|-------|------|-------------|
+| Getting Started | [USAGE.md](USAGE.md) | Complete setup and usage instructions |
+| Container Deployment | [DOCKER.md](DOCKER.md) | Docker build and deployment guide |
+| Database Setup | [MONGODB.md](MONGODB.md) | MongoDB configuration and connection |
+| Observability | [LOGGING.md](LOGGING.md) | Structured logging and S3 integration |
+
+## 🏗️ Sphinx Documentation
+
+For auto-generated API documentation and advanced topics:
+
+### Building Documentation
 
 ```bash
 # Build documentation
 hatch run dev:docs
 
-# Clean build (rebuild everything)
+# Clean build (rebuild everything)  
 hatch run dev:docs-clean
 
 # Serve documentation locally on port 8000
 hatch run dev:docs-serve
 ```
 
-## Structure
+### Structure
 
 - `source/` - Documentation source files
   - `conf.py` - Sphinx configuration
@@ -30,7 +51,7 @@ hatch run dev:docs-serve
   - `_templates/` - Custom Sphinx templates
 - `build/` - Generated HTML documentation (gitignored)
 
-## Viewing Documentation
+### Viewing Documentation
 
 After building, open `build/index.html` in your browser or use the serve command:
 
@@ -40,7 +61,7 @@ hatch run dev:docs-serve
 
 Then visit http://localhost:8000
 
-## Documentation Format
+## 📝 Documentation Format
 
 The documentation uses reStructuredText (.rst) format and supports:
 

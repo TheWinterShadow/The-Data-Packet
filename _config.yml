@@ -1,0 +1,33 @@
+# GitHub Pages Configuration
+title: The Data Packet Documentation
+description: AI-Powered Automated Podcast Generation System
+url: "https://thewintershadow.github.io"
+baseurl: "/The-Data-Packet"
+
+# Build settings
+markdown: kramdown
+theme: minima
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+
+# Navigation
+header_pages:
+  - docs/USAGE.md
+  - docs/DOCKER.md  
+  - docs/MONGODB.md
+  - docs/LOGGING.md
+
+# Exclude from processing
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor/bundle/
+  - vendor/cache/
+  - vendor/gems/
+  - vendor/ruby/
+  - .pytest_cache/
+  - htmlcov/
+  - output/
+  - tests/

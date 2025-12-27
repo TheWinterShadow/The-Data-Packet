@@ -78,10 +78,11 @@ docker run --rm \
 
 ## 📖 Documentation
 
-- **[USAGE.md](USAGE.md)** - Complete usage guide and examples  
-- **[DOCKER.md](DOCKER.md)** - Docker deployment and configuration
-- **[MONGODB.md](MONGODB.md)** - MongoDB setup and configuration
-- **[docs/](docs/)** - API documentation and development guides
+- **[docs/USAGE.md](docs/USAGE.md)** - Complete usage guide and examples  
+- **[docs/DOCKER.md](docs/DOCKER.md)** - Docker deployment and configuration
+- **[docs/MONGODB.md](docs/MONGODB.md)** - MongoDB setup and configuration  
+- **[docs/LOGGING.md](docs/LOGGING.md)** - Enhanced JSONL logging with S3 upload
+- **[docs/](docs/)** - Full documentation index and API references
 
 ## 📖 Full Documentation
 

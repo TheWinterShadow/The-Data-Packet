@@ -8,7 +8,7 @@ from typing import List, Optional
 
 from the_data_packet.core.config import Config, get_config
 from the_data_packet.core.exceptions import TheDataPacketError, ValidationError
-from the_data_packet.core.logging import get_logger
+from the_data_packet.core.logging import get_logger, upload_current_day_log
 from the_data_packet.generation.audio import AudioGenerator, AudioResult
 from the_data_packet.generation.rss import RSSGenerator
 from the_data_packet.generation.script import ScriptGenerator
@@ -148,6 +148,16 @@ class PodcastPipeline:
             )
 
             self._save_episode_metadata(result)
+
+            # Upload current log file to S3 alongside generated files
+            if self._should_use_s3():
+                try:
+                    logger.info("Uploading current day's log file to S3")
+                    upload_current_day_log()
+                except Exception as e:
+                    logger.warning(
+                        f"Failed to upload current day's log file to S3: {e}"
+                    )
 
             return result
 

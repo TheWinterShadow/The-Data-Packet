@@ -64,6 +64,13 @@ Environment Variables:
         SHOW_NAME - Podcast name override
         LOG_LEVEL - Logging level (DEBUG/INFO/WARNING/ERROR)
         MAX_ARTICLES - Max articles per source
+
+    Logging configuration:
+        LOG_DIRECTORY - Directory for JSONL log files (default: output/logs)
+        ENABLE_JSONL_LOGGING - Enable JSONL file logging (true/false, default: true)
+        ENABLE_S3_LOG_UPLOAD - Enable S3 upload of logs (true/false, default: true)
+        LOG_UPLOAD_INTERVAL - Upload interval in seconds (default: 3600)
+        REMOVE_LOGS_AFTER_UPLOAD - Remove local logs after S3 upload (true/false, default: false)
 """
 
 import os
@@ -224,6 +231,11 @@ class Config:
 
     # Logging
     log_level: str = "INFO"
+    log_dir: str = "output/logs"
+    enable_jsonl_logging: bool = True
+    enable_s3_log_upload: bool = True
+    log_upload_interval: int = 3600  # seconds
+    remove_logs_after_upload: bool = False
 
     def __post_init__(self) -> None:
         """Load configuration from environment variables."""
@@ -257,6 +269,34 @@ class Config:
             self.show_name = env_show_name
         if env_log_level := os.getenv("LOG_LEVEL"):
             self.log_level = env_log_level
+        if env_log_dir := os.getenv("LOG_DIRECTORY"):
+            self.log_dir = env_log_dir
+        if env_enable_jsonl := os.getenv("ENABLE_JSONL_LOGGING"):
+            self.enable_jsonl_logging = env_enable_jsonl.lower() in (
+                "true",
+                "1",
+                "yes",
+                "on",
+            )
+        if env_enable_s3_upload := os.getenv("ENABLE_S3_LOG_UPLOAD"):
+            self.enable_s3_log_upload = env_enable_s3_upload.lower() in (
+                "true",
+                "1",
+                "yes",
+                "on",
+            )
+        if env_upload_interval := os.getenv("LOG_UPLOAD_INTERVAL"):
+            try:
+                self.log_upload_interval = int(env_upload_interval)
+            except ValueError:
+                pass
+        if env_remove_logs := os.getenv("REMOVE_LOGS_AFTER_UPLOAD"):
+            self.remove_logs_after_upload = env_remove_logs.lower() in (
+                "true",
+                "1",
+                "yes",
+                "on",
+            )
         if env_output_dir := os.getenv("OUTPUT_DIRECTORY"):
             self.output_directory = Path(env_output_dir)
 

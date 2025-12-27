@@ -321,7 +321,10 @@ class TestPodcastPipeline(unittest.TestCase):
 
     @patch("the_data_packet.workflows.podcast.get_config")
     @patch.object(PodcastPipeline, "_validate_config")
-    def test_save_script(self, mock_validate: MagicMock, mock_get_config: MagicMock):
+    @patch("the_data_packet.core.logging.JSONLHandler.emit")  # Mock JSONL logging
+    def test_save_script(
+        self, mock_emit: MagicMock, mock_validate: MagicMock, mock_get_config: MagicMock
+    ):
         """Test script saving."""
         mock_get_config.return_value = self.mock_config
 
