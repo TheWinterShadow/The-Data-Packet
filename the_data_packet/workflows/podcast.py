@@ -68,7 +68,8 @@ class PodcastPipeline:
         self._rss_generator: Optional[RSSGenerator] = None
         self._s3_storage: Optional[S3Storage] = None
 
-        logger.info(f"Initialized podcast pipeline for '{self.config.show_name}'")
+        logger.info(
+            f"Initialized podcast pipeline for '{self.config.show_name}'")
 
     def run(self) -> PodcastResult:
         """
@@ -93,6 +94,16 @@ class PodcastPipeline:
             result.articles_collected = new_articles
 
             if not new_articles:
+                logger.error("No new articles collected after deduplication")
+                # Upload log file before failing
+                if self._should_use_s3():
+                    try:
+                        logger.info("Uploading current day's log file to S3")
+                        upload_current_day_log(self.config.show_name)
+                    except Exception as e:
+                        logger.warning(
+                            f"Failed to upload current day's log file to S3: {e}"
+                        )
                 raise TheDataPacketError("No new articles were collected")
 
             # Add used articles to database
@@ -161,7 +172,8 @@ class PodcastPipeline:
             try:
                 self._save_episode_metadata(result)
             except Exception as e:
-                logger.warning(f"Failed to save episode metadata to MongoDB: {e}")
+                logger.warning(
+                    f"Failed to save episode metadata to MongoDB: {e}")
 
             return result
 
@@ -207,7 +219,8 @@ class PodcastPipeline:
                     continue
 
                 try:
-                    logger.info(f"Collecting {category} articles from {source_name}")
+                    logger.info(
+                        f"Collecting {category} articles from {source_name}")
 
                     if self.config.max_articles_per_source == 1:
                         article = source.get_latest_article(category)
@@ -259,9 +272,11 @@ class PodcastPipeline:
                 username=self.config.mongodb_username,
                 password=self.config.mongodb_password,
             )
-            logger.info("MongoDB client created successfully for deduplication")
+            logger.info(
+                "MongoDB client created successfully for deduplication")
         except Exception as e:
-            logger.error(f"Failed to create MongoDB client for deduplication: {e}")
+            logger.error(
+                f"Failed to create MongoDB client for deduplication: {e}")
             logger.warning("Proceeding without deduplication")
             return articles
 
@@ -270,8 +285,10 @@ class PodcastPipeline:
         try:
             for article in articles:
                 # Check if article URL already exists in the database
-                logger.debug(f"Checking if article already exists: {article.title}")
-                existing = mongo_client.find_documents("articles", {"url": article.url})
+                logger.debug(
+                    f"Checking if article already exists: {article.title}")
+                existing = mongo_client.find_documents(
+                    "articles", {"url": article.url})
                 if len(list(existing)) > 0:
                     logger.info(
                         f"Article already used in previous episode: {article.title}"
@@ -284,7 +301,8 @@ class PodcastPipeline:
             )
         except Exception as e:
             logger.error(f"Error during deduplication: {e}")
-            logger.warning("Proceeding with all articles (deduplication failed)")
+            logger.warning(
+                "Proceeding with all articles (deduplication failed)")
             new_articles = articles
         finally:
             mongo_client.close()
@@ -314,9 +332,11 @@ class PodcastPipeline:
                 username=self.config.mongodb_username,
                 password=self.config.mongodb_password,
             )
-            logger.info("MongoDB client created successfully for article storage")
+            logger.info(
+                "MongoDB client created successfully for article storage")
         except Exception as e:
-            logger.error(f"Failed to create MongoDB client for article storage: {e}")
+            logger.error(
+                f"Failed to create MongoDB client for article storage: {e}")
             logger.warning("Proceeding without storing articles")
             return
 
@@ -439,7 +459,8 @@ class PodcastPipeline:
                 if rss_result.s3_url:
                     logger.info(f"RSS feed URL: {rss_result.s3_url}")
             else:
-                logger.error(f"Failed to update RSS feed: {rss_result.error_message}")
+                logger.error(
+                    f"Failed to update RSS feed: {rss_result.error_message}")
 
         except Exception as e:
             logger.error(f"RSS feed generation failed: {e}")
@@ -450,9 +471,11 @@ class PodcastPipeline:
         errors = []
 
         # Validate article sources
-        unknown_sources = set(self.config.article_sources) - set(self.SOURCES.keys())
+        unknown_sources = set(self.config.article_sources) - \
+            set(self.SOURCES.keys())
         if unknown_sources:
-            errors.append(f"Unknown article sources: {', '.join(unknown_sources)}")
+            errors.append(
+                f"Unknown article sources: {', '.join(unknown_sources)}")
 
         # Validate that at least one generation is enabled
         if not self.config.generate_script and not self.config.generate_audio:
