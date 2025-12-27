@@ -1,0 +1,282 @@
+name: Weekly Health Report
+
+on:
+  schedule:
+    - cron: '0 9 * * 1'  # Every Monday at 9 AM UTC
+  workflow_dispatch:     # Allow manual triggering
+
+jobs:
+  health-assessment:
+    name: 'Weekly Codebase Health Assessment'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install hatch
+
+      - name: Run comprehensive health checks
+        run: |
+          echo "# 📊 **Weekly Codebase Health Report**" > health-report.md
+          echo "" >> health-report.md
+          echo "**Generated on**: $(date)" >> health-report.md
+          echo "**Repository**: ${{ github.repository }}" >> health-report.md
+          echo "" >> health-report.md
+
+          mkdir -p health-reports
+
+          # Test coverage analysis
+          echo "## 🧪 **Test Coverage Analysis**" >> health-report.md
+          echo "" >> health-report.md
+          
+          hatch run test-ci > health-reports/test-results.txt 2>&1
+          
+          if [ -f coverage.xml ]; then
+            python3 << 'EOF'
+import xml.etree.ElementTree as ET
+
+try:
+    tree = ET.parse('coverage.xml')
+    root = tree.getroot()
+    line_rate = float(root.get('line-rate', 0)) * 100
+    
+    with open('health-report.md', 'a') as f:
+        f.write(f"**Overall Coverage**: {line_rate:.1f}%\n\n")
+        
+        if line_rate >= 90:
+            f.write("🟢 **Status**: Excellent coverage\n")
+        elif line_rate >= 80:
+            f.write("🟡 **Status**: Good coverage\n") 
+        elif line_rate >= 70:
+            f.write("🟠 **Status**: Moderate coverage\n")
+        else:
+            f.write("🔴 **Status**: Low coverage - needs improvement\n")
+        
+        f.write("\n")
+        
+        # Per-package coverage
+        f.write("### 📦 **Package Coverage Breakdown**\n\n")
+        f.write("| Package | Coverage | Status |\n")
+        f.write("|---------|----------|--------|\n")
+        
+        packages = root.findall('.//package')
+        for pkg in packages:
+            name = pkg.get('name', 'Unknown')
+            pkg_rate = float(pkg.get('line-rate', 0)) * 100
+            status = "🟢" if pkg_rate >= 80 else "🟡" if pkg_rate >= 60 else "🔴"
+            f.write(f"| {name} | {pkg_rate:.1f}% | {status} |\n")
+        
+        f.write("\n")
+        
+except Exception as e:
+    with open('health-report.md', 'a') as f:
+        f.write(f"❌ Could not parse coverage data: {e}\n\n")
+EOF
+          fi
+
+          # Code quality metrics
+          echo "## 🔍 **Code Quality Metrics**" >> health-report.md
+          echo "" >> health-report.md
+
+          # MyPy results
+          echo "### 🏷️ **Type Safety (MyPy)**" >> health-report.md
+          hatch run dev:mypy ./the_data_packet > health-reports/mypy.txt 2>&1
+          if [ $? -eq 0 ]; then
+            echo "✅ No type errors found" >> health-report.md
+          else
+            error_count=$(grep -c "error:" health-reports/mypy.txt 2>/dev/null || echo "0")
+            echo "❌ $error_count type errors found" >> health-report.md
+          fi
+          echo "" >> health-report.md
+
+          # Flake8 results  
+          echo "### 📏 **Code Style (Flake8)**" >> health-report.md
+          hatch run dev:flake8 ./the_data_packet > health-reports/flake8.txt 2>&1
+          if [ $? -eq 0 ]; then
+            echo "✅ No style issues found" >> health-report.md
+          else
+            issue_count=$(wc -l < health-reports/flake8.txt)
+            echo "⚠️ $issue_count style issues found" >> health-report.md
+          fi
+          echo "" >> health-report.md
+
+          # Test metrics
+          echo "## 📈 **Test Metrics**" >> health-report.md
+          echo "" >> health-report.md
+          
+          if [ -f test-results.xml ]; then
+            python3 << 'EOF'
+import xml.etree.ElementTree as ET
+
+try:
+    tree = ET.parse('test-results.xml')
+    root = tree.getroot()
+    testsuite = root.find('testsuite')
+    
+    if testsuite is not None:
+        tests = int(testsuite.get('tests', '0'))
+        failures = int(testsuite.get('failures', '0'))
+        errors = int(testsuite.get('errors', '0'))
+        skipped = int(testsuite.get('skipped', '0'))
+        time = float(testsuite.get('time', '0'))
+        
+        passed = tests - failures - errors - skipped
+        success_rate = (passed / tests * 100) if tests > 0 else 0
+        
+        with open('health-report.md', 'a') as f:
+            f.write(f"**Total Tests**: {tests}\n")
+            f.write(f"**Success Rate**: {success_rate:.1f}%\n")
+            f.write(f"**Total Time**: {time:.2f}s\n")
+            f.write(f"**Average per Test**: {(time/tests):.3f}s\n" if tests > 0 else "")
+            f.write(f"\n")
+            
+            if failures + errors == 0:
+                f.write("🎉 **All tests passing!**\n")
+            else:
+                f.write(f"⚠️ **{failures + errors} tests failing**\n")
+            
+            f.write(f"\n")
+            
+except Exception as e:
+    with open('health-report.md', 'a') as f:
+        f.write(f"❌ Could not parse test data: {e}\n\n")
+EOF
+          fi
+
+          # Repository metrics
+          echo "## 📊 **Repository Metrics**" >> health-report.md
+          echo "" >> health-report.md
+          
+          # Count lines of code
+          echo "### 📝 **Code Statistics**" >> health-report.md
+          total_py_files=$(find ./the_data_packet -name "*.py" | wc -l)
+          total_lines=$(find ./the_data_packet -name "*.py" -exec wc -l {} + | tail -1 | awk '{print $1}')
+          test_files=$(find ./tests -name "*.py" | wc -l)
+          test_lines=$(find ./tests -name "*.py" -exec wc -l {} + | tail -1 | awk '{print $1}')
+          
+          echo "- **Source Files**: $total_py_files" >> health-report.md
+          echo "- **Source Lines**: $total_lines" >> health-report.md
+          echo "- **Test Files**: $test_files" >> health-report.md
+          echo "- **Test Lines**: $test_lines" >> health-report.md
+          
+          if [ $total_lines -gt 0 ]; then
+            test_ratio=$(echo "scale=2; $test_lines / $total_lines * 100" | bc)
+            echo "- **Test/Code Ratio**: ${test_ratio}%" >> health-report.md
+          fi
+          echo "" >> health-report.md
+
+          # Recommendations
+          echo "## 💡 **Recommendations**" >> health-report.md
+          echo "" >> health-report.md
+          
+          # Generate recommendations based on metrics
+          python3 << 'EOF'
+import xml.etree.ElementTree as ET
+
+recommendations = []
+
+# Check coverage
+try:
+    tree = ET.parse('coverage.xml')
+    root = tree.getroot()
+    line_rate = float(root.get('line-rate', 0)) * 100
+    
+    if line_rate < 70:
+        recommendations.append("🔴 **Critical**: Increase test coverage to at least 70%")
+    elif line_rate < 80:
+        recommendations.append("🟡 **Improve**: Consider increasing test coverage to 80%+")
+    elif line_rate < 90:
+        recommendations.append("🟢 **Good**: Coverage is good, consider pushing to 90%+")
+    else:
+        recommendations.append("🌟 **Excellent**: Coverage is excellent!")
+        
+except:
+    recommendations.append("⚠️ **Setup**: Configure coverage reporting")
+
+# Check for type errors
+try:
+    with open('health-reports/mypy.txt', 'r') as f:
+        mypy_content = f.read()
+    if 'error:' in mypy_content:
+        error_count = mypy_content.count('error:')
+        recommendations.append(f"🔴 **Fix**: Resolve {error_count} type errors found by MyPy")
+    else:
+        recommendations.append("✅ **Type Safety**: No type errors found")
+except:
+    pass
+
+# Check for style issues
+try:
+    with open('health-reports/flake8.txt', 'r') as f:
+        flake8_content = f.read()
+    if flake8_content.strip():
+        recommendations.append("🔧 **Style**: Run code formatting to fix style issues")
+    else:
+        recommendations.append("✅ **Style**: Code style is consistent")
+except:
+    pass
+
+with open('health-report.md', 'a') as f:
+    for rec in recommendations:
+        f.write(f"- {rec}\n")
+    f.write("\n")
+    
+    f.write("---\n")
+    f.write("*This report was generated automatically by the Weekly Health Report workflow.*\n")
+EOF
+
+      - name: Upload health report artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: weekly-health-report
+          path: |
+            health-report.md
+            health-reports/
+            coverage.xml
+            htmlcov/
+            test-results.xml
+          retention-days: 90
+
+      - name: Create GitHub issue with health report
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const reportContent = fs.readFileSync('health-report.md', 'utf8');
+            
+            // Check if there's an existing health report issue open
+            const existingIssues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'health-report'
+            });
+            
+            if (existingIssues.data.length > 0) {
+              // Update existing issue
+              await github.rest.issues.createComment({
+                issue_number: existingIssues.data[0].number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: reportContent
+              });
+            } else {
+              // Create new issue
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `📊 Weekly Health Report - ${new Date().toISOString().split('T')[0]}`,
+                body: reportContent,
+                labels: ['health-report', 'automated']
+              });
+            }

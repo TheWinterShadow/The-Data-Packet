@@ -1,0 +1,219 @@
+name: Pull Request Checks
+
+on:
+  pull_request:
+    branches: [ main ]
+    types: [opened, synchronize, reopened]
+
+jobs:
+  pr-quality-checks:
+    name: 'PR Quality Assessment'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch full history for comparison
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install hatch
+
+      - name: Run comprehensive quality checks
+        run: |
+          echo "🔍 **Pull Request Quality Assessment**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**PR #${{ github.event.number }}**: ${{ github.event.pull_request.title }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Author**: @${{ github.event.pull_request.user.login }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          mkdir -p pr-reports
+
+          # Run all quality checks
+          echo "## 📋 **Quality Check Results**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Type checking
+          echo "### 🏷️ Type Checking (MyPy)" >> $GITHUB_STEP_SUMMARY
+          if hatch run dev:mypy ./the_data_packet > pr-reports/mypy.txt 2>&1; then
+            echo "✅ No type errors found" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Type errors found (see artifacts for details)" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Code formatting
+          echo "### 🎨 Code Formatting" >> $GITHUB_STEP_SUMMARY
+          format_issues=0
+          
+          if ! hatch run dev:black ./the_data_packet --check > pr-reports/black.txt 2>&1; then
+            format_issues=$((format_issues + 1))
+          fi
+          
+          if ! hatch run dev:isort ./the_data_packet --check-only > pr-reports/isort.txt 2>&1; then
+            format_issues=$((format_issues + 1))
+          fi
+          
+          if [ $format_issues -eq 0 ]; then
+            echo "✅ Code formatting is consistent" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Code formatting issues found (run \`hatch run format\` to fix)" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Linting
+          echo "### 🔍 Code Quality (Flake8)" >> $GITHUB_STEP_SUMMARY
+          if hatch run dev:flake8 ./the_data_packet > pr-reports/flake8.txt 2>&1; then
+            echo "✅ No linting issues found" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Linting issues found (see artifacts for details)" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+      - name: Run tests with coverage
+        run: |
+          echo "### 🧪 Test Results" >> $GITHUB_STEP_SUMMARY
+          
+          # Run tests with detailed output
+          if hatch run test-ci > pr-reports/test-output.txt 2>&1; then
+            echo "✅ All tests passed" >> $GITHUB_STEP_SUMMARY
+            
+            # Extract and display coverage info
+            if [ -f coverage.xml ]; then
+              python3 << 'EOF'
+import xml.etree.ElementTree as ET
+import os
+
+try:
+    tree = ET.parse('coverage.xml')
+    root = tree.getroot()
+    line_rate = float(root.get('line-rate', 0)) * 100
+    
+    with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
+        f.write(f"📊 **Coverage**: {line_rate:.1f}%\n")
+        if line_rate >= 90:
+            f.write("🟢 Excellent coverage!\n")
+        elif line_rate >= 80:
+            f.write("🟡 Good coverage\n")
+        elif line_rate >= 70:
+            f.write("🟠 Moderate coverage\n")
+        else:
+            f.write("🔴 Low coverage - please add tests\n")
+except:
+    pass
+EOF
+            fi
+          else
+            echo "❌ Some tests failed (see artifacts for details)" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+      - name: Generate PR recommendation
+        run: |
+          echo "## 🎯 **Recommendation**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Count issues from reports
+          issues=0
+          
+          if grep -q "error:" pr-reports/mypy.txt 2>/dev/null; then
+            issues=$((issues + 1))
+          fi
+          
+          if grep -q "would reformat" pr-reports/black.txt 2>/dev/null; then
+            issues=$((issues + 1))
+          fi
+          
+          if grep -q "Skipped" pr-reports/isort.txt 2>/dev/null; then
+            issues=$((issues + 1))
+          fi
+          
+          if grep -q ":" pr-reports/flake8.txt 2>/dev/null; then
+            issues=$((issues + 1))
+          fi
+          
+          if grep -q "FAILED" pr-reports/test-output.txt 2>/dev/null; then
+            issues=$((issues + 1))
+          fi
+          
+          if [ $issues -eq 0 ]; then
+            echo "🎉 **Ready to Merge!**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "This PR passes all quality checks and is ready for review and merge." >> $GITHUB_STEP_SUMMARY
+          elif [ $issues -le 2 ]; then
+            echo "⚠️ **Needs Minor Fixes**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "This PR has $issues minor issues that should be addressed before merging." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "🔴 **Needs Work**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "This PR has $issues issues that need to be resolved before it's ready for merge." >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📁 **Detailed reports are available in the artifacts section below.**" >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload PR check artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-quality-reports
+          path: |
+            pr-reports/
+            coverage.xml
+            htmlcov/
+            test-results.xml
+            test-report.html
+          retention-days: 30
+
+      - name: Comment PR with summary
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            
+            // Count issues from reports 
+            let summary = "## 🔍 PR Quality Check Summary\n\n";
+            let issues = 0;
+            let details = [];
+            
+            // Check each report file
+            const reports = ['mypy.txt', 'black.txt', 'isort.txt', 'flake8.txt', 'test-output.txt'];
+            
+            reports.forEach(report => {
+              try {
+                const content = fs.readFileSync(`pr-reports/${report}`, 'utf8');
+                if (content.includes('error:') || content.includes('FAILED') || content.includes('would reformat')) {
+                  issues++;
+                  details.push(`- ❌ Issues found in ${report}`);
+                } else {
+                  details.push(`- ✅ ${report} passed`);
+                }
+              } catch (e) {
+                details.push(`- ⚠️ ${report} not found`);
+              }
+            });
+            
+            summary += details.join('\n') + '\n\n';
+            
+            if (issues === 0) {
+              summary += "🎉 **All checks passed!** This PR is ready for review.\n";
+            } else {
+              summary += `⚠️ **Found ${issues} issues.** Please check the [workflow artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) for detailed reports.\n`;
+            }
+            
+            summary += "\n📊 Detailed coverage report and test results are available in the workflow artifacts.";
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: summary
+            });

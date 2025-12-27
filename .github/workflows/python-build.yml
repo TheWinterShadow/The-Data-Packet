@@ -36,13 +36,91 @@ jobs:
           pip install build pytest pytest-cov
           pip install -e .
 
-      - name: Run tests
+      - name: Run tests with detailed reporting
         run: |
-          pytest tests/ --cov=the_data_packet --cov-report=xml
+          echo "🧪 **Readiness Test Results**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          mkdir -p readiness-test-results
+          pytest tests/ --cov=the_data_packet --cov-report=xml --cov-report=html --cov-report=term-missing --junit-xml=readiness-test-results/pytest.xml
+
+          # Parse and display test results
+          if [ -f readiness-test-results/pytest.xml ]; then
+            python3 << 'EOF'
+          import xml.etree.ElementTree as ET
+          import os
+
+          try:
+              tree = ET.parse('readiness-test-results/pytest.xml')
+              root = tree.getroot()
+              testsuite = root.find('testsuite')
+              
+              if testsuite is not None:
+                  tests = testsuite.get('tests', '0')
+                  failures = testsuite.get('failures', '0') 
+                  errors = testsuite.get('errors', '0')
+                  time = testsuite.get('time', '0')
+                  
+                  passed = int(tests) - int(failures) - int(errors)
+                  
+                  with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
+                      f.write(f"📊 **Test Summary:**\\n")
+                      f.write(f"- ✅ Passed: {passed}\\n")
+                      f.write(f"- ❌ Failed: {failures}\\n")
+                      f.write(f"- ⚠️ Errors: {errors}\\n")
+                      f.write(f"- 🕒 Time: {time}s\\n")
+                      f.write(f"\\n")
+                      
+                      if int(failures) + int(errors) == 0:
+                          f.write("🎉 **All readiness tests passed!**\\n")
+                      else:
+                          f.write("❌ **Readiness tests failed**\\n")
+          except Exception as e:
+              with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
+                  f.write(f"❌ Could not parse test results: {e}\\n")
+          EOF
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📊 **Coverage Summary:**" >> $GITHUB_STEP_SUMMARY
+          if [ -f coverage.xml ]; then
+            python3 << 'EOF'
+          import xml.etree.ElementTree as ET
+          import os
+
+          try:
+              tree = ET.parse('coverage.xml')
+              root = tree.getroot()
+              line_rate = float(root.get('line-rate', 0)) * 100
+              
+              with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
+                  f.write(f"📈 Overall Coverage: {line_rate:.1f}%\\n")
+                  if line_rate >= 80:
+                      f.write("✅ Good coverage level\\n")
+                  else:
+                      f.write("⚠️ Coverage could be improved\\n")
+          except:
+              pass
+          EOF
+          fi
 
       - name: Build package
         run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📦 **Package Build**" >> $GITHUB_STEP_SUMMARY
           python -m build
+          echo "✅ Package built successfully" >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload readiness test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: readiness-test-results
+          path: |
+            readiness-test-results/
+            coverage.xml
+            htmlcov/
+          retention-days: 30
 
   terraform-deploy:
     needs: readiness-test
