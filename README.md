@@ -3,9 +3,43 @@
 **AI-Powered Automated Podcast Generation System** - Transform tech news articles into engaging, multi-speaker podcast episodes using cutting-edge AI technology.
 
 [![Docker](https://img.shields.io/badge/docker-ready-blue?logo=docker)](https://github.com/TheWinterShadow/the_data_packet/pkgs/container/the-data-packet)
-[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![Docker Image Version](https://img.shields.io/docker/v/thewintershadow/the-data-packet?logo=docker&label=docker%20version)](https://hub.docker.com/r/thewintershadow/the-data-packet)
+[![Docker Image Size](https://img.shields.io/docker/image-size/thewintershadow/the-data-packet?logo=docker)](https://hub.docker.com/r/thewintershadow/the-data-packet)
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg?logo=python)](https://www.python.org/downloads/)
+[![PyPI Version](https://img.shields.io/pypi/v/the-data-packet?logo=pypi)](https://pypi.org/project/the-data-packet/)
 [![MIT License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![GitHub Actions](https://img.shields.io/github/actions/workflow/status/TheWinterShadow/the_data_packet/docker.yml?branch=main)](https://github.com/TheWinterShadow/the_data_packet/actions)
+
+<!-- GitHub Actions Workflow Status -->
+[![CI Tests](https://img.shields.io/github/actions/workflow/status/TheWinterShadow/The-Data-Packet/ci.yml?branch=main&logo=github&label=CI%20Tests)](https://github.com/TheWinterShadow/The-Data-Packet/actions/workflows/ci.yml)
+[![Docker Build](https://img.shields.io/github/actions/workflow/status/TheWinterShadow/The-Data-Packet/docker.yml?branch=main&logo=docker&label=Docker%20Build)](https://github.com/TheWinterShadow/The-Data-Packet/actions/workflows/docker.yml)
+[![Documentation](https://img.shields.io/github/actions/workflow/status/TheWinterShadow/The-Data-Packet/docs.yml?branch=main&logo=readthedocs&label=Docs)](https://github.com/TheWinterShadow/The-Data-Packet/actions/workflows/docs.yml)
+[![Health Check](https://img.shields.io/github/actions/workflow/status/TheWinterShadow/The-Data-Packet/weekly-health.yml?logo=github&label=Health%20Check)](https://github.com/TheWinterShadow/The-Data-Packet/actions/workflows/weekly-health.yml)
+
+<!-- Repository Stats -->
+[![GitHub last commit](https://img.shields.io/github/last-commit/TheWinterShadow/The-Data-Packet?logo=github)](https://github.com/TheWinterShadow/The-Data-Packet/commits/main)
+[![GitHub issues](https://img.shields.io/github/issues/TheWinterShadow/The-Data-Packet?logo=github)](https://github.com/TheWinterShadow/The-Data-Packet/issues)
+[![GitHub pull requests](https://img.shields.io/github/issues-pr/TheWinterShadow/The-Data-Packet?logo=github)](https://github.com/TheWinterShadow/The-Data-Packet/pulls)
+
+
+## 📚 Documentation Index
+
+### Quick Start Guides
+- **[Usage Guide](USAGE.md)** - Complete usage instructions, CLI commands, and examples
+- **[Docker Setup](DOCKER.md)** - Docker installation, configuration, and deployment
+- **[MongoDB Configuration](MONGODB.md)** - Database setup and connection details
+
+### Advanced Configuration  
+- **[Enhanced Logging](LOGGING.md)** - JSONL logging with S3 upload capabilities
+
+## 🚀 Quick Links
+
+| Topic | File | Description |
+|-------|------|-------------|
+| Getting Started | [USAGE.md](USAGE.md) | Complete setup and usage instructions |
+| Container Deployment | [DOCKER.md](DOCKER.md) | Docker build and deployment guide |
+| Database Setup | [MONGODB.md](MONGODB.md) | MongoDB configuration and connection |
+| Observability | [LOGGING.md](LOGGING.md) | Structured logging and S3 integration |
+
 
 ## 🎯 What It Does
 
