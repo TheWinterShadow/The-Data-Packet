@@ -147,17 +147,21 @@ class PodcastPipeline:
                 f"Pipeline completed successfully in {result.execution_time_seconds:.1f} seconds"
             )
 
-            self._save_episode_metadata(result)
-
             # Upload current log file to S3 alongside generated files
             if self._should_use_s3():
                 try:
                     logger.info("Uploading current day's log file to S3")
-                    upload_current_day_log()
+                    upload_current_day_log(self.config.show_name)
                 except Exception as e:
                     logger.warning(
                         f"Failed to upload current day's log file to S3: {e}"
                     )
+
+            # Save episode metadata (non-critical, don't fail pipeline)
+            try:
+                self._save_episode_metadata(result)
+            except Exception as e:
+                logger.warning(f"Failed to save episode metadata to MongoDB: {e}")
 
             return result
 
@@ -166,10 +170,17 @@ class PodcastPipeline:
                 datetime.now() - start_time
             ).total_seconds()
             result.error_message = str(e)
-
             logger.error(
                 f"Pipeline failed after {result.execution_time_seconds:.1f} seconds: {e}"
             )
+            if self._should_use_s3():
+                try:
+                    logger.info("Uploading current day's log file to S3")
+                    upload_current_day_log(self.config.show_name)
+                except Exception as e:
+                    logger.warning(
+                        f"Failed to upload current day's log file to S3: {e}"
+                    )
 
             return result
 
@@ -472,28 +483,33 @@ class PodcastPipeline:
             )
             return
 
-        mongo_client = MongoDBClient(
-            username=self.config.mongodb_username,
-            password=self.config.mongodb_password,
-        )
+        try:
+            mongo_client = MongoDBClient(
+                username=self.config.mongodb_username,
+                password=self.config.mongodb_password,
+            )
 
-        # Convert the episode data to a dictionary, converting Article objects to dicts
-        episode_dict = episode_data.__dict__.copy()
-        episode_dict["articles_collected"] = [
-            article.to_dict() for article in episode_data.articles_collected
-        ]
+            # Convert the episode data to a dictionary, converting Article objects to dicts
+            episode_dict = episode_data.__dict__.copy()
+            episode_dict["articles_collected"] = [
+                article.to_dict() for article in episode_data.articles_collected
+            ]
 
-        # Convert Path objects to strings for MongoDB compatibility
-        if episode_dict.get("script_path"):
-            episode_dict["script_path"] = str(episode_dict["script_path"])
-        if episode_dict.get("audio_path"):
-            episode_dict["audio_path"] = str(episode_dict["audio_path"])
-        if episode_dict.get("rss_path"):
-            episode_dict["rss_path"] = str(episode_dict["rss_path"])
+            # Convert Path objects to strings for MongoDB compatibility
+            if episode_dict.get("script_path"):
+                episode_dict["script_path"] = str(episode_dict["script_path"])
+            if episode_dict.get("audio_path"):
+                episode_dict["audio_path"] = str(episode_dict["audio_path"])
+            if episode_dict.get("rss_path"):
+                episode_dict["rss_path"] = str(episode_dict["rss_path"])
 
-        # Remove article content to save space in database
-        for article in episode_dict["articles_collected"]:
-            article.pop("content", None)
+            # Remove article content to save space in database
+            for article in episode_dict["articles_collected"]:
+                article.pop("content", None)
 
-        mongo_client.insert_document("episodes", episode_dict)
-        logger.info("Added episode metadata to MongoDB database")
+            mongo_client.insert_document("episodes", episode_dict)
+            logger.info("Added episode metadata to MongoDB database")
+
+        except Exception as e:
+            logger.warning(f"Failed to save episode metadata to MongoDB: {e}")
+            # Don't re-raise the exception - metadata save is not critical

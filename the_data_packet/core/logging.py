@@ -446,7 +446,7 @@ def upload_current_logs() -> None:
         logger.warning("S3 uploader not initialized")
 
 
-def upload_current_day_log() -> None:
+def upload_current_day_log(show_name: str) -> None:
     """
     Upload the current day's log file to S3.
 
@@ -474,15 +474,15 @@ def upload_current_day_log() -> None:
             return
 
         today = datetime.now().strftime("%Y-%m-%d")
-        log_file = log_dir / f"the-data-packet-{today}.jsonl"
+        log_file = log_dir / f"logs-{today}.jsonl"
 
         if not log_file.exists():
             logger.warning(f"Today's log file not found: {log_file}")
             return
 
         # Upload to S3 with structured path
-        date_obj = datetime.now()
-        s3_key = f"logs/{date_obj.year:04d}/{date_obj.month:02d}/{date_obj.day:02d}/{log_file.name}"
+        timestamp = datetime.now().strftime("%Y-%m-%d")
+        s3_key = f"{show_name.lower().replace(' ', '-')}/{timestamp}/{log_file.name}"
 
         result = s3_storage.upload_file(
             local_path=log_file, s3_key=s3_key, content_type="application/x-ndjson"
