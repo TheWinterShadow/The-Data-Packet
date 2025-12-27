@@ -62,7 +62,8 @@ class TestPodcastResult(unittest.TestCase):
         self.assertEqual(
             result.s3_audio_url, "https://s3.amazonaws.com/bucket/audio.mp3"
         )
-        self.assertEqual(result.s3_rss_url, "https://s3.amazonaws.com/bucket/feed.xml")
+        self.assertEqual(result.s3_rss_url,
+                         "https://s3.amazonaws.com/bucket/feed.xml")
         self.assertEqual(result.execution_time_seconds, 45.2)
         self.assertIsNone(result.error_message)
 
@@ -241,7 +242,8 @@ class TestPodcastPipeline(unittest.TestCase):
         mock_wired_source = Mock()
         mock_wired_source.supported_categories = ["security", "ai", "science"]
         mock_wired_source.get_latest_article.return_value = self.sample_article
-        mock_wired_source.get_multiple_articles.return_value = [self.sample_article]
+        mock_wired_source.get_multiple_articles.return_value = [
+            self.sample_article]
 
         with patch.dict(PodcastPipeline.SOURCES, {"wired": lambda: mock_wired_source}):
             pipeline = PodcastPipeline()
@@ -252,7 +254,8 @@ class TestPodcastPipeline(unittest.TestCase):
             self.assertEqual(articles[0].title, self.sample_article.title)
             self.assertEqual(articles[0].content, self.sample_article.content)
             # Since max_articles_per_source is 1, it should call get_latest_article
-            mock_wired_source.get_latest_article.assert_called_once_with("security")
+            mock_wired_source.get_latest_article.assert_called_once_with(
+                "security")
 
     @patch("the_data_packet.workflows.podcast.get_config")
     @patch.object(PodcastPipeline, "_validate_config")
@@ -321,7 +324,8 @@ class TestPodcastPipeline(unittest.TestCase):
 
     @patch("the_data_packet.workflows.podcast.get_config")
     @patch.object(PodcastPipeline, "_validate_config")
-    @patch("the_data_packet.core.logging.JSONLHandler.emit")  # Mock JSONL logging
+    # Mock JSONL logging
+    @patch("the_data_packet.core.logging.JSONLHandler.emit")
     def test_save_script(
         self, mock_emit: MagicMock, mock_validate: MagicMock, mock_get_config: MagicMock
     ):
@@ -347,7 +351,8 @@ class TestPodcastPipeline(unittest.TestCase):
                     )
                     self.assertEqual(script_path, expected_path)
                 mock_mkdir.assert_called_once_with(parents=True, exist_ok=True)
-                mock_open.assert_called_once_with(expected_path, "w", encoding="utf-8")
+                mock_open.assert_called_once_with(
+                    expected_path, "w", encoding="utf-8")
 
     @patch("the_data_packet.workflows.podcast.get_config")
     @patch.object(PodcastPipeline, "_validate_config")
