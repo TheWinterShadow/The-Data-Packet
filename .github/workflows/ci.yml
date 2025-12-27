@@ -343,7 +343,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-results-python-3.11
+          name: test-results-coverage-python-3.11
           path: |
             test-results/
             coverage.xml
