@@ -60,6 +60,11 @@ Environment Variables:
         AWS_SECRET_ACCESS_KEY - AWS secret key
         AWS_REGION - AWS region (default: us-east-1)
 
+    Optional for Grafana Loki log aggregation:
+        GRAFANA_LOKI_URL - Loki endpoint URL
+        GRAFANA_LOKI_USERNAME - Loki authentication username
+        GRAFANA_LOKI_PASSWORD - Loki authentication password/API key
+
     Optional customizations:
         SHOW_NAME - Podcast name override
         LOG_LEVEL - Logging level (DEBUG/INFO/WARNING/ERROR)
@@ -106,7 +111,10 @@ class Config:
             aws_secret_access_key: AWS secret key for S3 uploads. Loaded from AWS_SECRET_ACCESS_KEY.
             aws_region: AWS region for S3 operations. Default: us-east-1.
             s3_bucket_name: S3 bucket name for hosting files. Loaded from S3_BUCKET_NAME.
-
+        Grafana Loki Configuration:
+            grafana_loki_url: Loki endpoint URL for log aggregation. Loaded from GRAFANA_LOKI_URL.
+            grafana_loki_username: Username for Loki authentication. Loaded from GRAFANA_LOKI_USERNAME.
+            grafana_loki_password: Password/API key for Loki authentication. Loaded from GRAFANA_LOKI_PASSWORD.
         Podcast Configuration:
             show_name: Podcast show name. Used in RSS feeds and file names.
             episode_number: Episode number for RSS feeds. Auto-generated if None.
@@ -177,6 +185,11 @@ class Config:
     aws_secret_access_key: Optional[str] = None
     aws_region: str = "us-east-1"
     s3_bucket_name: Optional[str] = None
+
+    # Grafana Loki Configuration
+    grafana_loki_url: Optional[str] = None
+    grafana_loki_username: Optional[str] = None
+    grafana_loki_password: Optional[str] = None
 
     # Podcast Configuration
     show_name: str = "The Data Packet"
@@ -263,6 +276,15 @@ class Config:
         )
         self.aws_region = os.getenv("AWS_REGION", self.aws_region)
         self.s3_bucket_name = self.s3_bucket_name or os.getenv("S3_BUCKET_NAME")
+
+        # Grafana Loki
+        self.grafana_loki_url = self.grafana_loki_url or os.getenv("GRAFANA_LOKI_URL")
+        self.grafana_loki_username = self.grafana_loki_username or os.getenv(
+            "GRAFANA_LOKI_USERNAME"
+        )
+        self.grafana_loki_password = self.grafana_loki_password or os.getenv(
+            "GRAFANA_LOKI_PASSWORD"
+        )
 
         # Other settings
         if env_show_name := os.getenv("SHOW_NAME"):

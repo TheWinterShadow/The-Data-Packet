@@ -40,7 +40,7 @@ from typing import TYPE_CHECKING, Optional
 if TYPE_CHECKING:
     from the_data_packet.utils.s3 import S3Storage
 
-from the_data_packet.core.config import get_config
+from the_data_packet.core.config import Config, get_config
 
 
 class JSONLHandler(logging.Handler):
@@ -447,7 +447,7 @@ def upload_current_logs() -> None:
         logger.warning("S3 uploader not initialized")
 
 
-def upload_current_day_log(show_name: str) -> None:
+def upload_current_day_log(config: Config) -> None:
     """
     Upload the current day's log file to S3.
 
@@ -483,7 +483,9 @@ def upload_current_day_log(show_name: str) -> None:
 
         # Upload to S3 with structured path
         timestamp = datetime.now().strftime("%Y-%m-%d")
-        s3_key = f"{show_name.lower().replace(' ', '-')}/{timestamp}/{log_file.name}"
+        s3_key = (
+            f"{config.show_name.lower().replace(' ', '-')}/{timestamp}/{log_file.name}"
+        )
 
         result = s3_storage.upload_file(
             local_path=log_file, s3_key=s3_key, content_type="application/x-ndjson"
@@ -496,6 +498,32 @@ def upload_current_day_log(show_name: str) -> None:
             logger.error(
                 f"Failed to upload current day's log file: {result.error_message}"
             )
+
+        # Upload to Grafana Loki if configured
+        if (
+            config.grafana_loki_url
+            and config.grafana_loki_username
+            and config.grafana_loki_password
+        ):
+            try:
+                from the_data_packet.utils.loki import upload_logs_to_loki
+
+                # Construct the full Loki push URL
+                loki_push_url = f"{config.grafana_loki_url}/loki/api/v1/push"
+
+                count = upload_logs_to_loki(
+                    file_path=log_file,
+                    url=loki_push_url,
+                    user=config.grafana_loki_username,
+                    api_key=config.grafana_loki_password,
+                )
+                logger.info(
+                    f"Successfully uploaded {count} log entries to Loki")
+            except Exception as e:
+                logger.error(f"Error uploading logs to Loki: {e}")
+        else:
+            logger.debug(
+                "Loki configuration not complete, skipping log upload")
 
     except Exception as e:
         logger.error(f"Error uploading current day's log file: {e}")

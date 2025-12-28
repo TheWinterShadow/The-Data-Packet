@@ -98,7 +98,7 @@ class PodcastPipeline:
                 if self._should_use_s3():
                     try:
                         logger.info("Uploading current day's log file to S3")
-                        upload_current_day_log(self.config.show_name)
+                        upload_current_day_log(self.config)
                     except Exception as e:
                         logger.warning(
                             f"Failed to upload current day's log file to S3: {e}"
@@ -161,7 +161,7 @@ class PodcastPipeline:
             if self._should_use_s3():
                 try:
                     logger.info("Uploading current day's log file to S3")
-                    upload_current_day_log(self.config.show_name)
+                    upload_current_day_log(self.config)
                 except Exception as e:
                     logger.warning(
                         f"Failed to upload current day's log file to S3: {e}"
@@ -186,7 +186,7 @@ class PodcastPipeline:
             if self._should_use_s3():
                 try:
                     logger.info("Uploading current day's log file to S3")
-                    upload_current_day_log(self.config.show_name)
+                    upload_current_day_log(self.config)
                 except Exception as e:
                     logger.warning(
                         f"Failed to upload current day's log file to S3: {e}"
