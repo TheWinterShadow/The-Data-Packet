@@ -345,8 +345,7 @@ def setup_logging(
                     _s3_uploader.stop()
 
                 upload_interval = getattr(config, "log_upload_interval", 3600)
-                remove_after_upload = getattr(
-                    config, "remove_logs_after_upload", False)
+                remove_after_upload = getattr(config, "remove_logs_after_upload", False)
 
                 # Ensure numeric values for thread safety
                 if not isinstance(upload_interval, int):
@@ -492,8 +491,7 @@ def upload_current_day_log(config: Config) -> None:
         )
 
         if result.success:
-            logger.info(
-                f"Uploaded current day's log file to S3: {result.s3_url}")
+            logger.info(f"Uploaded current day's log file to S3: {result.s3_url}")
         else:
             logger.error(
                 f"Failed to upload current day's log file: {result.error_message}"
@@ -517,13 +515,11 @@ def upload_current_day_log(config: Config) -> None:
                     user=config.grafana_loki_username,
                     api_key=config.grafana_loki_password,
                 )
-                logger.info(
-                    f"Successfully uploaded {count} log entries to Loki")
+                logger.info(f"Successfully uploaded {count} log entries to Loki")
             except Exception as e:
                 logger.error(f"Error uploading logs to Loki: {e}")
         else:
-            logger.debug(
-                "Loki configuration not complete, skipping log upload")
+            logger.debug("Loki configuration not complete, skipping log upload")
 
     except Exception as e:
         logger.error(f"Error uploading current day's log file: {e}")
