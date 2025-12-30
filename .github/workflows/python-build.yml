@@ -136,6 +136,9 @@ jobs:
                 GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
             - name: Set GOOGLE_APPLICATION_CREDENTIALS env
               run: echo "GOOGLE_APPLICATION_CREDENTIALS=$(pwd)/gcp-key.json" >> $GITHUB_ENV
+            - name: Authenticate gcloud with service account
+              run: |
+                gcloud auth activate-service-account --key-file=gcp-key.json
             - name: Setup Terraform
               uses: hashicorp/setup-terraform@v3
               with:
