@@ -34,6 +34,13 @@ jobs:
             - name: Build documentation
               run: hatch run docs:build
 
+            - name: Copy coverage HTML report into docs
+              run: |
+                  if [ -d "htmlcov" ]; then
+                    mkdir -p docs/build/coverage
+                    cp -r htmlcov/* docs/build/coverage/
+                  fi
+
             - name: Workflow Summary
               run: |
                   echo "✅ Documentation build completed successfully" >> $GITHUB_STEP_SUMMARY

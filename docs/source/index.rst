@@ -123,9 +123,21 @@ Package Structure
    development/testing
    development/contributing
 
+.. toctree::
+   :maxdepth: 1
+   :caption: Reports:
+
+   coverage/coverage_html_cb_bcae5fc4
+
 Indices and tables
 ==================
 
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+.. raw:: html
+
+   <div style="margin-top:2em;">
+      <a href="../coverage/index.html" target="_blank"><b>📊 Coverage Report</b></a>
+   </div>
