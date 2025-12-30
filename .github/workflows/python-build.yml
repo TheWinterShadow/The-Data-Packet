@@ -152,13 +152,26 @@ jobs:
               run: terraform validate
             - name: Import existing resources if they exist
               run: |
-                    # Try to import existing S3 bucket if it exists
-                    if aws s3 ls "s3://the-data-packet" 2>/dev/null; then
-                        echo "Bucket exists, importing to state..."
-                        terraform import aws_s3_bucket.data_packet_bucket the-data-packet || echo "Bucket already in state or import failed"
-                        terraform import aws_s3_bucket_public_access_block.data_packet_bucket_pab the-data-packet || echo "PAB already in state or import failed"
-                        terraform import aws_s3_bucket_policy.data_packet_bucket_policy the-data-packet || echo "Policy already in state or import failed"
-                    fi
+                # Try to import existing S3 bucket if it exists
+                if aws s3 ls "s3://the-data-packet" 2>/dev/null; then
+                    echo "Bucket exists, importing to state..."
+                    terraform import aws_s3_bucket.data_packet_bucket the-data-packet || echo "Bucket already in state or import failed"
+                    terraform import aws_s3_bucket_public_access_block.data_packet_bucket_pab the-data-packet || echo "PAB already in state or import failed"
+                    terraform import aws_s3_bucket_policy.data_packet_bucket_policy the-data-packet || echo "Policy already in state or import failed"
+                fi
+
+                # Try to import existing GCP resources if they exist
+                # Import GCP Storage Bucket if it exists
+                if gsutil ls -b "gs://audio_bucket" 2>/dev/null; then
+                    echo "GCP bucket exists, importing to state..."
+                    terraform import google_storage_bucket.audio_bucket audio_bucket || echo "Bucket already in state or import failed"
+                fi
+
+                # Import GCP Service Account if it exists
+                if gcloud iam service-accounts list --filter="email:data-packet-service@gen-lang-client-0429374219.iam.gserviceaccount.com" --format="value(email)" | grep -q "data-packet-service@gen-lang-client-0429374219.iam.gserviceaccount.com"; then
+                    echo "GCP service account exists, importing to state..."
+                    terraform import google_service_account.data_packet_sa projects/gen-lang-client-0429374219/serviceAccounts/data-packet-service@gen-lang-client-0429374219.iam.gserviceaccount.com || echo "Service account already in state or import failed"
+                fi
             - name: Terraform Plan
               run: terraform plan -out=tfplan
             - name: Terraform Apply
