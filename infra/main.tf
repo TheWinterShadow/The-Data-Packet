@@ -134,12 +134,6 @@ resource "google_service_account_key" "data_packet_key" {
   public_key_type    = "TYPE_X509_PEM_FILE"
 }
 
-# Grant Text-to-Speech permissions to service account
-resource "google_project_iam_member" "tts_user" {
-  project = var.project_id
-  role    = "roles/cloudtts.user"
-  member  = "serviceAccount:${google_service_account.data_packet_sa.email}"
-}
 
 # Grant Storage permissions to service account  
 resource "google_project_iam_member" "storage_admin" {
