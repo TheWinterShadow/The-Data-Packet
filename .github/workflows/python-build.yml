@@ -131,6 +131,15 @@ jobs:
         steps:
             - uses: actions/checkout@v4
 
+          - name: Set up GCP credentials
+            run: |
+              echo "$GCP_SERVICE_ACCOUNT_KEY" > gcp-key.json
+            env:
+              GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+
+          - name: Set GOOGLE_APPLICATION_CREDENTIALS env
+            run: echo "GOOGLE_APPLICATION_CREDENTIALS=$(pwd)/gcp-key.json" >> $GITHUB_ENV
+
             - name: Setup Terraform
               uses: hashicorp/setup-terraform@v3
               with:
