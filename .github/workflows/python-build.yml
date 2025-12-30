@@ -168,9 +168,9 @@ jobs:
                 fi
 
                 # Import GCP Service Account if it exists
-                if gcloud iam service-accounts list --filter="email:data-packet-service@gen-lang-client-0429374219.iam.gserviceaccount.com" --format="value(email)" | grep -q "data-packet-service@gen-lang-client-0429374219.iam.gserviceaccount.com"; then
-                    echo "GCP service account exists, importing to state..."
-                    terraform import google_service_account.data_packet_sa projects/gen-lang-client-0429374219/serviceAccounts/data-packet-service@gen-lang-client-0429374219.iam.gserviceaccount.com || echo "Service account already in state or import failed"
+                if gcloud iam service-accounts list --project=${{ secrets.GCP_PROJECT_ID }} --filter="email:data-packet-service@${{ secrets.GCP_PROJECT_ID }}.iam.gserviceaccount.com" --format="value(email)" | grep -q "data-packet-service@${{ secrets.GCP_PROJECT_ID }}.iam.gserviceaccount.com"; then
+                  echo "GCP service account exists, importing to state..."
+                  terraform import google_service_account.data_packet_sa projects/${{ secrets.GCP_PROJECT_ID }}/serviceAccounts/data-packet-service@${{ secrets.GCP_PROJECT_ID }}.iam.gserviceaccount.com || echo "Service account already in state or import failed"
                 fi
             - name: Terraform Plan
               run: terraform plan -out=tfplan
