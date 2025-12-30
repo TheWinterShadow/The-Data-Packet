@@ -45,9 +45,9 @@ The Data Packet is a complete end-to-end podcast generation system that:
 
 1. **📰 Intelligently Scrapes** the latest tech news from Wired.com across multiple categories
 2. **🤖 AI-Generated Scripts** using Anthropic Claude to create natural, engaging dialogue  
-3. **🎙️ Multi-Speaker Audio** with ElevenLabs TTS featuring realistic conversational voices
+3. **🎙️ Multi-Speaker Audio** with Google Cloud Text-to-Speech Long Audio Synthesis for professional-quality voices without timeouts
 4. **📻 Complete RSS Feeds** for podcast distribution with metadata and hosting
-5. **☁️ Cloud Integration** with AWS S3 for reliable content hosting and delivery
+5. **☁️ Hybrid Cloud Integration** with AWS S3 for hosting and Google Cloud for advanced TTS processing
 6. **�️ MongoDB Integration** for episode tracking and article deduplication
 7. **�🔄 Full Automation** - Generate professional podcast episodes with a single command
 
@@ -470,8 +470,12 @@ graph LR
 # Required for script generation
 ANTHROPIC_API_KEY=your-claude-api-key
 
-# Required for audio generation  
-ELEVENLABS_API_KEY=your-elevenlabs-api-key
+# Required for audio generation (Google Cloud TTS)
+GCS_BUCKET_NAME=your-gcs-bucket-name
+GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json
+
+# Legacy audio generation (deprecated)
+ELEVENLABS_API_KEY=your-elevenlabs-api-key  # No longer required
 
 # Optional MongoDB configuration for episode tracking
 MONGODB_USERNAME=admin
@@ -497,44 +501,51 @@ from the_data_packet import get_config
 config = get_config(
     show_name="My Tech Podcast",
     claude_model="claude-sonnet-4-5-20250929",
-    tts_model="eleven_turbo_v2_5",
-    voice_a="XrExE9yKIg1WjnnlVkGX",  # George (narrator)
-    voice_b="IKne3meq5aSn9XLyUdCD",  # Rachel (female narrator)
-    max_tokens=3000,
-    temperature=0.7,
+    tts_model="google_cloud_tts",
+    voice_a="en-US-Studio-MultiSpeaker-R",  # Alex (male narrator)
+    voice_b="en-US-Studio-MultiSpeaker-S",  # Sam (female narrator)
+    max_articles_per_source=2,
+    gcs_bucket_name="your-audio-bucket",
     output_directory="./episodes"
 )
 ```
 
-## 🎙️ Available ElevenLabs Voices
+## 🎙️ Google Cloud TTS Voice Configuration
 
 ### Default Voice Configuration
 
-| Role | Voice ID | Description |
-|------|----------|-------------|
-| **Alex (Voice A)** | `XrExE9yKIg1WjnnlVkGX` | George - Professional male narrator |
-| **Sam (Voice B)** | `IKne3meq5aSn9XLyUdCD` | Rachel - Clear female narrator |
+| Role | Voice Name | Description |
+|------|------------|-------------|
+| **Alex (Voice A)** | `en-US-Studio-MultiSpeaker-R` | Professional male narrator optimized for dialogue |
+| **Sam (Voice B)** | `en-US-Studio-MultiSpeaker-S` | Clear female narrator optimized for conversation |
 
-### Additional Available Voices
+### Available Studio Multi-speaker Voices
 
-| Gender | Voice ID | Description |
-|--------|----------|-------------|
-| Male | `JBFqnCBsd6RMkjVDRZzb` | George - Primary narrator voice |
-| Male | `N2lVS1w4EtoT3dr4eOWO` | Callum - Conversational style |
-| Male | `5Q0t7uMcjvnagumLfvZi` | Charlie - Young adult male |
-| Male | `onwK4e9ZLuTAKqWW03F9` | Daniel - Middle-aged voice |
-| Female | `21m00Tcm4TlvDq8ikWAM` | Rachel - Primary female narrator |
-| Female | `AZnzlk1XvdvUeBnXmlld` | Domi - Young woman voice |
-| Female | `EXAVITQu4vr4xnSDxMaL` | Bella - Reading style |
-| Female | `MF3mGyEYCl7XYWbV9V6O` | Elli - Emotional range |
+| Gender | Voice Name | Description |
+|--------|------------|-------------|
+| Male | `en-US-Studio-MultiSpeaker-R` | Alex - Primary male narrator (default) |
+| Male | `en-US-Studio-MultiSpeaker-T` | Alternative male voice option |
+| Male | `en-US-Studio-MultiSpeaker-V` | Secondary male narrator |
+| Female | `en-US-Studio-MultiSpeaker-S` | Sam - Primary female narrator (default) |
+| Female | `en-US-Studio-MultiSpeaker-U` | Alternative female voice option |
+| Female | `en-US-Studio-MultiSpeaker-W` | Secondary female narrator |
 
-### TTS Models
+### Audio Synthesis Features
 
-| Model | Description |
-|-------|-------------|
-| `eleven_turbo_v2_5` | Ultra-fast, high-quality (recommended) |
-| `eleven_multilingual_v2` | High-quality multilingual |
-| `eleven_flash_v2_5` | Fast generation with good quality |
+| Feature | Description |
+|---------|-------------|
+| **Long Audio Synthesis** | Process entire 20-minute scripts without timeouts |
+| **SSML Support** | Advanced speech markup for natural voice switching |
+| **Cloud Storage Integration** | Automatic file management via Google Cloud Storage |
+| **Background Processing** | Long Running Operations (LRO) for lengthy synthesis |
+
+### Legacy ElevenLabs Support (Deprecated)
+
+ElevenLabs support is deprecated but still available for backward compatibility. We recommend migrating to Google Cloud TTS for:
+- **No timeout limitations** for long content
+- **Better voice consistency** across speakers  
+- **Cost-effective processing** for extended audio
+- **Professional-grade synthesis** optimized for dialogue
 
 ## 📈 What's New in v2.0
 

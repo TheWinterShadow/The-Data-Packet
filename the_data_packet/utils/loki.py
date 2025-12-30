@@ -331,7 +331,7 @@ class LokiUploader:
                     "stream": {
                         "service_name": service_name,
                         "environment": environment,
-                        "trace_id": uuid.uuid4(),
+                        "trace_id": str(uuid.uuid4()),
                     },
                     "values": logs,
                 }

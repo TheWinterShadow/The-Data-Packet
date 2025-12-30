@@ -2,7 +2,7 @@
 
 import unittest
 from pathlib import Path
-from unittest.mock import Mock, mock_open, patch
+from unittest.mock import Mock, patch
 
 from the_data_packet.core.exceptions import AudioGenerationError, ConfigurationError
 from the_data_packet.generation.audio import AudioGenerator, AudioResult
@@ -41,100 +41,146 @@ class TestAudioGenerator(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures."""
         self.mock_config = Mock()
-        self.mock_config.elevenlabs_api_key = "test-api-key"
-        self.mock_config.tts_model = "eleven_turbo_v2_5"
-        self.mock_config.voice_a = "voice-a-id"
-        self.mock_config.voice_b = "voice-b-id"
+        self.mock_config.gcs_bucket_name = "test-audio-bucket"
+        self.mock_config.google_credentials_path = None  # No credentials file in tests
+        self.mock_config.voice_a = "en-US-Studio-MultiSpeaker-R"
+        self.mock_config.voice_b = "en-US-Studio-MultiSpeaker-S"
         self.mock_config.output_directory = Path("/tmp/test")
+        self.mock_config.cleanup_temp_files = True
 
-    def test_available_models_defined(self):
-        """Test that available models are properly defined."""
-        self.assertIsInstance(AudioGenerator.AVAILABLE_MODELS, dict)
-        self.assertIn("eleven_turbo_v2_5", AudioGenerator.AVAILABLE_MODELS)
-        self.assertIn("eleven_multilingual_v2", AudioGenerator.AVAILABLE_MODELS)
-        self.assertIn("eleven_flash_v2_5", AudioGenerator.AVAILABLE_MODELS)
+    def test_available_voices_defined(self):
+        """Test that available voices are properly defined."""
+        self.assertIsInstance(AudioGenerator.AVAILABLE_VOICES, dict)
+        self.assertIn("male", AudioGenerator.AVAILABLE_VOICES)
+        self.assertIn("female", AudioGenerator.AVAILABLE_VOICES)
+        self.assertIn(
+            "en-US-Studio-MultiSpeaker-R", AudioGenerator.AVAILABLE_VOICES["male"]
+        )
+        self.assertIn(
+            "en-US-Studio-MultiSpeaker-S", AudioGenerator.AVAILABLE_VOICES["female"]
+        )
 
-    def test_default_voices_defined(self):
-        """Test that default voices are properly defined."""
-        self.assertIsInstance(AudioGenerator.DEFAULT_VOICES, dict)
-        self.assertIn("male", AudioGenerator.DEFAULT_VOICES)
-        self.assertIn("female", AudioGenerator.DEFAULT_VOICES)
-        self.assertIsInstance(AudioGenerator.DEFAULT_VOICES["male"], list)
-        self.assertIsInstance(AudioGenerator.DEFAULT_VOICES["female"], list)
+    def test_audio_config_defined(self):
+        """Test that audio configuration is properly defined."""
+        from google.cloud import texttospeech
+
+        self.assertIsInstance(AudioGenerator.AUDIO_CONFIG, dict)
+        self.assertEqual(
+            AudioGenerator.AUDIO_CONFIG["audio_encoding"],
+            texttospeech.AudioEncoding.MP3,
+        )
+        self.assertEqual(AudioGenerator.AUDIO_CONFIG["sample_rate_hertz"], 44100)
 
     @patch("the_data_packet.generation.audio.get_config")
-    @patch("the_data_packet.generation.audio.ElevenLabs")
-    def test_init_with_api_key(self, mock_elevenlabs, mock_get_config):
-        """Test AudioGenerator initialization with API key."""
+    @patch(
+        "the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient"
+    )
+    @patch("the_data_packet.generation.audio.storage.Client")
+    @patch("os.path.exists")
+    def test_init_with_gcs_bucket(
+        self, mock_exists, mock_storage, mock_tts, mock_get_config
+    ):
+        """Test AudioGenerator initialization with GCS bucket."""
         mock_get_config.return_value = self.mock_config
-        mock_client = Mock()
-        mock_elevenlabs.return_value = mock_client
+        mock_exists.return_value = True
+        mock_tts_client = Mock()
+        mock_storage_client = Mock()
+        mock_bucket = Mock()
+        mock_storage_client.bucket.return_value = mock_bucket
+        mock_bucket.list_blobs.return_value = []
+        mock_tts.return_value = mock_tts_client
+        mock_storage.return_value = mock_storage_client
 
-        generator = AudioGenerator(api_key="test-key")
+        generator = AudioGenerator(gcs_bucket_name="test-bucket")
 
-        self.assertEqual(generator.api_key, "test-key")
-        self.assertEqual(generator.model_id, "eleven_turbo_v2_5")
-        mock_elevenlabs.assert_called_once_with(api_key="test-key")
+        self.assertEqual(generator.gcs_bucket_name, "test-bucket")
+        self.assertEqual(generator.voice_a, "en-US-Studio-MultiSpeaker-R")
+        self.assertEqual(generator.voice_b, "en-US-Studio-MultiSpeaker-S")
 
     @patch("the_data_packet.generation.audio.get_config")
-    def test_init_without_api_key_raises_error(self, mock_get_config):
-        """Test that initialization without API key raises ConfigurationError."""
-        mock_config_no_key = Mock()
-        mock_config_no_key.elevenlabs_api_key = None
-        mock_get_config.return_value = mock_config_no_key
+    def test_init_without_gcs_bucket_raises_error(self, mock_get_config):
+        """Test that initialization without GCS bucket raises ConfigurationError."""
+        mock_config_no_bucket = Mock()
+        mock_config_no_bucket.gcs_bucket_name = None
+        mock_get_config.return_value = mock_config_no_bucket
 
         with self.assertRaises(ConfigurationError) as cm:
             AudioGenerator()
 
-        self.assertIn("ElevenLabs API key is required", str(cm.exception))
+        self.assertIn("Google Cloud Storage bucket is required", str(cm.exception))
 
     @patch("the_data_packet.generation.audio.get_config")
-    @patch("the_data_packet.generation.audio.ElevenLabs")
-    def test_init_with_custom_voices(self, mock_elevenlabs, mock_get_config):
+    @patch(
+        "the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient"
+    )
+    @patch("the_data_packet.generation.audio.storage.Client")
+    @patch("os.path.exists")
+    def test_init_with_custom_voices(
+        self, mock_exists, mock_storage, mock_tts, mock_get_config
+    ):
         """Test AudioGenerator initialization with custom voices."""
         mock_get_config.return_value = self.mock_config
-        mock_client = Mock()
-        mock_elevenlabs.return_value = mock_client
+        mock_exists.return_value = True
+        mock_tts_client = Mock()
+        mock_storage_client = Mock()
+        mock_bucket = Mock()
+        mock_storage_client.bucket.return_value = mock_bucket
+        mock_bucket.list_blobs.return_value = []
+        mock_tts.return_value = mock_tts_client
+        mock_storage.return_value = mock_storage_client
 
         generator = AudioGenerator(
-            api_key="test-key", voice_a="custom-voice-a", voice_b="custom-voice-b"
+            gcs_bucket_name="test-bucket",
+            voice_a="en-US-Studio-MultiSpeaker-T",
+            voice_b="en-US-Studio-MultiSpeaker-U",
         )
 
-        self.assertEqual(generator.voice_a, "custom-voice-a")
-        self.assertEqual(generator.voice_b, "custom-voice-b")
+        self.assertEqual(generator.voice_a, "en-US-Studio-MultiSpeaker-T")
+        self.assertEqual(generator.voice_b, "en-US-Studio-MultiSpeaker-U")
 
     @patch("the_data_packet.generation.audio.get_config")
-    @patch("the_data_packet.generation.audio.ElevenLabs")
-    def test_validate_voices_with_available_voices(
-        self, mock_elevenlabs, mock_get_config
+    @patch(
+        "the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient"
+    )
+    @patch("the_data_packet.generation.audio.storage.Client")
+    @patch("os.path.exists")
+    def test_validate_gcs_bucket_success(
+        self, mock_exists, mock_storage, mock_tts, mock_get_config
     ):
-        """Test voice validation with available voices."""
+        """Test successful GCS bucket validation."""
         mock_get_config.return_value = self.mock_config
-        mock_client = Mock()
-        mock_voice_response = Mock()
-        mock_voice_response.voices = [
-            Mock(voice_id="voice-a-id"),
-            Mock(voice_id="voice-b-id"),
-            Mock(voice_id="other-voice"),
-        ]
-        mock_client.voices.get_all.return_value = mock_voice_response
-        mock_elevenlabs.return_value = mock_client
+        mock_exists.return_value = True
+        mock_storage_client = Mock()
+        mock_bucket = Mock()
+        mock_storage_client.bucket.return_value = mock_bucket
+        mock_bucket.list_blobs.return_value = []
+        mock_storage.return_value = mock_storage_client
+        mock_tts.return_value = Mock()
 
         # Should not raise an exception
-        generator = AudioGenerator(api_key="test-key")
+        generator = AudioGenerator(gcs_bucket_name="test-bucket")
         self.assertIsNotNone(generator)
 
     @patch("the_data_packet.generation.audio.get_config")
-    @patch("the_data_packet.generation.audio.ElevenLabs")
+    @patch(
+        "the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient"
+    )
+    @patch("the_data_packet.generation.audio.storage.Client")
+    @patch("os.path.exists")
     def test_generate_audio_with_empty_script_raises_error(
-        self, mock_elevenlabs, mock_get_config
+        self, mock_exists, mock_storage, mock_tts, mock_get_config
     ):
         """Test that empty script raises AudioGenerationError."""
         mock_get_config.return_value = self.mock_config
-        mock_client = Mock()
-        mock_elevenlabs.return_value = mock_client
+        mock_exists.return_value = True
+        mock_storage_client = Mock()
+        mock_bucket = Mock()
+        mock_storage_client.bucket.return_value = mock_bucket
+        mock_bucket.list_blobs.return_value = []
+        mock_storage.return_value = mock_storage_client
+        mock_tts.return_value = Mock()
 
-        generator = AudioGenerator(api_key="test-key")
+        generator = AudioGenerator(gcs_bucket_name="test-bucket")
 
         with self.assertRaises(AudioGenerationError) as cm:
             generator.generate_audio("")
@@ -142,16 +188,25 @@ class TestAudioGenerator(unittest.TestCase):
         self.assertIn("Script too short or empty", str(cm.exception))
 
     @patch("the_data_packet.generation.audio.get_config")
-    @patch("the_data_packet.generation.audio.ElevenLabs")
+    @patch(
+        "the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient"
+    )
+    @patch("the_data_packet.generation.audio.storage.Client")
+    @patch("os.path.exists")
     def test_generate_audio_with_short_script_raises_error(
-        self, mock_elevenlabs, mock_get_config
+        self, mock_exists, mock_storage, mock_tts, mock_get_config
     ):
         """Test that very short script raises AudioGenerationError."""
         mock_get_config.return_value = self.mock_config
-        mock_client = Mock()
-        mock_elevenlabs.return_value = mock_client
+        mock_exists.return_value = True
+        mock_storage_client = Mock()
+        mock_bucket = Mock()
+        mock_storage_client.bucket.return_value = mock_bucket
+        mock_bucket.list_blobs.return_value = []
+        mock_storage.return_value = mock_storage_client
+        mock_tts.return_value = Mock()
 
-        generator = AudioGenerator(api_key="test-key")
+        generator = AudioGenerator(gcs_bucket_name="test-bucket")
 
         with self.assertRaises(AudioGenerationError) as cm:
             generator.generate_audio("Short")
@@ -159,14 +214,25 @@ class TestAudioGenerator(unittest.TestCase):
         self.assertIn("Script too short or empty", str(cm.exception))
 
     @patch("the_data_packet.generation.audio.get_config")
-    @patch("the_data_packet.generation.audio.ElevenLabs")
-    def test_parse_script_for_speakers(self, mock_elevenlabs, mock_get_config):
-        """Test script parsing for speaker identification."""
+    @patch(
+        "the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient"
+    )
+    @patch("the_data_packet.generation.audio.storage.Client")
+    @patch("os.path.exists")
+    def test_parse_script_to_ssml(
+        self, mock_exists, mock_storage, mock_tts, mock_get_config
+    ):
+        """Test script parsing to SSML with voice switching."""
         mock_get_config.return_value = self.mock_config
-        mock_client = Mock()
-        mock_elevenlabs.return_value = mock_client
+        mock_exists.return_value = True
+        mock_storage_client = Mock()
+        mock_bucket = Mock()
+        mock_storage_client.bucket.return_value = mock_bucket
+        mock_bucket.list_blobs.return_value = []
+        mock_storage.return_value = mock_storage_client
+        mock_tts.return_value = Mock()
 
-        generator = AudioGenerator(api_key="test-key")
+        generator = AudioGenerator(gcs_bucket_name="test-bucket")
 
         script = """
         Alex: Welcome to the show!
@@ -175,96 +241,161 @@ class TestAudioGenerator(unittest.TestCase):
         Alex: Let's talk about tech.
         """
 
-        segments = generator._parse_script_for_speakers(script)
+        ssml = generator._parse_script_to_ssml(script)
 
-        self.assertEqual(len(segments), 4)
-        self.assertEqual(segments[0]["text"], "Welcome to the show!")
-        self.assertEqual(segments[0]["speaker"], "Alex")
-        self.assertEqual(segments[1]["text"], "Thanks for having me.")
-        self.assertEqual(segments[1]["speaker"], "Sam")
-        self.assertEqual(segments[2]["text"], "This is a narrator line.")
-        self.assertEqual(segments[2]["speaker"], "Alex")  # Default to Alex
-        self.assertEqual(segments[3]["text"], "Let's talk about tech.")
-        self.assertEqual(segments[3]["speaker"], "Alex")
+        self.assertTrue(ssml.startswith("<speak>"))
+        self.assertTrue(ssml.endswith("</speak>"))
+        self.assertIn(
+            '<voice name="en-US-Studio-MultiSpeaker-R">Welcome to the show!</voice>',
+            ssml,
+        )
+        self.assertIn(
+            '<voice name="en-US-Studio-MultiSpeaker-S">Thanks for having me.</voice>',
+            ssml,
+        )
+        self.assertIn(
+            '<voice name="en-US-Studio-MultiSpeaker-R">This is a narrator line.</voice>',
+            ssml,
+        )
+        self.assertIn(
+            '<voice name="en-US-Studio-MultiSpeaker-R">Let\'s talk about tech.</voice>',
+            ssml,
+        )
 
     def test_get_available_voices_structure(self):
         """Test get_available_voices returns proper structure."""
         with patch("the_data_packet.generation.audio.get_config") as mock_get_config:
             mock_get_config.return_value = self.mock_config
 
-            with patch(
-                "the_data_packet.generation.audio.ElevenLabs"
-            ) as mock_elevenlabs:
-                mock_client = Mock()
-                mock_voice_response = Mock()
-                mock_voice_response.voices = [Mock(voice_id="test-voice-1")]
-                mock_client.voices.get_all.return_value = mock_voice_response
-                mock_elevenlabs.return_value = mock_client
+            with (
+                patch(
+                    "the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient"
+                ),
+                patch("the_data_packet.generation.audio.storage.Client"),
+                patch("os.path.exists", return_value=True),
+            ):
 
-                generator = AudioGenerator(api_key="test-key")
-                voices = generator.get_available_voices()
+                mock_storage_client = Mock()
+                mock_bucket = Mock()
+                mock_storage_client.bucket.return_value = mock_bucket
+                mock_bucket.list_blobs.return_value = []
 
-                self.assertIsInstance(voices, dict)
-                self.assertIn("male", voices)
-                self.assertIn("female", voices)
+                with patch(
+                    "the_data_packet.generation.audio.storage.Client",
+                    return_value=mock_storage_client,
+                ):
+                    generator = AudioGenerator(gcs_bucket_name="test-bucket")
+                    voices = generator.get_available_voices()
 
-    def test_get_available_voices_with_exception(self):
-        """Test get_available_voices returns defaults when API fails."""
-        with patch("the_data_packet.generation.audio.get_config") as mock_get_config:
-            mock_get_config.return_value = self.mock_config
-
-            with patch(
-                "the_data_packet.generation.audio.ElevenLabs"
-            ) as mock_elevenlabs:
-                mock_client = Mock()
-                mock_client.voices.get_all.side_effect = Exception("API Error")
-                mock_elevenlabs.return_value = mock_client
-
-                generator = AudioGenerator(api_key="test-key")
-                voices = generator.get_available_voices()
-
-                # Should return default voices
-                self.assertEqual(voices, AudioGenerator.DEFAULT_VOICES)
+                    self.assertIsInstance(voices, dict)
+                    self.assertIn("male", voices)
+                    self.assertIn("female", voices)
+                    self.assertIn("en-US-Studio-MultiSpeaker-R", voices["male"])
+                    self.assertIn("en-US-Studio-MultiSpeaker-S", voices["female"])
 
     @patch("the_data_packet.generation.audio.get_config")
-    @patch("the_data_packet.generation.audio.ElevenLabs")
-    def test_test_authentication_success(self, mock_elevenlabs, mock_get_config):
+    @patch(
+        "the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient"
+    )
+    @patch("the_data_packet.generation.audio.texttospeech.TextToSpeechClient")
+    @patch("the_data_packet.generation.audio.storage.Client")
+    @patch("os.path.exists")
+    def test_test_authentication_success(
+        self, mock_exists, mock_storage, mock_tts_client, mock_tts_long, mock_get_config
+    ):
         """Test successful authentication test."""
         mock_get_config.return_value = self.mock_config
-        mock_client = Mock()
-        mock_client.voices.get_all.return_value = [Mock()]  # Non-empty list
-        mock_elevenlabs.return_value = mock_client
+        mock_exists.return_value = True
 
-        generator = AudioGenerator(api_key="test-key")
+        # Mock TTS client for authentication test
+        mock_client = Mock()
+        mock_voices_response = Mock()
+        mock_voices_response.voices = [Mock()]  # Non-empty list
+        mock_client.list_voices.return_value = mock_voices_response
+        mock_tts_client.return_value = mock_client
+
+        # Mock storage client
+        mock_storage_client = Mock()
+        mock_bucket = Mock()
+        mock_bucket.exists.return_value = True
+        mock_storage_client.bucket.return_value = mock_bucket
+        mock_storage_client.bucket().list_blobs.return_value = []
+        mock_storage.return_value = mock_storage_client
+
+        # Mock long audio client
+        mock_tts_long.return_value = Mock()
+
+        generator = AudioGenerator(gcs_bucket_name="test-bucket")
         result = generator.test_authentication()
 
         self.assertTrue(result)
 
     @patch("the_data_packet.generation.audio.get_config")
-    @patch("the_data_packet.generation.audio.ElevenLabs")
-    def test_test_authentication_failure(self, mock_elevenlabs, mock_get_config):
+    @patch(
+        "the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient"
+    )
+    @patch("the_data_packet.generation.audio.texttospeech.TextToSpeechClient")
+    @patch("the_data_packet.generation.audio.storage.Client")
+    @patch("os.path.exists")
+    def test_test_authentication_failure(
+        self, mock_exists, mock_storage, mock_tts_client, mock_tts_long, mock_get_config
+    ):
         """Test failed authentication test."""
         mock_get_config.return_value = self.mock_config
-        mock_client = Mock()
-        mock_client.voices.get_all.side_effect = Exception("Auth failed")
-        mock_elevenlabs.return_value = mock_client
+        mock_exists.return_value = True
 
-        generator = AudioGenerator(api_key="test-key")
+        # Mock TTS client failure
+        mock_client = Mock()
+        mock_client.list_voices.side_effect = Exception("Auth failed")
+        mock_tts_client.return_value = mock_client
+
+        # Mock storage client
+        mock_storage_client = Mock()
+        mock_bucket = Mock()
+        mock_storage_client.bucket.return_value = mock_bucket
+        mock_storage_client.bucket().list_blobs.return_value = []
+        mock_storage.return_value = mock_storage_client
+
+        # Mock long audio client
+        mock_tts_long.return_value = Mock()
+
+        generator = AudioGenerator(gcs_bucket_name="test-bucket")
         result = generator.test_authentication()
 
         self.assertFalse(result)
 
     @patch("the_data_packet.generation.audio.get_config")
-    @patch("the_data_packet.generation.audio.ElevenLabs")
-    def test_generate_audio_success(self, mock_elevenlabs, mock_get_config):
-        """Test successful audio generation."""
+    @patch(
+        "the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient"
+    )
+    @patch("the_data_packet.generation.audio.storage.Client")
+    @patch("os.path.exists")
+    @patch("time.sleep")
+    def test_generate_audio_success(
+        self, mock_sleep, mock_exists, mock_storage, mock_tts, mock_get_config
+    ):
+        """Test successful audio generation with Google Cloud TTS."""
         mock_get_config.return_value = self.mock_config
-        mock_client = Mock()
-        mock_elevenlabs.return_value = mock_client
+        mock_exists.return_value = True
 
-        # Mock successful audio generation
-        mock_response = [b"audio_chunk_1", b"audio_chunk_2"]
-        mock_client.text_to_speech.convert.return_value = mock_response
+        # Mock TTS long audio client
+        mock_tts_client = Mock()
+        mock_operation = Mock()
+        mock_operation.operation.name = "test-operation"
+        mock_operation.done.return_value = True
+        mock_operation.result.return_value = Mock()
+        mock_tts_client.synthesize_long_audio.return_value = mock_operation
+        mock_tts.return_value = mock_tts_client
+
+        # Mock storage client
+        mock_storage_client = Mock()
+        mock_bucket = Mock()
+        mock_blob = Mock()
+        mock_blob.exists.return_value = True
+        mock_bucket.blob.return_value = mock_blob
+        mock_bucket.list_blobs.return_value = []
+        mock_storage_client.bucket.return_value = mock_bucket
+        mock_storage.return_value = mock_storage_client
 
         # Create a longer script to pass validation
         script = """Alex: Hello and welcome to our tech podcast.
@@ -272,17 +403,15 @@ Sam: Thanks for having me, Alex. Today we're discussing AI.
 Alex: That's right. The latest developments are fascinating.
 Sam: Absolutely. Let's dive into the details."""
 
-        generator = AudioGenerator(api_key="test-key")
+        generator = AudioGenerator(gcs_bucket_name="test-bucket")
 
         with (
             patch("pathlib.Path.mkdir"),
             patch("pathlib.Path.stat") as mock_stat,
-            patch("pathlib.Path.exists") as mock_exists,
-            patch("builtins.open", mock_open()),
+            patch("pathlib.Path.exists") as mock_path_exists,
         ):
-
             mock_stat.return_value = Mock(st_size=1024)
-            mock_exists.return_value = True
+            mock_path_exists.return_value = True
 
             result = generator.generate_audio(script)
 
@@ -292,271 +421,155 @@ Sam: Absolutely. Let's dive into the details."""
             self.assertEqual(result.file_size_bytes, 1024)
 
     @patch("the_data_packet.generation.audio.get_config")
-    @patch("the_data_packet.generation.audio.ElevenLabs")
-    def test_generate_audio_no_segments_found(self, mock_elevenlabs, mock_get_config):
-        """Test audio generation when all segments fail to generate."""
+    @patch(
+        "the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient"
+    )
+    @patch("the_data_packet.generation.audio.storage.Client")
+    @patch("os.path.exists")
+    def test_generate_audio_no_segments_found(
+        self, mock_exists, mock_storage, mock_tts, mock_get_config
+    ):
+        """Test audio generation when synthesis fails."""
         mock_get_config.return_value = self.mock_config
-        mock_client = Mock()
-        mock_elevenlabs.return_value = mock_client
+        mock_exists.return_value = True
 
-        # Mock complete failure for all text-to-speech calls
-        mock_client.text_to_speech.convert.side_effect = Exception(
-            "Complete API failure"
-        )
+        # Mock TTS client failure
+        mock_tts_client = Mock()
+        mock_tts_client.synthesize_long_audio.side_effect = Exception("TTS failure")
+        mock_tts.return_value = mock_tts_client
 
-        # Any script will generate segments, but TTS will fail
+        # Mock storage client
+        mock_storage_client = Mock()
+        mock_bucket = Mock()
+        mock_bucket.list_blobs.return_value = []
+        mock_storage_client.bucket.return_value = mock_bucket
+        mock_storage.return_value = mock_storage_client
+
         script = """Alex: Hello and welcome to our tech podcast.
 Sam: Thanks for having me, Alex. Today we're discussing AI."""
 
-        generator = AudioGenerator(api_key="test-key")
+        generator = AudioGenerator(gcs_bucket_name="test-bucket")
 
         with self.assertRaises(AudioGenerationError) as context:
             generator.generate_audio(script)
 
         self.assertIn(
-            "No audio segments were successfully generated", str(context.exception)
+            "Failed to generate audio with Google Cloud TTS", str(context.exception)
         )
 
     @patch("the_data_packet.generation.audio.get_config")
-    @patch("the_data_packet.generation.audio.ElevenLabs")
-    def test_generate_audio_api_failure(self, mock_elevenlabs, mock_get_config):
+    @patch(
+        "the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient"
+    )
+    @patch("the_data_packet.generation.audio.storage.Client")
+    @patch("os.path.exists")
+    @patch("time.sleep")
+    def test_generate_audio_operation_timeout(
+        self, mock_sleep, mock_exists, mock_storage, mock_tts, mock_get_config
+    ):
+        """Test audio generation with operation timeout."""
+        mock_get_config.return_value = self.mock_config
+        mock_exists.return_value = True
+
+        # Mock TTS client with operation that never completes
+        mock_tts_client = Mock()
+        mock_operation = Mock()
+        mock_operation.operation.name = "test-operation"
+        mock_operation.done.return_value = False  # Never completes
+        mock_tts_client.synthesize_long_audio.return_value = mock_operation
+        mock_tts.return_value = mock_tts_client
+
+        # Mock storage client
+        mock_storage_client = Mock()
+        mock_bucket = Mock()
+        mock_bucket.list_blobs.return_value = []
+        mock_storage_client.bucket.return_value = mock_bucket
+        mock_storage.return_value = mock_storage_client
+
+        script = """Alex: Hello and welcome to our tech podcast.
+Sam: Thanks for having me, Alex. Today we're discussing AI."""
+
+        generator = AudioGenerator(gcs_bucket_name="test-bucket")
+
+        with self.assertRaises(AudioGenerationError) as context:
+            generator.generate_audio(script)
+
+        self.assertIn("Audio synthesis timed out", str(context.exception))
+
+    @patch("the_data_packet.generation.audio.get_config")
+    @patch(
+        "the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient"
+    )
+    @patch("the_data_packet.generation.audio.storage.Client")
+    @patch("os.path.exists")
+    def test_generate_audio_api_failure(
+        self, mock_exists, mock_storage, mock_tts, mock_get_config
+    ):
         """Test audio generation with API failure."""
         mock_get_config.return_value = self.mock_config
-        mock_client = Mock()
-        mock_elevenlabs.return_value = mock_client
+        mock_exists.return_value = True
 
-        # Mock API failure
-        mock_client.text_to_speech.convert.side_effect = Exception("API Error")
+        # Mock TTS client failure
+        mock_tts_client = Mock()
+        mock_tts_client.synthesize_long_audio.side_effect = Exception("API Error")
+        mock_tts.return_value = mock_tts_client
+
+        # Mock storage client
+        mock_storage_client = Mock()
+        mock_bucket = Mock()
+        mock_bucket.list_blobs.return_value = []
+        mock_storage_client.bucket.return_value = mock_bucket
+        mock_storage.return_value = mock_storage_client
 
         script = """Alex: Hello and welcome to our tech podcast.
 Sam: Thanks for having me, Alex. Today we're discussing AI."""
 
-        generator = AudioGenerator(api_key="test-key")
+        generator = AudioGenerator(gcs_bucket_name="test-bucket")
 
         with self.assertRaises(AudioGenerationError) as context:
             generator.generate_audio(script)
 
-        # This will fail at the voice generation step, not the initial generation
         self.assertIn(
-            "No audio segments were successfully generated", str(context.exception)
+            "Failed to generate audio with Google Cloud TTS", str(context.exception)
         )
 
     @patch("the_data_packet.generation.audio.get_config")
-    @patch("the_data_packet.generation.audio.ElevenLabs")
-    def test_generate_audio_with_custom_output_file(
-        self, mock_elevenlabs, mock_get_config
+    @patch(
+        "the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient"
+    )
+    @patch("the_data_packet.generation.audio.storage.Client")
+    @patch("os.path.exists")
+    @patch("time.sleep")
+    def test_download_audio_from_gcs_success(
+        self, mock_sleep, mock_exists, mock_storage, mock_tts, mock_get_config
     ):
-        """Test audio generation with custom output file."""
+        """Test successful audio download from GCS."""
         from pathlib import Path
 
         mock_get_config.return_value = self.mock_config
-        mock_client = Mock()
-        mock_elevenlabs.return_value = mock_client
+        mock_exists.return_value = True
 
-        # Mock successful audio generation
-        mock_response = [b"audio_chunk"]
-        mock_client.text_to_speech.convert.return_value = mock_response
+        # Mock storage client
+        mock_storage_client = Mock()
+        mock_bucket = Mock()
+        mock_blob = Mock()
+        mock_blob.exists.return_value = True
+        mock_bucket.blob.return_value = mock_blob
+        mock_bucket.list_blobs.return_value = []
+        mock_storage_client.bucket.return_value = mock_bucket
+        mock_storage.return_value = mock_storage_client
 
-        script = """Alex: Hello and welcome to our tech podcast.
-Sam: Thanks for having me, Alex. Today we're discussing AI."""
+        # Mock TTS client
+        mock_tts.return_value = Mock()
 
-        generator = AudioGenerator(api_key="test-key")
-        custom_output = Path("/custom/path/episode.mp3")
+        generator = AudioGenerator(gcs_bucket_name="test-bucket")
+        gcs_uri = "gs://test-bucket/audio/episode_20231230_120000.mp3"
+        output_file = Path("/test/output.mp3")
 
-        with (
-            patch("pathlib.Path.mkdir"),
-            patch("pathlib.Path.stat") as mock_stat,
-            patch("pathlib.Path.exists") as mock_exists,
-            patch("builtins.open", mock_open()),
-        ):
+        generator._download_audio_from_gcs(gcs_uri, output_file)
 
-            mock_stat.return_value = Mock(st_size=512)
-            mock_exists.return_value = True
-
-            result = generator.generate_audio(script, custom_output)
-
-            self.assertEqual(result.output_file, custom_output)
-            self.assertEqual(result.file_size_bytes, 512)
-
-    def test_parse_script_for_speakers_complex_dialogue(self):
-        """Test parsing complex dialogue with multiple speakers."""
-        from the_data_packet.generation.audio import AudioGenerator
-
-        with patch("the_data_packet.generation.audio.get_config") as mock_get_config:
-            mock_config = Mock()
-            mock_config.voice_a = "voice_a_id"
-            mock_config.voice_b = "voice_b_id"
-            mock_get_config.return_value = mock_config
-
-            with patch("the_data_packet.generation.audio.ElevenLabs"):
-                generator = AudioGenerator(api_key="test-key")
-
-                script = """
-Alex: Hello everyone, welcome to our show.
-Sam: Thanks Alex. Today we're covering AI developments.
-Alex: That's right. The field is moving rapidly.
-
-[Some narrative text]
-
-Sam: Let's start with the latest research.
-Alex: Absolutely. The new models are impressive.
-"""
-
-                segments = generator._parse_script_for_speakers(script)
-
-                # Should find the dialogue lines and ignore narrative
-                dialogue_segments = [s for s in segments if s["text"].strip()]
-                self.assertGreaterEqual(len(dialogue_segments), 4)
-
-                # Check that voices are assigned correctly
-                alex_segments = [s for s in segments if s["speaker"] == "Alex"]
-                sam_segments = [s for s in segments if s["speaker"] == "Sam"]
-
-                self.assertGreater(len(alex_segments), 0)
-                self.assertGreater(len(sam_segments), 0)
-
-                # All Alex segments should have voice_a
-                for segment in alex_segments:
-                    self.assertEqual(segment["voice"], "voice_a_id")
-
-                # All Sam segments should have voice_b
-                for segment in sam_segments:
-                    self.assertEqual(segment["voice"], "voice_b_id")
-
-    @patch("the_data_packet.generation.audio.get_config")
-    @patch("the_data_packet.generation.audio.ElevenLabs")
-    def test_generate_with_individual_voices_success(
-        self, mock_elevenlabs, mock_get_config
-    ):
-        """Test successful individual voice generation and combination."""
-        mock_get_config.return_value = self.mock_config
-        mock_client = Mock()
-        mock_elevenlabs.return_value = mock_client
-
-        # Mock audio generation responses
-        mock_client.text_to_speech.convert.side_effect = [
-            [b"audio_chunk_1"],
-            [b"audio_chunk_2"],
-        ]
-
-        generator = AudioGenerator(api_key="test-key")
-
-        segments = [
-            {"speaker": "Alex", "text": "Hello", "voice": "voice_a"},
-            {"speaker": "Sam", "text": "Hi there", "voice": "voice_b"},
-        ]
-
-        audio_data = generator._generate_with_individual_voices(segments)
-
-        # Should combine all chunks
-        self.assertEqual(audio_data, b"audio_chunk_1audio_chunk_2")
-
-        # Should call convert for each segment
-        self.assertEqual(mock_client.text_to_speech.convert.call_count, 2)
-
-    @patch("the_data_packet.generation.audio.get_config")
-    @patch("the_data_packet.generation.audio.ElevenLabs")
-    def test_generate_with_individual_voices_partial_failure(
-        self, mock_elevenlabs, mock_get_config
-    ):
-        """Test individual voice generation with partial failures."""
-        mock_get_config.return_value = self.mock_config
-        mock_client = Mock()
-        mock_elevenlabs.return_value = mock_client
-
-        # Mock mixed success/failure responses
-        def mock_convert_side_effect(*args, **kwargs):
-            if kwargs["text"].startswith("Hello"):
-                return [b"audio_chunk_1"]
-            else:
-                raise Exception("API Error for this segment")
-
-        mock_client.text_to_speech.convert.side_effect = mock_convert_side_effect
-
-        generator = AudioGenerator(api_key="test-key")
-
-        segments = [
-            {"speaker": "Alex", "text": "Hello", "voice": "voice_a"},
-            {"speaker": "Sam", "text": "Hi there", "voice": "voice_b"},
-        ]
-
-        audio_data = generator._generate_with_individual_voices(segments)
-
-        # Should still return partial success
-        self.assertEqual(audio_data, b"audio_chunk_1")
-
-    @patch("the_data_packet.generation.audio.get_config")
-    @patch("the_data_packet.generation.audio.ElevenLabs")
-    def test_generate_with_individual_voices_total_failure(
-        self, mock_elevenlabs, mock_get_config
-    ):
-        """Test individual voice generation with total failure."""
-        mock_get_config.return_value = self.mock_config
-        mock_client = Mock()
-        mock_elevenlabs.return_value = mock_client
-
-        # Mock all failures
-        mock_client.text_to_speech.convert.side_effect = Exception("Total API failure")
-
-        generator = AudioGenerator(api_key="test-key")
-
-        segments = [
-            {"speaker": "Alex", "text": "Hello", "voice": "voice_a"},
-            {"speaker": "Sam", "text": "Hi there", "voice": "voice_b"},
-        ]
-
-        with self.assertRaises(AudioGenerationError) as context:
-            generator._generate_with_individual_voices(segments)
-
-        self.assertIn(
-            "No audio segments were successfully generated", str(context.exception)
-        )
-
-    def test_save_audio_success(self):
-        """Test successful audio file saving."""
-        from pathlib import Path
-
-        from the_data_packet.generation.audio import AudioGenerator
-
-        with patch("the_data_packet.generation.audio.get_config") as mock_get_config:
-            mock_config = Mock()
-            mock_get_config.return_value = mock_config
-
-            with patch("the_data_packet.generation.audio.ElevenLabs"):
-                generator = AudioGenerator(api_key="test-key")
-
-                audio_data = b"test_audio_data"
-                output_file = Path("/test/output.mp3")
-
-                with patch("builtins.open", mock_open()) as mock_file:
-                    generator._save_audio(audio_data, output_file)
-
-                    # Verify file was opened for binary write
-                    mock_file.assert_called_once_with(output_file, "wb")
-                    # Verify audio data was written
-                    mock_file().write.assert_called_once_with(audio_data)
-
-    def test_save_audio_failure(self):
-        """Test audio file saving failure."""
-        from pathlib import Path
-
-        from the_data_packet.generation.audio import AudioGenerator
-
-        with patch("the_data_packet.generation.audio.get_config") as mock_get_config:
-            mock_config = Mock()
-            mock_get_config.return_value = mock_config
-
-            with patch("the_data_packet.generation.audio.ElevenLabs"):
-                generator = AudioGenerator(api_key="test-key")
-
-                audio_data = b"test_audio_data"
-                output_file = Path("/test/output.mp3")
-
-                with patch("builtins.open", side_effect=IOError("Permission denied")):
-                    with self.assertRaises(AudioGenerationError) as context:
-                        generator._save_audio(audio_data, output_file)
-
-                    self.assertIn("Failed to save audio to", str(context.exception))
+        # Verify blob download was called
+        mock_blob.download_to_filename.assert_called_once_with(str(output_file))
 
 
 if __name__ == "__main__":

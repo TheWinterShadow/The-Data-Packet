@@ -12,16 +12,21 @@ description = "Automated podcast generation from news articles using AI with Mon
 readme = "README.md"
 requires-python = ">=3.9"
 license = "MIT"
-keywords = ["podcast", "ai", "automation", "news", "scraping", "tts", "claude", "elevenlabs", "s3", "aws", "storage", "mongodb", "episode-tracking", "deduplication"]
+keywords = ["podcast", "ai", "automation", "news", "scraping", "tts", "claude", "google-cloud", "text-to-speech", "s3", "aws", "storage", "mongodb", "episode-tracking", "deduplication", "long-audio-synthesis"]
 dependencies = [
     "feedparser>=6.0.0",
     "requests>=2.25.0",
     "beautifulsoup4>=4.9.0",
-    "elevenlabs>=0.2.0",
     "tenacity>=8.0.0",
     "anthropic>=0.25.0",
     "boto3>=1.20.0",
     "pymongo",
+    # Google Cloud dependencies for TTS Long Audio Synthesis
+    "google-cloud-texttospeech>=2.16.0",
+    "google-cloud-storage>=2.10.0",
+    "google-auth>=2.17.0",
+    # Legacy TTS support (deprecated)
+    "elevenlabs>=0.2.0;python_version<'3.13'",  # Optional for backward compatibility
 ]
 authors = [
   { name = "TheWinterShadow", email = "elijah.j.winter@outlook.com" },
@@ -101,10 +106,16 @@ dependencies = [
   "requests>=2.25.0",
   "pymongo",
   "beautifulsoup4>=4.9.0",
-  "elevenlabs>=0.2.0",
   "tenacity>=8.0.0",
   "anthropic>=0.25.0",
   "boto3>=1.20.0",
+  # Google Cloud dependencies
+  "google-cloud-texttospeech>=2.16.0",
+  "google-cloud-storage>=2.10.0",
+  "google-auth>=2.17.0",
+  # Legacy support
+  "elevenlabs>=0.2.0",
+  # Development tools
   "black>=23.0.0",
   "isort>=5.12.0",
   "flake8>=6.0.0",

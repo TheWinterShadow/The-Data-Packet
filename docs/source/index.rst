@@ -12,7 +12,7 @@ The Data Packet automates the entire podcast creation workflow:
 
 1. **📰 Article Collection**: Scrapes latest tech news from Wired.com and TechCrunch via RSS feeds
 2. **🤖 Script Generation**: Uses Anthropic Claude AI to create engaging dialogue scripts 
-3. **🎙️ Audio Production**: Generates multi-speaker audio using ElevenLabs TTS
+3. **🎙️ Audio Production**: Generates multi-speaker audio using Google Cloud Text-to-Speech Long Audio Synthesis
 4. **�️ Episode Tracking**: Optional MongoDB integration for article deduplication and episode metadata
 5. **📦 Podcast Distribution**: Creates RSS feeds and uploads to AWS S3 for hosting
 6. **🔄 Complete Automation**: Runs the entire pipeline with a single command
@@ -21,7 +21,7 @@ Key Features
 ------------
 
 - **🐳 Docker-First Deployment**: Run anywhere with consistent environment
-- **🤖 AI-Powered Content**: Claude for natural dialogue, ElevenLabs for professional voices
+- **🤖 AI-Powered Content**: Claude for natural dialogue, Google Cloud TTS for professional voices
 - **⚙️ Highly Configurable**: Multiple voices, show formats, and content categories
 - **🔒 Production Ready**: Robust error handling, logging, and security
 - **📊 Monitoring & Analytics**: Comprehensive logging and status tracking
@@ -41,8 +41,10 @@ Docker Deployment (Recommended)
    # Run with your API keys
    docker run --rm \\
      -e ANTHROPIC_API_KEY="your-claude-key" \\
-     -e ELEVENLABS_API_KEY="your-elevenlabs-key" \\
+     -e GOOGLE_CREDENTIALS_PATH="/path/to/credentials.json" \\
+     -e GCS_BUCKET_NAME="your-audio-bucket" \\
      -v "$(pwd)/output:/app/output" \\
+     -v "$(pwd)/credentials.json:/path/to/credentials.json" \\
      ghcr.io/thewintershadow/the-data-packet:latest
 
 Python Installation
@@ -83,8 +85,9 @@ Command Line Interface
    # Custom configuration
    the-data-packet \\
      --show-name "Tech Brief" \\
-     --voice-a XrExE9yKIg1WjnnlVkGX \\
-     --voice-b IKne3meq5aSn9XLyUdCD \\
+     --voice-a en-US-Studio-MultiSpeaker-R \\
+     --voice-b en-US-Studio-MultiSpeaker-S \\
+     --gcs-bucket-name your-audio-bucket \\
      --sources wired techcrunch \\
      --categories security ai
 

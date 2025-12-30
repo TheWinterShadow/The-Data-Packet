@@ -18,7 +18,7 @@ tests/
 │   └── test_logging.py     # Logging system
 ├── generation/             # Tests for content generation
 │   ├── test___init__.py    # Generation module imports
-│   ├── test_audio.py       # ElevenLabs TTS audio generation
+│   ├── test_audio.py       # Google Cloud TTS audio generation
 │   ├── test_rss.py         # RSS feed generation
 │   └── test_script.py      # Claude AI script generation
 ├── sources/                # Tests for article collection
@@ -128,11 +128,12 @@ The test suite covers the following areas:
 
 ### Generation Module Tests
 
-#### Audio Generation (ElevenLabs TTS)
-- API client initialization
-- Voice validation
-- Script parsing for speakers
-- Audio generation workflow
+#### Audio Generation (Google Cloud TTS)
+- TTS client initialization
+- Voice validation and SSML generation
+- Script parsing for multi-speaker content
+- Long Audio Synthesis workflow
+- GCS integration and file management
 - Error handling and retries
 
 #### RSS Feed Generation
@@ -190,7 +191,7 @@ The test suite covers the following areas:
 
 ### Mocking and Isolation
 - Extensive use of `unittest.mock` for API isolation
-- External service mocking (ElevenLabs, Claude, AWS)
+- External service mocking (Google Cloud TTS, Claude, AWS)
 - File system operation mocking
 - Network request mocking
 
@@ -293,7 +294,8 @@ The test suite requires:
 ### Environment Variables
 Some tests may require environment variables for configuration testing:
 - `ANTHROPIC_API_KEY` (can be mock value)
-- `ELEVENLABS_API_KEY` (can be mock value) 
+- `GCS_BUCKET_NAME` (can be mock value)
+- `GOOGLE_CREDENTIALS_PATH` (can be mock path) 
 - `AWS_ACCESS_KEY_ID` (can be mock value)
 - `AWS_SECRET_ACCESS_KEY` (can be mock value)
 

@@ -1,12 +1,14 @@
-"""Audio generation using ElevenLabs Text-to-Speech."""
+"""Audio generation using Google Cloud Text-to-Speech Long Audio Synthesis."""
 
+import os
+import time
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
 
-from elevenlabs import VoiceSettings
-from elevenlabs.client import ElevenLabs
+from google.cloud import storage, texttospeech  # type: ignore[attr-defined]
+from google.oauth2 import service_account
 
 from the_data_packet.core.config import get_config
 from the_data_packet.core.exceptions import AudioGenerationError, ConfigurationError
@@ -26,99 +28,114 @@ class AudioResult:
 
 
 class AudioGenerator:
-    """Generates podcast audio from scripts using ElevenLabs Text-to-Speech."""
+    """Generates podcast audio from scripts using Google Cloud Text-to-Speech Long Audio Synthesis."""
 
-    # Available voice models and their descriptions
-    AVAILABLE_MODELS = {
-        "eleven_turbo_v2_5": "Ultra-fast, high-quality voices (recommended)",
-        "eleven_multilingual_v2": "High-quality multilingual voices",
-        "eleven_flash_v2_5": "Fast generation with good quality",
-    }
-
-    # Popular voice IDs for podcast content (Creator tier)
-    DEFAULT_VOICES = {
+    # Available Studio Multi-speaker voices for podcast content
+    AVAILABLE_VOICES = {
         "male": [
-            "JBFqnCBsd6RMkjVDRZzb",  # George (narrator)
-            "N2lVS1w4EtoT3dr4eOWO",  # Callum (conversational)
-            "5Q0t7uMcjvnagumLfvZi",  # Charlie (young adult male)
-            "onwK4e9ZLuTAKqWW03F9",  # Daniel (middle-aged)
+            "en-US-Studio-MultiSpeaker-R",  # Alex (male narrator)
+            "en-US-Studio-MultiSpeaker-T",  # Additional male voice
+            "en-US-Studio-MultiSpeaker-V",  # Another male option
         ],
         "female": [
-            "21m00Tcm4TlvDq8ikWAM",  # Rachel (narrator)
-            "AZnzlk1XvdvUeBnXmlld",  # Domi (young woman)
-            "EXAVITQu4vr4xnSDxMaL",  # Bella (reading)
-            "MF3mGyEYCl7XYWbV9V6O",  # Elli (emotional range)
+            "en-US-Studio-MultiSpeaker-S",  # Sam (female narrator)
+            "en-US-Studio-MultiSpeaker-U",  # Additional female voice
+            "en-US-Studio-MultiSpeaker-W",  # Another female option
         ],
+    }
+
+    # Audio encoding settings for long audio synthesis
+    AUDIO_CONFIG = {
+        "audio_encoding": texttospeech.AudioEncoding.MP3,
+        "sample_rate_hertz": 44100,
+        # Optimized for voice
+        "effects_profile_id": ["telephony-class-application"],
     }
 
     def __init__(
         self,
-        api_key: Optional[str] = None,
-        model_id: Optional[str] = None,
+        credentials_path: Optional[str] = None,
         voice_a: Optional[str] = None,
         voice_b: Optional[str] = None,
+        gcs_bucket_name: Optional[str] = None,
     ):
         """
         Initialize the audio generator.
 
         Args:
-            api_key: ElevenLabs API key
-            model_id: ElevenLabs model ID (defaults to eleven_turbo_v2_5)
-            voice_a: Voice ID for first speaker (Alex)
-            voice_b: Voice ID for second speaker (Sam)
+            credentials_path: Path to Google Cloud service account JSON credentials
+            voice_a: Voice name for first speaker (Alex)
+            voice_b: Voice name for second speaker (Sam)
+            gcs_bucket_name: Google Cloud Storage bucket for audio output
         """
         config = get_config()
 
-        self.api_key = api_key or config.elevenlabs_api_key
-        self.model_id = model_id or config.tts_model
-        self.voice_a = voice_a or config.voice_a
-        self.voice_b = voice_b or config.voice_b
+        self.credentials_path = credentials_path or getattr(
+            config, "google_credentials_path", None
+        )
+        self.voice_a = voice_a or getattr(
+            config, "voice_a", "en-US-Studio-MultiSpeaker-R"
+        )
+        self.voice_b = voice_b or getattr(
+            config, "voice_b", "en-US-Studio-MultiSpeaker-S"
+        )
+        self.gcs_bucket_name = gcs_bucket_name or getattr(
+            config, "gcs_bucket_name", None
+        )
         self.config = config
 
-        if not self.api_key:
+        if not self.gcs_bucket_name:
             raise ConfigurationError(
-                "ElevenLabs API key is required for audio generation. "
-                "Set ELEVENLABS_API_KEY environment variable or provide api_key parameter."
+                "Google Cloud Storage bucket is required for long audio synthesis. "
+                "Set gcs_bucket_name in config or provide gcs_bucket_name parameter."
             )
 
-        # Initialize ElevenLabs client
+        # Initialize Google Cloud clients
         try:
-            self.client = ElevenLabs(api_key=self.api_key)
-            logger.info("Initialized ElevenLabs client")
-        except Exception as e:
-            raise ConfigurationError(f"Failed to initialize ElevenLabs client: {e}")
+            if self.credentials_path and os.path.exists(self.credentials_path):
+                credentials = service_account.Credentials.from_service_account_file(
+                    self.credentials_path
+                )
+                self.tts_client = texttospeech.TextToSpeechLongAudioSynthesizeClient(
+                    credentials=credentials
+                )
+                self.storage_client = storage.Client(credentials=credentials)
+            else:
+                # Use default application credentials
+                self.tts_client = texttospeech.TextToSpeechLongAudioSynthesizeClient()
+                self.storage_client = storage.Client()
 
-        # Validate voices
-        self._validate_voices()
+            logger.info("Initialized Google Cloud Text-to-Speech Long Audio client")
+        except Exception as e:
+            raise ConfigurationError(f"Failed to initialize Google Cloud clients: {e}")
+
+        # Validate GCS bucket access
+        self._validate_gcs_bucket()
 
         logger.info(
-            f"Initialized ElevenLabs audio generator with model {self.model_id} and voices: {self.voice_a}, {self.voice_b}"  # noqa: E501
+            f"Initialized Google Cloud TTS generator with voices: {self.voice_a}, {self.voice_b} and bucket: {self.gcs_bucket_name}"  # noqa: E501
         )
 
-    def _validate_voices(self) -> None:
-        """Validate that the selected voices are available."""
+    def _validate_gcs_bucket(self) -> None:
+        """Validate that the GCS bucket is accessible."""
         try:
-            # Get available voices from ElevenLabs
-            voices_response = self.client.voices.get_all()
-            available_voices = [voice.voice_id for voice in voices_response.voices]
-
-            if self.voice_a not in available_voices:
-                logger.warning(
-                    f"Voice A '{self.voice_a}' may not be available. Available voices: {available_voices[:10]}..."
-                )
-            if self.voice_b not in available_voices:
-                logger.warning(
-                    f"Voice B '{self.voice_b}' may not be available. Available voices: {available_voices[:10]}..."
-                )
-
+            bucket = self.storage_client.bucket(self.gcs_bucket_name)
+            # Test bucket access by attempting to list objects (just checking first one)
+            list(bucket.list_blobs(max_results=1))
+            logger.info(
+                f"Successfully validated access to GCS bucket: {self.gcs_bucket_name}"
+            )
         except Exception as e:
-            logger.warning(f"Could not validate voices: {e}")
+            raise ConfigurationError(
+                f"Cannot access GCS bucket '{self.gcs_bucket_name}': {e}. "
+                "Ensure the bucket exists and you have proper permissions."
+            )
 
     def generate_audio(
         self, script: str, output_file: Optional[Path] = None
     ) -> AudioResult:
         """
-        Generate audio from a podcast script using ElevenLabs Text-to-Speech.
+        Generate audio from a podcast script using Google Cloud Text-to-Speech Long Audio Synthesis.
 
         Args:
             script: Podcast script text
@@ -144,19 +161,19 @@ class AudioGenerator:
         start_time = datetime.now()
 
         try:
-            # Parse and prepare script for multi-speaker TTS
-            speaker_segments = self._parse_script_for_speakers(script)
+            # Parse and prepare script as single SSML for long audio synthesis
+            ssml_content = self._parse_script_to_ssml(script)
 
-            if not speaker_segments:
-                raise AudioGenerationError("No dialogue found in script")
+            if not ssml_content:
+                raise AudioGenerationError("No valid content found in script")
 
-            logger.info(f"Parsed script into {len(speaker_segments)} speaker segments")
+            logger.info(f"Generated SSML content ({len(ssml_content)} characters)")
 
-            # Generate audio using ElevenLabs individual voice synthesis
-            audio_data = self._generate_with_individual_voices(speaker_segments)
+            # Generate audio using Google Cloud Long Audio Synthesis
+            gcs_uri = self._generate_with_long_audio_synthesis(ssml_content)
 
-            # Save the audio file
-            self._save_audio(audio_data, output_file)
+            # Download the generated audio from GCS
+            self._download_audio_from_gcs(gcs_uri, output_file)
 
             # Calculate metrics
             generation_time = (datetime.now() - start_time).total_seconds()
@@ -175,10 +192,10 @@ class AudioGenerator:
                 raise
             raise AudioGenerationError(f"Audio generation failed: {e}")
 
-    def _parse_script_for_speakers(self, script: str) -> List[Dict[str, str]]:
-        """Parse script and identify speaker segments."""
+    def _parse_script_to_ssml(self, script: str) -> str:
+        """Parse script and convert to SSML with voice switching for multi-speaker synthesis."""
         lines = script.split("\n")
-        segments: List[Dict[str, str]] = []
+        ssml_parts = ["<speak>"]
 
         for line in lines:
             line = line.strip()
@@ -187,111 +204,196 @@ class AudioGenerator:
             if not line or line.startswith("#") or line.startswith("**"):
                 continue
 
-            # Handle dialogue lines
+            # Handle dialogue lines with voice switching
             if line.startswith("Alex:"):
                 content = line[5:].strip()
-                segments.append(
-                    {"text": content, "speaker": "Alex", "voice": self.voice_a}
-                )
+                ssml_parts.append(f'<voice name="{self.voice_a}">{content}</voice>')
+                # Pause between speakers
+                ssml_parts.append('<break time="0.5s"/>')
             elif line.startswith("Sam:"):
                 content = line[4:].strip()
-                segments.append(
-                    {"text": content, "speaker": "Sam", "voice": self.voice_b}
-                )
+                ssml_parts.append(f'<voice name="{self.voice_b}">{content}</voice>')
+                # Pause between speakers
+                ssml_parts.append('<break time="0.5s"/>')
             else:
-                # Non-dialogue text - assign to Alex by default
+                # Non-dialogue text - assign to Alex (default narrator)
                 if line:
-                    segments.append(
-                        {"text": line, "speaker": "Alex", "voice": self.voice_a}
-                    )
+                    ssml_parts.append(f'<voice name="{self.voice_a}">{line}</voice>')
+                    # Short pause for continuity
+                    ssml_parts.append('<break time="0.3s"/>')
 
-        return segments
+        ssml_parts.append("</speak>")
 
-    def _generate_with_individual_voices(self, segments: List[Dict[str, str]]) -> bytes:
-        """Generate audio using ElevenLabs individual voice synthesis and combine."""
-        audio_chunks: List[bytes] = []
+        # Join and clean up extra breaks
+        ssml_content = "".join(ssml_parts)
+        # Remove any trailing breaks before closing speak tag
+        ssml_content = ssml_content.replace('<break time="0.5s"/></speak>', "</speak>")
+        ssml_content = ssml_content.replace('<break time="0.3s"/></speak>', "</speak>")
 
-        for i, segment in enumerate(segments):
-            try:
-                # Select the appropriate voice for this segment
-                voice_id = segment["voice"]
-                text = segment["text"]
+        return ssml_content
 
-                # Add pauses and improve text for ElevenLabs
-                if i > 0:  # Add small pause before non-first segments
-                    text = f"<break time='0.3s'/>{text}"
+    def _generate_with_long_audio_synthesis(self, ssml_content: str) -> str:
+        """Generate audio using Google Cloud Long Audio Synthesis and return GCS URI."""
+        try:
+            # Create the synthesis input
+            synthesis_input = texttospeech.SynthesisInput(ssml=ssml_content)
 
-                # Generate audio using ElevenLabs
-                response = self.client.text_to_speech.convert(
-                    text=text,
-                    voice_id=voice_id,
-                    model_id=self.model_id,
-                    output_format="mp3_44100_192",  # High quality for Creator tier
-                    voice_settings=VoiceSettings(
-                        stability=0.5,  # Balanced for dialogue
-                        similarity_boost=0.75,  # Good voice consistency
-                        style=0.2,  # Slight style variation
-                        use_speaker_boost=True,  # Better multi-speaker clarity
-                    ),
+            # Configure audio output settings
+            audio_config = texttospeech.AudioConfig(
+                audio_encoding=self.AUDIO_CONFIG["audio_encoding"],
+                sample_rate_hertz=self.AUDIO_CONFIG["sample_rate_hertz"],
+                effects_profile_id=self.AUDIO_CONFIG["effects_profile_id"],
+            )
+
+            # Generate unique output file name with timestamp
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            gcs_uri = f"gs://{self.gcs_bucket_name}/audio/episode_{timestamp}.mp3"
+
+            # Create the Long Audio Synthesis request
+            request = texttospeech.SynthesizeLongAudioRequest(
+                input=synthesis_input,
+                audio_config=audio_config,
+                output_gcs_uri=gcs_uri,
+            )
+
+            logger.info(f"Starting long audio synthesis operation to {gcs_uri}")
+
+            # Start the Long Running Operation (LRO)
+            operation_future = self.tts_client.synthesize_long_audio(request=request)
+
+            logger.info(
+                f"Long audio synthesis started. Operation name: {operation_future.operation.name}"
+            )
+
+            # Wait for the operation to complete with timeout and progress logging
+            timeout_seconds = 1800  # 30 minutes timeout for very long audio
+            poll_interval = 30  # Check every 30 seconds
+            elapsed = 0
+
+            while not operation_future.done() and elapsed < timeout_seconds:
+                logger.info(
+                    f"Waiting for synthesis to complete... ({elapsed}s elapsed)"
+                )
+                time.sleep(poll_interval)
+                elapsed += poll_interval
+
+            if not operation_future.done():
+                raise AudioGenerationError(
+                    f"Audio synthesis timed out after {timeout_seconds} seconds"
                 )
 
-                # Convert generator to bytes
-                if response:
-                    audio_bytes = b"".join(response)  # Consume the generator
-                    audio_chunks.append(audio_bytes)
-                    logger.debug(
-                        f"Generated segment {i+1}/{len(segments)} ({len(audio_bytes)} bytes)"
-                    )
-                else:
-                    logger.warning(f"No audio content for segment {i+1}")
+            # Get the result
+            operation_future.result()
+            logger.info("Long audio synthesis completed successfully")
 
-            except Exception as e:
-                logger.warning(f"Failed to generate audio for segment {i+1}: {e}")
-                continue
-
-        if not audio_chunks:
-            raise AudioGenerationError("No audio segments were successfully generated")
-
-        # Combine all audio chunks (MP3 concatenation)
-        return b"".join(audio_chunks)
-
-    def _save_audio(self, audio_data: bytes, output_file: Path) -> None:
-        """Save MP3 audio data to file."""
-        try:
-            # ElevenLabs returns complete MP3 data, save directly
-            with open(output_file, "wb") as f:
-                f.write(audio_data)
-            logger.info(f"Saved MP3 audio to {output_file}")
+            return gcs_uri
 
         except Exception as e:
-            raise AudioGenerationError(f"Failed to save audio to {output_file}: {e}")
+            logger.error(f"Long audio synthesis failed: {e}")
+            raise AudioGenerationError(
+                f"Failed to generate audio with Google Cloud TTS: {e}"
+            )
+
+    def _download_audio_from_gcs(self, gcs_uri: str, output_file: Path) -> None:
+        """Download the generated audio file from Google Cloud Storage."""
+        try:
+            # Parse the GCS URI to get bucket and blob name
+            # Format: gs://bucket-name/path/to/file.mp3
+            if not gcs_uri.startswith("gs://"):
+                raise AudioGenerationError(f"Invalid GCS URI format: {gcs_uri}")
+
+            # Remove 'gs://' prefix and split bucket/path
+            path_parts = gcs_uri[5:].split("/", 1)
+            if len(path_parts) != 2:
+                raise AudioGenerationError(f"Invalid GCS URI format: {gcs_uri}")
+
+            bucket_name, blob_name = path_parts
+
+            logger.info(f"Downloading audio from GCS: {gcs_uri}")
+
+            # Get the bucket and blob
+            bucket = self.storage_client.bucket(bucket_name)
+            blob = bucket.blob(blob_name)
+
+            # Wait for file to be available (sometimes there's a slight delay)
+            max_retries = 10
+            retry_delay = 5  # seconds
+
+            for attempt in range(max_retries):
+                try:
+                    if blob.exists():
+                        break
+                    else:
+                        logger.info(
+                            f"Audio file not yet available, retrying in {retry_delay}s (attempt {attempt + 1}/{max_retries})"  # noqa: E501
+                        )
+                        time.sleep(retry_delay)
+                except Exception as e:
+                    if attempt == max_retries - 1:
+                        raise AudioGenerationError(
+                            f"Audio file not found in GCS after {max_retries} attempts: {e}"
+                        )
+                    logger.warning(
+                        f"Error checking blob existence (attempt {attempt + 1}): {e}"
+                    )
+                    time.sleep(retry_delay)
+
+            # Download the file
+            blob.download_to_filename(str(output_file))
+            logger.info(f"Successfully downloaded audio to {output_file}")
+
+            # Optionally clean up the GCS file
+            if getattr(self.config, "cleanup_temp_files", True):
+                try:
+                    blob.delete()
+                    logger.info(f"Cleaned up temporary GCS file: {gcs_uri}")
+                except Exception as e:
+                    logger.warning(f"Could not clean up GCS file {gcs_uri}: {e}")
+
+        except Exception as e:
+            raise AudioGenerationError(
+                f"Failed to download audio from GCS {gcs_uri}: {e}"
+            )
 
     def get_available_voices(self) -> Dict[str, List[str]]:
-        """Get available voices from ElevenLabs."""
+        """Get available Studio Multi-speaker voices for Google Cloud TTS."""
         try:
-            response = self.client.voices.get_all()
-
-            voices_by_gender: Dict[str, List[str]] = {"male": [], "female": []}
-            for voice in response.voices:
-                # ElevenLabs voices don't have explicit gender markers
-                # For now, categorize by voice ID (this could be improved)
-                voices_by_gender["male"].append(voice.voice_id)
-
-            return voices_by_gender
+            # For Google Cloud, we return the predefined Studio Multi-speaker voices
+            # These are the voices specifically designed for multi-speaker content
+            return self.AVAILABLE_VOICES.copy()
 
         except Exception as e:
             logger.warning(f"Could not retrieve available voices: {e}")
-            # Return default voices for compatibility
-            return self.DEFAULT_VOICES
+            # Return available voices as fallback
+            return self.AVAILABLE_VOICES
 
     def test_authentication(self) -> bool:
-        """Test ElevenLabs authentication and basic functionality."""
+        """Test Google Cloud TTS authentication and basic functionality."""
         try:
-            # Try to get voices to test authentication
-            voices = self.client.voices.get_all()
+            # Test TTS client by listing available voices
+            request = texttospeech.ListVoicesRequest(language_code="en-US")
 
-            if voices:
-                logger.info("Authentication successful! Retrieved voice list.")
+            # Use the regular TTS client for testing (not long audio client)
+            test_client = texttospeech.TextToSpeechClient(
+                credentials=(
+                    self.tts_client._credentials
+                    if hasattr(self.tts_client, "_credentials")
+                    else None
+                )
+            )
+
+            voices_response = test_client.list_voices(request=request)
+
+            if voices_response.voices:
+                logger.info(
+                    f"Authentication successful! Retrieved {len(voices_response.voices)} voices."
+                )
+
+                # Also test GCS bucket access
+                bucket = self.storage_client.bucket(self.gcs_bucket_name)
+                bucket.exists()  # This will raise an exception if no access
+
+                logger.info(f"GCS bucket access confirmed: {self.gcs_bucket_name}")
                 return True
             else:
                 logger.warning("Authentication successful but no voices found")

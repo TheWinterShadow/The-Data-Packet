@@ -33,13 +33,15 @@ Examples:
   the-data-packet --sources wired techcrunch --categories security ai --output ./multi-source
 
 Environment Variables:
-  ANTHROPIC_API_KEY    - Claude API key for script generation
-  ELEVENLABS_API_KEY   - ElevenLabs API key for TTS audio generation
-  S3_BUCKET_NAME       - S3 bucket for uploads (optional)
-  AWS_ACCESS_KEY_ID    - AWS access key (optional)
-  AWS_SECRET_ACCESS_KEY - AWS secret key (optional)
-  MONGODB_USERNAME     - MongoDB username for episode tracking (optional)
-  MONGODB_PASSWORD     - MongoDB password for episode tracking (optional)
+  ANTHROPIC_API_KEY        - Claude API key for script generation
+  GCS_BUCKET_NAME          - Google Cloud Storage bucket for audio synthesis
+  GOOGLE_APPLICATION_CREDENTIALS - Path to Google Cloud service account JSON (optional)
+  ELEVENLABS_API_KEY       - [DEPRECATED] ElevenLabs API key (use Google Cloud TTS instead)
+  S3_BUCKET_NAME           - S3 bucket for uploads (optional)
+  AWS_ACCESS_KEY_ID        - AWS access key (optional)
+  AWS_SECRET_ACCESS_KEY    - AWS secret key (optional)
+  MONGODB_USERNAME         - MongoDB username for episode tracking (optional)
+  MONGODB_PASSWORD         - MongoDB password for episode tracking (optional)
         """,
     )
 
@@ -49,8 +51,16 @@ Environment Variables:
         help="Anthropic API key (overrides ANTHROPIC_API_KEY env var)",
     )
     parser.add_argument(
+        "--gcs-bucket",
+        help="Google Cloud Storage bucket for audio synthesis (overrides GCS_BUCKET_NAME env var)",
+    )
+    parser.add_argument(
+        "--google-credentials",
+        help="Path to Google Cloud service account JSON (overrides GOOGLE_APPLICATION_CREDENTIALS env var)",
+    )
+    parser.add_argument(
         "--elevenlabs-key",
-        help="ElevenLabs API key (overrides ELEVENLABS_API_KEY env var)",
+        help="[DEPRECATED] ElevenLabs API key (overrides ELEVENLABS_API_KEY env var)",
     )
     parser.add_argument(
         "--mongodb-username",
@@ -97,13 +107,13 @@ Environment Variables:
     # Audio Settings
     parser.add_argument(
         "--voice-a",
-        default="XrExE9yKIg1WjnnlVkGX",
-        help="ElevenLabs voice ID for first speaker (default: XrExE9yKIg1WjnnlVkGX - George)",
+        default="en-US-Studio-MultiSpeaker-R",
+        help="Google Cloud TTS voice name for first speaker (default: en-US-Studio-MultiSpeaker-R - Alex)",
     )
     parser.add_argument(
         "--voice-b",
-        default="IKne3meq5aSn9XLyUdCD",
-        help="ElevenLabs voice ID for second speaker (default: IKne3meq5aSn9XLyUdCD - Rachel)",
+        default="en-US-Studio-MultiSpeaker-S",
+        help="Google Cloud TTS voice name for second speaker (default: en-US-Studio-MultiSpeaker-S - Sam)",
     )
 
     # Output Settings
@@ -171,6 +181,10 @@ Environment Variables:
         # API keys
         if args.anthropic_key:
             config_overrides["anthropic_api_key"] = args.anthropic_key
+        if args.gcs_bucket:
+            config_overrides["gcs_bucket_name"] = args.gcs_bucket
+        if args.google_credentials:
+            config_overrides["google_credentials_path"] = args.google_credentials
         if args.elevenlabs_key:
             config_overrides["elevenlabs_api_key"] = args.elevenlabs_key
         if args.mongodb_username:

@@ -52,7 +52,11 @@ Environment Variables:
         ANTHROPIC_API_KEY - Claude API key
 
     Required for audio generation:
-        ELEVENLABS_API_KEY - ElevenLabs API key
+        GCS_BUCKET_NAME - Google Cloud Storage bucket for long audio synthesis
+        GOOGLE_APPLICATION_CREDENTIALS - Path to service account JSON (optional if using default credentials)
+
+    Legacy (deprecated):
+        ELEVENLABS_API_KEY - ElevenLabs API key (replaced by Google Cloud TTS)
 
     Optional for S3 uploads:
         S3_BUCKET_NAME - S3 bucket for hosting
@@ -99,12 +103,19 @@ class Config:
         API Keys:
             anthropic_api_key: Anthropic API key for Claude script generation.
                               Required for script generation. Loaded from ANTHROPIC_API_KEY.
-            elevenlabs_api_key: ElevenLabs API key for TTS audio generation.
-                               Required for audio generation. Loaded from ELEVENLABS_API_KEY.
+            elevenlabs_api_key: [DEPRECATED] ElevenLabs API key for legacy TTS.
+                               Replaced by Google Cloud TTS. Loaded from ELEVENLABS_API_KEY.
             mongodb_username: MongoDB username for episode tracking and article deduplication.
                              Optional. Loaded from MONGODB_USERNAME.
             mongodb_password: MongoDB password for episode tracking and article deduplication.
                              Optional. Loaded from MONGODB_PASSWORD.
+
+        Google Cloud Configuration:
+            google_credentials_path: Path to Google Cloud service account JSON file.
+                                   Optional if using default application credentials.
+                                   Loaded from GOOGLE_APPLICATION_CREDENTIALS.
+            gcs_bucket_name: Google Cloud Storage bucket for long audio synthesis output.
+                           Required for audio generation. Loaded from GCS_BUCKET_NAME.
 
         AWS Configuration:
             aws_access_key_id: AWS access key for S3 uploads. Loaded from AWS_ACCESS_KEY_ID.
@@ -128,13 +139,13 @@ class Config:
 
         AI Generation Settings:
             claude_model: Claude model name for script generation.
-            tts_model: Text-to-speech model type for audio generation.
+            tts_model: Text-to-speech service type (now "google_cloud_tts").
             max_tokens: Maximum tokens for Claude API calls.
             temperature: AI generation temperature (0.0-1.0, lower = more consistent).
 
-        Audio Settings:
-            voice_a: First speaker voice for multi-speaker audio.
-            voice_b: Second speaker voice for multi-speaker audio.
+        Audio Settings (Google Cloud Studio Multi-speaker voices):
+            voice_a: First speaker voice name (Alex - male narrator).
+            voice_b: Second speaker voice name (Sam - female narrator).
             audio_sample_rate: Audio sample rate in Hz.
 
         Processing Options:
@@ -176,9 +187,16 @@ class Config:
 
     # API Keys
     anthropic_api_key: Optional[str] = None
+    # Deprecated - use Google Cloud TTS
     elevenlabs_api_key: Optional[str] = None
     mongodb_username: Optional[str] = None
     mongodb_password: Optional[str] = None
+
+    # Google Cloud Configuration
+    # Path to service account JSON
+    google_credentials_path: Optional[str] = None
+    # GCS bucket for long audio synthesis
+    gcs_bucket_name: Optional[str] = None
 
     # AWS Configuration
     aws_access_key_id: Optional[str] = None
@@ -209,13 +227,13 @@ class Config:
 
     # AI Generation Settings
     claude_model: str = "claude-sonnet-4-5-20250929"
-    tts_model: str = "eleven_turbo_v2_5"
+    tts_model: str = "google_cloud_tts"  # Updated to use Google Cloud TTS
     max_tokens: int = 3000
     temperature: float = 0.7
 
-    # Audio Settings
-    voice_a: str = "XrExE9yKIg1WjnnlVkGX"  # George (narrator voice)
-    voice_b: str = "IKne3meq5aSn9XLyUdCD"  # Rachel (female narrator)
+    # Audio Settings (Google Cloud Studio Multi-speaker voices)
+    voice_a: str = "en-US-Studio-MultiSpeaker-R"  # Alex (male narrator)
+    voice_b: str = "en-US-Studio-MultiSpeaker-S"  # Sam (female narrator)
     audio_sample_rate: int = 44100
 
     # Processing Options
@@ -264,6 +282,12 @@ class Config:
         self.elevenlabs_api_key = self.elevenlabs_api_key or os.getenv(
             "ELEVENLABS_API_KEY"
         )
+
+        # Google Cloud
+        self.google_credentials_path = self.google_credentials_path or os.getenv(
+            "GOOGLE_APPLICATION_CREDENTIALS"
+        )
+        self.gcs_bucket_name = self.gcs_bucket_name or os.getenv("GCS_BUCKET_NAME")
         self.mongodb_username = self.mongodb_username or os.getenv("MONGODB_USERNAME")
         self.mongodb_password = self.mongodb_password or os.getenv("MONGODB_PASSWORD")
 
@@ -402,11 +426,12 @@ class Config:
 
     def validate_for_audio_generation(self) -> None:
         """Validate configuration for audio generation."""
-        if not self.elevenlabs_api_key:
+        if not self.gcs_bucket_name:
             from .exceptions import ConfigurationError
 
             raise ConfigurationError(
-                "ElevenLabs API key is required for audio generation"
+                "Google Cloud Storage bucket is required for audio generation. "
+                "Set gcs_bucket_name in config or GCS_BUCKET_NAME environment variable."
             )
 
     def get_sources_for_category(self, category: str) -> List[str]:
