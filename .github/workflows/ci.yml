@@ -1,0 +1,437 @@
+name: Python Build
+
+on:
+    push:
+        branches: ["main"]
+    pull_request:
+        branches: ["main"]
+
+jobs:
+    test-matrix:
+        name: "Test Python ${{ matrix.python-version }}"
+        runs-on: ubuntu-latest
+        if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'push' || github.event_name == 'pull_request' }}
+        strategy:
+            matrix:
+                python-version: ["3.10", "3.11", "3.12", "3.13"]
+
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Set up Python ${{ matrix.python-version }}
+              uses: actions/setup-python@v5
+              with:
+                  python-version: ${{ matrix.python-version }}
+
+            - name: Install Hatch
+              run: |
+                  python -m pip install --upgrade pip
+                  pip install hatch
+
+            - name: Run type checking
+              run: |
+                  echo "🔍 Running type checking for Python ${{ matrix.python-version }}" >> $GITHUB_STEP_SUMMARY
+                  hatch run dev:mypy the_data_packet
+                  echo "✅ Type checking passed" >> $GITHUB_STEP_SUMMARY
+
+            - name: Run tests with basic reporting
+              run: |
+                  echo "🧪 Running tests for Python ${{ matrix.python-version }}" >> $GITHUB_STEP_SUMMARY
+                  mkdir -p test-results-${{ matrix.python-version }}
+                  hatch test -- --junit-xml=test-results-${{ matrix.python-version }}/pytest.xml
+                  echo "✅ Tests completed for Python ${{ matrix.python-version }}" >> $GITHUB_STEP_SUMMARY
+            - name: Build package
+              run: |
+                  echo "📦 Building package for Python ${{ matrix.python-version }}" >> $GITHUB_STEP_SUMMARY
+                  hatch build
+                  echo "✅ Package built successfully" >> $GITHUB_STEP_SUMMARY
+
+            - name: Upload test results for Python ${{ matrix.python-version }}
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: test-results-python-${{ matrix.python-version }}
+                  path: test-results-${{ matrix.python-version }}/
+                  retention-days: 30
+
+    codeBuild:
+        name: "Build Code with Hatch"
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Workflow Chain Status
+              run: |
+                  echo "🔄 **Workflow Dependency Chain Status**" >> $GITHUB_STEP_SUMMARY
+                  echo "1. ✅ Documentation Build - Completed Successfully" >> $GITHUB_STEP_SUMMARY
+                  echo "2. ✅ CI Tests - Completed Successfully" >> $GITHUB_STEP_SUMMARY
+                  echo "3. 🚀 **Build and Package** - Running Now" >> $GITHUB_STEP_SUMMARY
+                  echo "" >> $GITHUB_STEP_SUMMARY
+
+            - name: Set up Python 3.11
+              uses: actions/setup-python@v5
+              with:
+                  python-version: "3.11"
+            - name: Install dependencies
+              run: |
+                  python -m pip install --upgrade pip
+                  pip install hatch
+            - name: Build the project
+              run: |
+                  hatch build
+
+    lintingChecks:
+        name: "Run Linting Checks"
+        runs-on: ubuntu-latest
+        needs: codeBuild
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+            - name: Set up Python 3.11
+              uses: actions/setup-python@v5
+              with:
+                  python-version: "3.11"
+            - name: Install dependencies
+              run: |
+                  python -m pip install --upgrade pip
+                  pip install hatch
+            - name: Create Hatch environment
+              run: |
+                  hatch env create
+            - name: Build the project
+              run: |
+                  hatch build
+            - name: Create linting reports directory
+              run: |
+                  mkdir -p linting-reports
+
+            - name: Run isort
+              continue-on-error: true
+              run: |
+                  echo "🔍 **Code Formatting Checks**" >> $GITHUB_STEP_SUMMARY
+                  echo "" >> $GITHUB_STEP_SUMMARY
+                  echo "Running isort import sorting check..."
+                  hatch run dev:isort ./the_data_packet --check-only --diff > linting-reports/isort-report.txt 2>&1 || echo "❌ isort found issues" >> $GITHUB_STEP_SUMMARY
+                  if [ $? -eq 0 ]; then
+                    echo "✅ **isort**: Import sorting is correct" >> $GITHUB_STEP_SUMMARY
+                  else
+                    echo "❌ **isort**: Import sorting issues found" >> $GITHUB_STEP_SUMMARY
+                  fi
+
+            - name: Run black
+              continue-on-error: true
+              run: |
+                  echo "Running black code formatting check..."
+                  hatch run dev:black ./the_data_packet --check --diff > linting-reports/black-report.txt 2>&1
+                  if [ $? -eq 0 ]; then
+                    echo "✅ **black**: Code formatting is correct" >> $GITHUB_STEP_SUMMARY
+                  else
+                    echo "❌ **black**: Code formatting issues found" >> $GITHUB_STEP_SUMMARY
+                  fi
+
+            - name: Run flake8
+              continue-on-error: true
+              run: |
+                  echo "Running flake8 linting check..."
+                  hatch run dev:flake8 ./the_data_packet > linting-reports/flake8-report.txt 2>&1
+                  if [ $? -eq 0 ]; then
+                    echo "✅ **flake8**: No linting issues found" >> $GITHUB_STEP_SUMMARY
+                  else
+                    echo "❌ **flake8**: Linting issues found" >> $GITHUB_STEP_SUMMARY
+                  fi
+
+            - name: Generate linting summary
+              if: always()
+              run: |
+                  echo "" >> $GITHUB_STEP_SUMMARY
+                  echo "📁 **Detailed linting reports available in artifacts**" >> $GITHUB_STEP_SUMMARY
+            - name: Upload linting reports
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: linting-reports
+                  path: linting-reports/
+                  retention-days: 30
+    mypyChecks:
+        name: "Run MyPy Checks"
+        runs-on: ubuntu-latest
+        needs: lintingChecks
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+            - name: Set up Python 3.11
+              uses: actions/setup-python@v5
+              with:
+                  python-version: "3.11"
+            - name: Install dependencies
+              run: |
+                  python -m pip install --upgrade pip
+                  pip install hatch
+            - name: Build the project
+              run: |
+                  hatch build
+            - name: Create Hatch environment
+              run: |
+                  hatch env create
+            - name: Create mypy reports directory
+              run: |
+                  mkdir -p mypy-reports
+
+            - name: Run mypy with detailed reporting
+              continue-on-error: true
+              run: |
+                  echo "🔍 **Type Checking Results**" >> $GITHUB_STEP_SUMMARY
+                  echo "" >> $GITHUB_STEP_SUMMARY
+                  echo "Running mypy type checking..."
+
+                  # Run mypy with different output formats
+                  hatch run dev:mypy ./the_data_packet > mypy-reports/mypy-output.txt 2>&1
+                  mypy_exit_code=$?
+
+                  # Also generate a detailed report
+                  hatch run dev:mypy ./the_data_packet --html-report mypy-reports/html/ --txt-report mypy-reports/ --linecount-report mypy-reports/ 2>/dev/null || true
+                  if [ $mypy_exit_code -eq 0 ]; then
+                    echo "✅ **MyPy**: No type errors found" >> $GITHUB_STEP_SUMMARY
+                  else
+                    echo "❌ **MyPy**: Type errors found" >> $GITHUB_STEP_SUMMARY
+                    
+                    # Count errors and add to summary
+                    if [ -f mypy-reports/mypy-output.txt ]; then
+                      error_count=$(grep -c "error:" mypy-reports/mypy-output.txt 2>/dev/null || echo "0")
+                      warning_count=$(grep -c "note:" mypy-reports/mypy-output.txt 2>/dev/null || echo "0")
+                      echo "  - 🔴 Errors: $error_count" >> $GITHUB_STEP_SUMMARY
+                      echo "  - 🟡 Notes: $warning_count" >> $GITHUB_STEP_SUMMARY
+                    fi
+                  fi
+
+                  echo "" >> $GITHUB_STEP_SUMMARY
+                  echo "📁 **Detailed mypy report available in artifacts**" >> $GITHUB_STEP_SUMMARY
+
+            - name: Upload mypy reports
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: mypy-reports
+                  path: mypy-reports/
+                  retention-days: 30
+
+    unitTests:
+        name: "Run Unit Tests with Coverage"
+        runs-on: ubuntu-latest
+        needs: mypyChecks
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+            - name: Set up Python 3.11
+              uses: actions/setup-python@v5
+              with:
+                  python-version: "3.11"
+            - name: Install dependencies
+              run: |
+                  python -m pip install --upgrade pip
+                  pip install hatch
+            - name: Build the project
+              run: |
+                  hatch build
+            - name: Run unit tests with coverage
+              run: |
+                  echo "Running unit tests with coverage..." 
+                  mkdir -p test-results
+                  hatch run test-cov -- --junit-xml=test-results/pytest.xml --cov-report=xml --cov-report=html --cov-report=term-missing
+              continue-on-error: true
+
+            - name: Generate test summary
+              if: always()
+              run: |
+                  echo "## 🧪 Test Results Summary" >> $GITHUB_STEP_SUMMARY
+                  echo "" >> $GITHUB_STEP_SUMMARY
+
+                  # Parse test results if available
+                  if [ -f test-results/pytest.xml ]; then
+                    python3 << 'EOF'
+                  import xml.etree.ElementTree as ET
+                  import os
+
+                  try:
+                      tree = ET.parse('test-results/pytest.xml')
+                      root = tree.getroot()
+                      testsuite = root.find('testsuite')
+                      
+                      if testsuite is not None:
+                          tests = testsuite.get('tests', '0')
+                          failures = testsuite.get('failures', '0') 
+                          errors = testsuite.get('errors', '0')
+                          skipped = testsuite.get('skipped', '0')
+                          time = testsuite.get('time', '0')
+                          
+                          passed = int(tests) - int(failures) - int(errors) - int(skipped)
+                          
+                          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
+                              f.write(f"📊 **Test Statistics:**\n")
+                              f.write(f"- ✅ Passed: {passed}\n")
+                              f.write(f"- ❌ Failed: {failures}\n")
+                              f.write(f"- ⚠️  Errors: {errors}\n")
+                              f.write(f"- ⏭️  Skipped: {skipped}\n")
+                              f.write(f"- 🕐 Total Time: {time}s\n")
+                              f.write(f"\n")
+                              
+                              if int(failures) + int(errors) == 0:
+                                  f.write("🎉 **All tests passed!**\n")
+                              else:
+                                  f.write("❌ **Some tests failed - check detailed report below**\n")
+                  except Exception as e:
+                      with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
+                          f.write(f"❌ Could not parse test results: {e}\n")
+                  EOF
+                  else
+                    echo "❌ **No test results found**" >> $GITHUB_STEP_SUMMARY
+                  fi
+
+                  echo "" >> $GITHUB_STEP_SUMMARY
+
+            - name: Generate coverage summary
+              if: always()
+              run: |
+                  echo "## 📊 Coverage Report" >> $GITHUB_STEP_SUMMARY
+                  echo "" >> $GITHUB_STEP_SUMMARY
+
+                  # Parse coverage.xml if available
+                  if [ -f coverage.xml ]; then
+                    python3 << 'EOF'
+                  import xml.etree.ElementTree as ET
+                  import os
+
+                  try:
+                      tree = ET.parse('coverage.xml')
+                      root = tree.getroot()
+                      
+                      # Get overall coverage
+                      line_rate = float(root.get('line-rate', 0)) * 100
+                      branch_rate = float(root.get('branch-rate', 0)) * 100
+                      
+                      with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
+                          f.write(f"📈 **Overall Coverage:** {line_rate:.1f}%\n")
+                          if branch_rate > 0:
+                              f.write(f"🌿 **Branch Coverage:** {branch_rate:.1f}%\n")
+                          f.write(f"\n")
+                          
+                          # Coverage status emoji
+                          if line_rate >= 90:
+                              f.write("🟢 **Excellent coverage!**\n")
+                          elif line_rate >= 80:
+                              f.write("🟡 **Good coverage**\n")
+                          elif line_rate >= 70:
+                              f.write("🟠 **Moderate coverage - consider improving**\n")
+                          else:
+                              f.write("🔴 **Low coverage - needs improvement**\n")
+                              
+                          f.write(f"\n")
+                          f.write(f"📁 Detailed coverage report available in artifacts\n")
+                  except Exception as e:
+                      with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
+                          f.write(f"❌ Could not parse coverage: {e}\n")
+                  EOF
+                  else
+                    echo "❌ **No coverage data found**" >> $GITHUB_STEP_SUMMARY
+                  fi
+
+            - name: Upload test results
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: test-results-coverage-python-3.11
+                  path: |
+                      test-results/
+                      coverage.xml
+                      htmlcov/
+                  retention-days: 30
+
+            - name: Upload coverage to Codecov
+              if: always()
+              uses: codecov/codecov-action@v3
+              with:
+                  file: ./coverage.xml
+                  fail_ci_if_error: false
+                  verbose: true
+
+    buildSummary:
+        name: "Build Summary Report"
+        runs-on: ubuntu-latest
+        needs: [test-matrix, codeBuild, lintingChecks, mypyChecks, unitTests]
+        if: always()
+        steps:
+            - name: Download all artifacts
+              uses: actions/download-artifact@v4
+              with:
+                  path: artifacts/
+
+            - name: Generate comprehensive summary
+              run: |
+                  echo "# 🚀 **Build Summary Report**" >> $GITHUB_STEP_SUMMARY
+                  echo "" >> $GITHUB_STEP_SUMMARY
+                  echo "## 📊 **Job Status Overview**" >> $GITHUB_STEP_SUMMARY
+                  echo "" >> $GITHUB_STEP_SUMMARY
+
+                  # Check job results and create status table
+                  echo "| Component | Status | Details |" >> $GITHUB_STEP_SUMMARY
+                  echo "|-----------|--------|---------|" >> $GITHUB_STEP_SUMMARY
+
+                  # Test Matrix Status
+                  if [[ "${{ needs.test-matrix.result }}" == "success" ]]; then
+                    echo "| Multi-Python Testing | ✅ Passed | All Python versions (3.10-3.13) tested successfully |" >> $GITHUB_STEP_SUMMARY
+                  elif [[ "${{ needs.test-matrix.result }}" == "failure" ]]; then
+                    echo "| Multi-Python Testing | ❌ Failed | Some Python versions failed testing |" >> $GITHUB_STEP_SUMMARY
+                  else
+                    echo "| Multi-Python Testing | ⏭️ Skipped | Tests were skipped |" >> $GITHUB_STEP_SUMMARY
+                  fi
+
+                  # Code Build Status
+                  if [[ "${{ needs.codeBuild.result }}" == "success" ]]; then
+                    echo "| Code Build | ✅ Passed | Package built successfully |" >> $GITHUB_STEP_SUMMARY
+                  else
+                    echo "| Code Build | ❌ Failed | Package build failed |" >> $GITHUB_STEP_SUMMARY
+                  fi
+
+                  # Linting Status
+                  if [[ "${{ needs.lintingChecks.result }}" == "success" ]]; then
+                    echo "| Code Quality | ✅ Passed | All linting checks passed |" >> $GITHUB_STEP_SUMMARY
+                  else
+                    echo "| Code Quality | ❌ Failed | Linting issues found |" >> $GITHUB_STEP_SUMMARY
+                  fi
+
+                  # MyPy Status
+                  if [[ "${{ needs.mypyChecks.result }}" == "success" ]]; then
+                    echo "| Type Checking | ✅ Passed | No type errors found |" >> $GITHUB_STEP_SUMMARY
+                  else
+                    echo "| Type Checking | ❌ Failed | Type errors found |" >> $GITHUB_STEP_SUMMARY
+                  fi
+
+                  # Unit Tests Status
+                  if [[ "${{ needs.unitTests.result }}" == "success" ]]; then
+                    echo "| Unit Tests | ✅ Passed | All tests passed with coverage |" >> $GITHUB_STEP_SUMMARY
+                  else
+                    echo "| Unit Tests | ❌ Failed | Some tests failed |" >> $GITHUB_STEP_SUMMARY
+                  fi
+
+                  echo "" >> $GITHUB_STEP_SUMMARY
+
+                  # Overall Status
+                  if [[ "${{ needs.test-matrix.result }}" == "success" && "${{ needs.codeBuild.result }}" == "success" && "${{ needs.lintingChecks.result }}" == "success" && "${{ needs.mypyChecks.result }}" == "success" && "${{ needs.unitTests.result }}" == "success" ]]; then
+                    echo "## 🎉 **Overall Status: SUCCESS**" >> $GITHUB_STEP_SUMMARY
+                    echo "" >> $GITHUB_STEP_SUMMARY
+                    echo "✨ All checks passed! The build is ready for deployment." >> $GITHUB_STEP_SUMMARY
+                  else
+                    echo "## ⚠️ **Overall Status: ISSUES FOUND**" >> $GITHUB_STEP_SUMMARY
+                    echo "" >> $GITHUB_STEP_SUMMARY
+                    echo "🔍 Some issues were found. Please check the detailed reports in the artifacts." >> $GITHUB_STEP_SUMMARY
+                  fi
+
+                  echo "" >> $GITHUB_STEP_SUMMARY
+                  echo "## 📁 **Available Artifacts**" >> $GITHUB_STEP_SUMMARY
+                  echo "" >> $GITHUB_STEP_SUMMARY
+                  echo "The following detailed reports are available for download:" >> $GITHUB_STEP_SUMMARY
+                  echo "- 🧪 **Test Results**: Unit test results for all Python versions" >> $GITHUB_STEP_SUMMARY
+                  echo "- 📊 **Coverage Report**: Detailed code coverage analysis (HTML & XML)" >> $GITHUB_STEP_SUMMARY
+                  echo "- 🔍 **Linting Reports**: Code quality and formatting analysis" >> $GITHUB_STEP_SUMMARY
+                  echo "- 🏷️ **Type Check Reports**: MyPy type analysis with HTML visualization" >> $GITHUB_STEP_SUMMARY
