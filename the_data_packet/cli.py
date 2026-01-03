@@ -106,14 +106,14 @@ Environment Variables:
 
     # Audio Settings
     parser.add_argument(
-        "--voice-a",
-        default="en-US-Studio-MultiSpeaker-R",
-        help="Google Cloud TTS voice name for first speaker (default: en-US-Studio-MultiSpeaker-R - Alex)",
+        "--male-voice",
+        default="en-US-Studio-Q",
+        help="Google Cloud TTS voice name for first speaker (default: en-US-Studio-Q - Alex)",
     )
     parser.add_argument(
-        "--voice-b",
-        default="en-US-Studio-MultiSpeaker-S",
-        help="Google Cloud TTS voice name for second speaker (default: en-US-Studio-MultiSpeaker-S - Sam)",
+        "--female-voice",
+        default="en-US-Studio-O",
+        help="Google Cloud TTS voice name for second speaker (default: en-US-Studio-O - Sam)",
     )
 
     # Output Settings
@@ -172,8 +172,8 @@ Environment Variables:
             "article_sources": args.sources,
             "article_categories": args.categories,
             "max_articles_per_source": args.max_articles,
-            "male_voice": args.voice_a,
-            "female_voice": args.voice_b,
+            "male_voice": args.male_voice,
+            "female_voice": args.female_voice,
             "save_intermediate_files": args.save_intermediate,
             "log_level": args.log_level,
         }
