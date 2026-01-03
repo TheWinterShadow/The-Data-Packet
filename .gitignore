@@ -21,3 +21,4 @@ infra/terraform.tfstate
 infra/.terraform/
 docs/build/
 .coverage
+google_auth.json

@@ -43,8 +43,8 @@ class TestAudioGenerator(unittest.TestCase):
         self.mock_config = Mock()
         self.mock_config.gcs_bucket_name = "test-audio-bucket"
         self.mock_config.google_credentials_path = None  # No credentials file in tests
-        self.mock_config.voice_a = "en-US-Studio-MultiSpeaker-R"
-        self.mock_config.voice_b = "en-US-Studio-MultiSpeaker-S"
+        self.mock_config.male_voice = "en-US-Studio-Q"
+        self.mock_config.female_voice = "en-US-Studio-O"
         self.mock_config.output_directory = Path("/tmp/test")
         self.mock_config.cleanup_temp_files = True
 
@@ -53,12 +53,8 @@ class TestAudioGenerator(unittest.TestCase):
         self.assertIsInstance(AudioGenerator.AVAILABLE_VOICES, dict)
         self.assertIn("male", AudioGenerator.AVAILABLE_VOICES)
         self.assertIn("female", AudioGenerator.AVAILABLE_VOICES)
-        self.assertIn(
-            "en-US-Studio-MultiSpeaker-R", AudioGenerator.AVAILABLE_VOICES["male"]
-        )
-        self.assertIn(
-            "en-US-Studio-MultiSpeaker-S", AudioGenerator.AVAILABLE_VOICES["female"]
-        )
+        self.assertIn("en-US-Studio-Q", AudioGenerator.AVAILABLE_VOICES["male"])
+        self.assertIn("en-US-Studio-O", AudioGenerator.AVAILABLE_VOICES["female"])
 
     def test_audio_config_defined(self):
         """Test that audio configuration is properly defined."""
@@ -67,7 +63,7 @@ class TestAudioGenerator(unittest.TestCase):
         self.assertIsInstance(AudioGenerator.AUDIO_CONFIG, dict)
         self.assertEqual(
             AudioGenerator.AUDIO_CONFIG["audio_encoding"],
-            texttospeech.AudioEncoding.MP3,
+            texttospeech.AudioEncoding.LINEAR16,
         )
         self.assertEqual(AudioGenerator.AUDIO_CONFIG["sample_rate_hertz"], 44100)
 
@@ -94,8 +90,8 @@ class TestAudioGenerator(unittest.TestCase):
         generator = AudioGenerator(gcs_bucket_name="test-bucket")
 
         self.assertEqual(generator.gcs_bucket_name, "test-bucket")
-        self.assertEqual(generator.voice_a, "en-US-Studio-MultiSpeaker-R")
-        self.assertEqual(generator.voice_b, "en-US-Studio-MultiSpeaker-S")
+        self.assertEqual(generator.male_voice, "en-US-Studio-Q")
+        self.assertEqual(generator.female_voice, "en-US-Studio-O")
 
     @patch("the_data_packet.generation.audio.get_config")
     def test_init_without_gcs_bucket_raises_error(self, mock_get_config):
@@ -131,12 +127,12 @@ class TestAudioGenerator(unittest.TestCase):
 
         generator = AudioGenerator(
             gcs_bucket_name="test-bucket",
-            voice_a="en-US-Studio-MultiSpeaker-T",
-            voice_b="en-US-Studio-MultiSpeaker-U",
+            male_voice="en-US-Studio-Q",
+            female_voice="Leda",
         )
 
-        self.assertEqual(generator.voice_a, "en-US-Studio-MultiSpeaker-T")
-        self.assertEqual(generator.voice_b, "en-US-Studio-MultiSpeaker-U")
+        self.assertEqual(generator.male_voice, "en-US-Studio-Q")
+        self.assertEqual(generator.female_voice, "Leda")
 
     @patch("the_data_packet.generation.audio.get_config")
     @patch(
@@ -246,19 +242,19 @@ class TestAudioGenerator(unittest.TestCase):
         self.assertTrue(ssml.startswith("<speak>"))
         self.assertTrue(ssml.endswith("</speak>"))
         self.assertIn(
-            '<voice name="en-US-Studio-MultiSpeaker-R">Welcome to the show!</voice>',
+            '<voice name="en-US-Studio-Q">Welcome to the show!</voice>',
             ssml,
         )
         self.assertIn(
-            '<voice name="en-US-Studio-MultiSpeaker-S">Thanks for having me.</voice>',
+            '<voice name="en-US-Studio-O">Thanks for having me.</voice>',
             ssml,
         )
         self.assertIn(
-            '<voice name="en-US-Studio-MultiSpeaker-R">This is a narrator line.</voice>',
+            '<voice name="en-US-Studio-Q">This is a narrator line.</voice>',
             ssml,
         )
         self.assertIn(
-            '<voice name="en-US-Studio-MultiSpeaker-R">Let\'s talk about tech.</voice>',
+            '<voice name="en-US-Studio-Q">Let\'s talk about tech.</voice>',
             ssml,
         )
 
@@ -290,8 +286,8 @@ class TestAudioGenerator(unittest.TestCase):
                     self.assertIsInstance(voices, dict)
                     self.assertIn("male", voices)
                     self.assertIn("female", voices)
-                    self.assertIn("en-US-Studio-MultiSpeaker-R", voices["male"])
-                    self.assertIn("en-US-Studio-MultiSpeaker-S", voices["female"])
+                    self.assertIn("en-US-Studio-Q", voices["male"])
+                    self.assertIn("en-US-Studio-O", voices["female"])
 
     @patch("the_data_packet.generation.audio.get_config")
     @patch(
@@ -405,16 +401,21 @@ Sam: Absolutely. Let's dive into the details."""
 
         generator = AudioGenerator(gcs_bucket_name="test-bucket")
 
-        with (
-            patch("pathlib.Path.mkdir"),
-            patch("pathlib.Path.stat") as mock_stat,
-            patch("pathlib.Path.exists") as mock_path_exists,
-        ):
-            mock_stat.return_value = Mock(st_size=1024)
-            mock_path_exists.return_value = True
+        # Mock generate_audio_chunked to avoid file system operations
+        mock_result = AudioResult(
+            output_file=Path("/tmp/test/episode.mp3"),
+            duration_seconds=120.0,
+            file_size_bytes=1024,
+            generation_time_seconds=45.2,
+        )
 
+        with patch.object(
+            generator, "generate_audio_chunked", return_value=mock_result
+        ) as mock_chunked:
             result = generator.generate_audio(script)
 
+            # Verify generate_audio_chunked was called
+            mock_chunked.assert_called_once()
             self.assertIsInstance(result, AudioResult)
             self.assertEqual(result.output_file.name, "episode.mp3")
             self.assertIsNotNone(result.generation_time_seconds)
@@ -570,6 +571,193 @@ Sam: Thanks for having me, Alex. Today we're discussing AI."""
 
         # Verify blob download was called
         mock_blob.download_to_filename.assert_called_once_with(str(output_file))
+
+    def test_split_text_by_bytes(self):
+        """Test text splitting by byte size."""
+        with patch("the_data_packet.generation.audio.get_config") as mock_get_config:
+            mock_get_config.return_value = self.mock_config
+
+            with (
+                patch(
+                    "the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient"
+                ),
+                patch("the_data_packet.generation.audio.storage.Client"),
+                patch("os.path.exists", return_value=True),
+            ):
+                mock_storage_client = Mock()
+                mock_bucket = Mock()
+                mock_storage_client.bucket.return_value = mock_bucket
+                mock_bucket.list_blobs.return_value = []
+
+                with patch(
+                    "the_data_packet.generation.audio.storage.Client",
+                    return_value=mock_storage_client,
+                ):
+                    generator = AudioGenerator(gcs_bucket_name="test-bucket")
+
+                    # Test with text that should be split
+                    text = "A" * 3000 + "\n" + "B" * 3000
+                    chunks = generator.split_text_by_bytes(text, max_bytes=4000)
+
+                    self.assertGreater(len(chunks), 1)
+                    for chunk in chunks:
+                        self.assertLessEqual(len(chunk.encode("utf-8")), 4000)
+
+    @patch("the_data_packet.generation.audio.get_config")
+    @patch(
+        "the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient"
+    )
+    @patch("the_data_packet.generation.audio.storage.Client")
+    @patch("os.path.exists")
+    @patch("time.sleep")
+    @patch("tempfile.mktemp")
+    @patch("pydub.AudioSegment")
+    def test_generate_audio_chunked_success(
+        self,
+        mock_audio_segment,
+        mock_mktemp,
+        mock_sleep,
+        mock_exists,
+        mock_storage,
+        mock_tts,
+        mock_get_config,
+    ):
+        """Test successful chunked audio generation."""
+        from unittest.mock import MagicMock
+
+        mock_get_config.return_value = self.mock_config
+        mock_exists.return_value = True
+
+        # Mock TTS long audio client
+        mock_tts_client = Mock()
+        mock_operation = Mock()
+        mock_operation.operation.name = "test-operation"
+        mock_operation.done.return_value = True
+        mock_operation.result.return_value = Mock()
+        mock_tts_client.synthesize_long_audio.return_value = mock_operation
+        mock_tts.return_value = mock_tts_client
+
+        # Mock storage client
+        mock_storage_client = Mock()
+        mock_bucket = Mock()
+        mock_blob = Mock()
+        mock_blob.exists.return_value = True
+        mock_bucket.blob.return_value = mock_blob
+        mock_bucket.list_blobs.return_value = []
+        mock_storage_client.bucket.return_value = mock_bucket
+        mock_storage.return_value = mock_storage_client
+
+        # Mock temp files
+        mock_mktemp.side_effect = ["/tmp/chunk1.wav", "/tmp/chunk2.wav"]
+
+        # Mock AudioSegment with proper chaining
+        mock_segment = MagicMock()
+        mock_segment.duration_seconds = 120.0
+        mock_segment.__iadd__ = Mock(return_value=mock_segment)  # For += operator
+        mock_segment.__add__ = Mock(return_value=mock_segment)
+        mock_segment.export = Mock()
+        mock_audio_segment.empty.return_value = mock_segment
+        mock_audio_segment.from_wav.return_value = mock_segment
+
+        # Create a long script that will be split
+        script = "A" * 3000 + "\nAlex: Part two of the podcast.\n" + "B" * 3000
+
+        generator = AudioGenerator(gcs_bucket_name="test-bucket")
+
+        with (
+            patch("pathlib.Path.mkdir"),
+            patch("pathlib.Path.stat") as mock_stat,
+            patch("pathlib.Path.exists") as mock_path_exists,
+            patch("pathlib.Path.unlink"),
+        ):
+            mock_stat.return_value = Mock(st_size=2048)
+            mock_path_exists.return_value = True
+
+            result = generator.generate_audio_chunked(script)
+
+            self.assertIsInstance(result, AudioResult)
+            self.assertEqual(result.duration_seconds, 120.0)
+            self.assertEqual(result.file_size_bytes, 2048)
+
+    @patch("the_data_packet.generation.audio.get_config")
+    @patch(
+        "the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient"
+    )
+    @patch("the_data_packet.generation.audio.storage.Client")
+    @patch("os.path.exists")
+    @patch("pydub.AudioSegment")
+    def test_convert_wav_to_mp3(
+        self, mock_audio_segment, mock_exists, mock_storage, mock_tts, mock_get_config
+    ):
+        """Test WAV to MP3 conversion."""
+        mock_get_config.return_value = self.mock_config
+        mock_exists.return_value = True
+
+        # Mock storage client
+        mock_storage_client = Mock()
+        mock_bucket = Mock()
+        mock_bucket.list_blobs.return_value = []
+        mock_storage_client.bucket.return_value = mock_bucket
+        mock_storage.return_value = mock_storage_client
+
+        # Mock TTS client
+        mock_tts.return_value = Mock()
+
+        # Mock AudioSegment
+        mock_segment = Mock()
+        mock_audio_segment.from_wav.return_value = mock_segment
+
+        generator = AudioGenerator(gcs_bucket_name="test-bucket")
+
+        wav_path = Path("/test/input.wav")
+        mp3_path = Path("/test/output.mp3")
+
+        generator.convert_wav_to_mp3(wav_path, mp3_path)
+
+        # Verify AudioSegment was called correctly
+        mock_audio_segment.from_wav.assert_called_once_with(wav_path)
+        mock_segment.export.assert_called_once_with(mp3_path, format="mp3")
+
+    @patch("the_data_packet.generation.audio.get_config")
+    @patch(
+        "the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient"
+    )
+    @patch("the_data_packet.generation.audio.storage.Client")
+    @patch("os.path.exists")
+    def test_generate_audio_calls_chunked_generation(
+        self, mock_exists, mock_storage, mock_tts, mock_get_config
+    ):
+        """Test that generate_audio calls generate_audio_chunked."""
+        mock_get_config.return_value = self.mock_config
+        mock_exists.return_value = True
+
+        # Mock storage client
+        mock_storage_client = Mock()
+        mock_bucket = Mock()
+        mock_bucket.list_blobs.return_value = []
+        mock_storage_client.bucket.return_value = mock_bucket
+        mock_storage.return_value = mock_storage_client
+
+        # Mock TTS client
+        mock_tts.return_value = Mock()
+
+        script = """Alex: Hello and welcome to our tech podcast.
+Sam: Thanks for having me, Alex. Today we're discussing AI.
+Alex: That's right. The latest developments are fascinating.
+Sam: Absolutely. Let's dive into the details."""
+
+        generator = AudioGenerator(gcs_bucket_name="test-bucket")
+
+        with patch.object(
+            generator,
+            "generate_audio_chunked",
+            return_value=AudioResult(output_file=Path("test.mp3")),
+        ) as mock_chunked:
+            result = generator.generate_audio(script)
+
+            # Verify generate_audio_chunked was called
+            mock_chunked.assert_called_once()
+            self.assertIsInstance(result, AudioResult)
 
 
 if __name__ == "__main__":

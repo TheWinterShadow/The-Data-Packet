@@ -232,8 +232,8 @@ class Config:
     temperature: float = 0.7
 
     # Audio Settings (Google Cloud Studio Multi-speaker voices)
-    voice_a: str = "en-US-Studio-MultiSpeaker-R"  # Alex (male narrator)
-    voice_b: str = "en-US-Studio-MultiSpeaker-S"  # Sam (female narrator)
+    male_voice: str = "en-US-Studio-Q"  # Alex (male narrator)
+    female_voice: str = "en-US-Studio-O"  # Sam (female narrator)
     audio_sample_rate: int = 44100
 
     # Processing Options
@@ -251,7 +251,7 @@ class Config:
         "https://the-data-packet.s3.us-west-2.amazonaws.com/the-data-packet/the_data_packet.png"
     )
     # Contact email for podcast
-    rss_channel_email: Optional[str] = "contact@securitytechhelp.com"
+    rss_channel_email: Optional[str] = "contact@thewintershadow.com"
     max_rss_episodes: int = 500
 
     # Network Settings

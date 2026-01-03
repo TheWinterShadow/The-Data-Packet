@@ -31,22 +31,11 @@ class AudioGenerator:
     """Generates podcast audio from scripts using Google Cloud Text-to-Speech Long Audio Synthesis."""
 
     # Available Studio Multi-speaker voices for podcast content
-    AVAILABLE_VOICES = {
-        "male": [
-            "en-US-Studio-MultiSpeaker-R",  # Alex (male narrator)
-            "en-US-Studio-MultiSpeaker-T",  # Additional male voice
-            "en-US-Studio-MultiSpeaker-V",  # Another male option
-        ],
-        "female": [
-            "en-US-Studio-MultiSpeaker-S",  # Sam (female narrator)
-            "en-US-Studio-MultiSpeaker-U",  # Additional female voice
-            "en-US-Studio-MultiSpeaker-W",  # Another female option
-        ],
-    }
+    AVAILABLE_VOICES = {"male": ["en-US-Studio-Q"], "female": ["en-US-Studio-O"]}
 
     # Audio encoding settings for long audio synthesis
     AUDIO_CONFIG = {
-        "audio_encoding": texttospeech.AudioEncoding.MP3,
+        "audio_encoding": texttospeech.AudioEncoding.LINEAR16,
         "sample_rate_hertz": 44100,
         # Optimized for voice
         "effects_profile_id": ["telephony-class-application"],
@@ -55,8 +44,8 @@ class AudioGenerator:
     def __init__(
         self,
         credentials_path: Optional[str] = None,
-        voice_a: Optional[str] = None,
-        voice_b: Optional[str] = None,
+        male_voice: Optional[str] = None,
+        female_voice: Optional[str] = None,
         gcs_bucket_name: Optional[str] = None,
     ):
         """
@@ -64,8 +53,8 @@ class AudioGenerator:
 
         Args:
             credentials_path: Path to Google Cloud service account JSON credentials
-            voice_a: Voice name for first speaker (Alex)
-            voice_b: Voice name for second speaker (Sam)
+            male_voice: Voice name for first speaker (Alex)
+            female_voice: Voice name for second speaker (Sam)
             gcs_bucket_name: Google Cloud Storage bucket for audio output
         """
         config = get_config()
@@ -73,11 +62,9 @@ class AudioGenerator:
         self.credentials_path = credentials_path or getattr(
             config, "google_credentials_path", None
         )
-        self.voice_a = voice_a or getattr(
-            config, "voice_a", "en-US-Studio-MultiSpeaker-R"
-        )
-        self.voice_b = voice_b or getattr(
-            config, "voice_b", "en-US-Studio-MultiSpeaker-S"
+        self.male_voice = male_voice or getattr(config, "male_voice", "en-US-Studio-Q")
+        self.female_voice = female_voice or getattr(
+            config, "female_voice", "en-US-Studio-O"
         )
         self.gcs_bucket_name = gcs_bucket_name or getattr(
             config, "gcs_bucket_name", None
@@ -113,7 +100,7 @@ class AudioGenerator:
         self._validate_gcs_bucket()
 
         logger.info(
-            f"Initialized Google Cloud TTS generator with voices: {self.voice_a}, {self.voice_b} and bucket: {self.gcs_bucket_name}"  # noqa: E501
+            f"Initialized Google Cloud TTS generator with voices: {self.male_voice}, {self.female_voice} and bucket: {self.gcs_bucket_name}"  # noqa: E501
         )
 
     def _validate_gcs_bucket(self) -> None:
@@ -135,62 +122,13 @@ class AudioGenerator:
         self, script: str, output_file: Optional[Path] = None
     ) -> AudioResult:
         """
-        Generate audio from a podcast script using Google Cloud Text-to-Speech Long Audio Synthesis.
-
-        Args:
-            script: Podcast script text
-            output_file: Output file path (defaults to config output directory)
-
-        Returns:
-            AudioResult with generation details
-
-        Raises:
-            AudioGenerationError: If audio generation fails
+        Generate audio from a podcast script, automatically handling chunking and mp3 output.
         """
         if not script or len(script.strip()) < 100:
             raise AudioGenerationError("Script too short or empty")
 
-        if output_file is None:
-            # Use .mp3 extension for Spotify compatibility
-            output_file = self.config.output_directory / "episode.mp3"
-
-        # Ensure output directory exists
-        output_file.parent.mkdir(parents=True, exist_ok=True)
-
-        logger.info(f"Generating audio to {output_file}")
-        start_time = datetime.now()
-
-        try:
-            # Parse and prepare script as single SSML for long audio synthesis
-            ssml_content = self._parse_script_to_ssml(script)
-
-            if not ssml_content:
-                raise AudioGenerationError("No valid content found in script")
-
-            logger.info(f"Generated SSML content ({len(ssml_content)} characters)")
-
-            # Generate audio using Google Cloud Long Audio Synthesis
-            gcs_uri = self._generate_with_long_audio_synthesis(ssml_content)
-
-            # Download the generated audio from GCS
-            self._download_audio_from_gcs(gcs_uri, output_file)
-
-            # Calculate metrics
-            generation_time = (datetime.now() - start_time).total_seconds()
-            file_size = output_file.stat().st_size if output_file.exists() else None
-
-            logger.info(f"Audio generation completed in {generation_time:.1f} seconds")
-
-            return AudioResult(
-                output_file=output_file,
-                generation_time_seconds=generation_time,
-                file_size_bytes=file_size,
-            )
-
-        except Exception as e:
-            if isinstance(e, AudioGenerationError):
-                raise
-            raise AudioGenerationError(f"Audio generation failed: {e}")
+        # Always use chunked generation to avoid 4000-byte limit
+        return self.generate_audio_chunked(script, output_file=output_file)
 
     def _parse_script_to_ssml(self, script: str) -> str:
         """Parse script and convert to SSML with voice switching for multi-speaker synthesis."""
@@ -207,18 +145,20 @@ class AudioGenerator:
             # Handle dialogue lines with voice switching
             if line.startswith("Alex:"):
                 content = line[5:].strip()
-                ssml_parts.append(f'<voice name="{self.voice_a}">{content}</voice>')
+                ssml_parts.append(f'<voice name="{self.male_voice}">{content}</voice>')
                 # Pause between speakers
                 ssml_parts.append('<break time="0.5s"/>')
             elif line.startswith("Sam:"):
                 content = line[4:].strip()
-                ssml_parts.append(f'<voice name="{self.voice_b}">{content}</voice>')
+                ssml_parts.append(
+                    f'<voice name="{self.female_voice}">{content}</voice>'
+                )
                 # Pause between speakers
                 ssml_parts.append('<break time="0.5s"/>')
             else:
                 # Non-dialogue text - assign to Alex (default narrator)
                 if line:
-                    ssml_parts.append(f'<voice name="{self.voice_a}">{line}</voice>')
+                    ssml_parts.append(f'<voice name="{self.male_voice}">{line}</voice>')
                     # Short pause for continuity
                     ssml_parts.append('<break time="0.3s"/>')
 
@@ -246,14 +186,20 @@ class AudioGenerator:
             )
 
             # Generate unique output file name with timestamp
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            timestamp = datetime.now().strftime("%Y-%m-%d")
             gcs_uri = f"gs://{self.gcs_bucket_name}/audio/episode_{timestamp}.mp3"
 
             # Create the Long Audio Synthesis request
+            # Studio voices require a model name
             request = texttospeech.SynthesizeLongAudioRequest(
+                parent="projects/gen-lang-client-0429374219/locations/us-central1",
                 input=synthesis_input,
                 audio_config=audio_config,
                 output_gcs_uri=gcs_uri,
+                voice=texttospeech.VoiceSelectionParams(
+                    language_code="en-US",
+                    name=self.male_voice,
+                ),
             )
 
             logger.info(f"Starting long audio synthesis operation to {gcs_uri}")
@@ -402,3 +348,76 @@ class AudioGenerator:
         except Exception as e:
             logger.error(f"Authentication test failed: {e}")
             return False
+
+    def split_text_by_bytes(self, text: str, max_bytes: int = 4000) -> List[str]:
+        """Split text into chunks under max_bytes, preserving words."""
+        chunks = []
+        current = ""
+        for line in text.splitlines(keepends=True):
+            if len((current + line).encode("utf-8")) > max_bytes:
+                if current:
+                    chunks.append(current)
+                    current = ""
+            current += line
+        if current:
+            chunks.append(current)
+        return chunks
+
+    def generate_audio_chunked(
+        self, script: str, output_file: Optional[Path] = None
+    ) -> AudioResult:
+        """
+        Generate audio for long scripts by splitting into chunks and merging the results into a single mp3 file.
+        """
+        import tempfile
+
+        from pydub import AudioSegment
+
+        if output_file is None:
+            output_file = self.config.output_directory / "episode.mp3"
+        output_file.parent.mkdir(parents=True, exist_ok=True)
+
+        # Split script into chunks under 4000 bytes
+        chunks = self.split_text_by_bytes(script, max_bytes=4000)
+        logger.info(f"Script split into {len(chunks)} chunks for TTS.")
+
+        temp_wav_files = []
+        try:
+            for i, chunk in enumerate(chunks):
+                logger.info(f"Generating audio for chunk {i+1}/{len(chunks)}...")
+                ssml_content = self._parse_script_to_ssml(chunk)
+                gcs_uri = self._generate_with_long_audio_synthesis(ssml_content)
+                # Save each chunk as a temporary wav file
+                temp_wav = Path(tempfile.mktemp(suffix=f"_chunk{i+1}.wav"))
+                self._download_audio_from_gcs(gcs_uri, temp_wav)
+                temp_wav_files.append(temp_wav)
+            # Merge all wav files into one
+            combined = AudioSegment.empty()
+            for wav_file in temp_wav_files:
+                combined += AudioSegment.from_wav(wav_file)
+            # Export as mp3
+            combined.export(output_file, format="mp3")
+            logger.info(f"Combined audio exported to {output_file}")
+            # Gather stats
+            duration = combined.duration_seconds
+            file_size = output_file.stat().st_size if output_file.exists() else None
+            return AudioResult(
+                output_file=output_file,
+                duration_seconds=duration,
+                file_size_bytes=file_size,
+            )
+        finally:
+            # Clean up temp wav files
+            for f in temp_wav_files:
+                try:
+                    f.unlink()
+                except Exception:
+                    pass
+
+    def convert_wav_to_mp3(self, wav_path: Path, mp3_path: Path) -> None:
+        """Convert a wav file to mp3 using pydub."""
+        from pydub import AudioSegment
+
+        audio = AudioSegment.from_wav(wav_path)
+        audio.export(mp3_path, format="mp3")
+        logger.info(f"Converted {wav_path} to {mp3_path}")

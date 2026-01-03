@@ -25,8 +25,7 @@ dependencies = [
     "google-cloud-texttospeech>=2.16.0",
     "google-cloud-storage>=2.10.0",
     "google-auth>=2.17.0",
-    # Legacy TTS support (deprecated)
-    "elevenlabs>=0.2.0;python_version<'3.13'",  # Optional for backward compatibility
+    "pydub",
 ]
 authors = [
   { name = "TheWinterShadow", email = "elijah.j.winter@outlook.com" },
@@ -113,8 +112,7 @@ dependencies = [
   "google-cloud-texttospeech>=2.16.0",
   "google-cloud-storage>=2.10.0",
   "google-auth>=2.17.0",
-  # Legacy support
-  "elevenlabs>=0.2.0",
+  "pydub",
   # Development tools
   "black>=23.0.0",
   "isort>=5.12.0",
