@@ -172,8 +172,8 @@ Environment Variables:
             "article_sources": args.sources,
             "article_categories": args.categories,
             "max_articles_per_source": args.max_articles,
-            "voice_a": args.voice_a,
-            "voice_b": args.voice_b,
+            "male_voice": args.voice_a,
+            "female_voice": args.voice_b,
             "save_intermediate_files": args.save_intermediate,
             "log_level": args.log_level,
         }
