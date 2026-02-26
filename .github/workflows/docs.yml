@@ -34,7 +34,7 @@ jobs:
                   cache: "pip"
 
             - name: Install Hatch
-              run: pip install hatch
+              run: pip install "hatch" "virtualenv<20.27.0"
 
             # ── Step 1: Build Zensical site → site/ ────────────────────────────
             - name: Build Zensical site
