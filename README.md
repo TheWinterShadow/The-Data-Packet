@@ -7,6 +7,8 @@
 [![Documentation](https://img.shields.io/github/actions/workflow/status/TheWinterShadow/The-Data-Packet/docs.yml?branch=main&logo=readthedocs&label=Docs)](https://github.com/TheWinterShadow/The-Data-Packet/actions/workflows/docs.yml)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg?logo=python)](https://www.python.org/downloads/)
 [![MIT License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Spotify](https://img.shields.io/badge/Spotify-Listen-1DB954?logo=spotify&logoColor=white)](https://open.spotify.com/show/3LZkCwaYdOeGPo9flaYcop?si=7TJU0DEMTGC3bb1w5_2wxQ)
+[![Apple Podcasts](https://img.shields.io/badge/Apple%20Podcasts-Listen-9933CC?logo=applepodcasts&logoColor=white)](https://podcasts.apple.com/us/podcast/the-data-packet/id1880395487)
 
 **Full documentation:** [the-data-packet.thewintershadow.com](https://the-data-packet.thewintershadow.com)
 

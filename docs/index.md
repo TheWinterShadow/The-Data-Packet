@@ -16,6 +16,8 @@ multi-speaker podcast episodes with a single command.
 [![Docker](https://img.shields.io/github/actions/workflow/status/TheWinterShadow/The-Data-Packet/docker.yml?branch=main&logo=docker&label=Docker)](https://github.com/TheWinterShadow/The-Data-Packet/actions/workflows/docker.yml)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg?logo=python&logoColor=white)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/TheWinterShadow/The-Data-Packet/blob/main/LICENSE)
+[![Spotify](https://img.shields.io/badge/Spotify-Listen-1DB954?logo=spotify&logoColor=white)](https://open.spotify.com/show/3LZkCwaYdOeGPo9flaYcop?si=7TJU0DEMTGC3bb1w5_2wxQ)
+[![Apple Podcasts](https://img.shields.io/badge/Apple%20Podcasts-Listen-9933CC?logo=applepodcasts&logoColor=white)](https://podcasts.apple.com/us/podcast/the-data-packet/id1880395487)
 
 ---
 
@@ -47,7 +49,8 @@ multi-speaker podcast episodes with a single command.
     ---
 
     Generates RSS feeds and uploads audio, script, and feed to **AWS S3** for immediate podcast
-    hosting. Ready to submit to Apple Podcasts or Spotify.
+    hosting. Live on [Spotify](https://open.spotify.com/show/3LZkCwaYdOeGPo9flaYcop?si=7TJU0DEMTGC3bb1w5_2wxQ)
+    and [Apple Podcasts](https://podcasts.apple.com/us/podcast/the-data-packet/id1880395487).
 
 </div>
 
