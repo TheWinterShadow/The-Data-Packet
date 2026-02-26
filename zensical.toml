@@ -1,0 +1,152 @@
+[project]
+site_name       = "The Data Packet"
+site_url        = "https://the-data-packet.thewintershadow.com"
+site_description = "AI-powered automated podcast generation — transform tech news into multi-speaker audio episodes."
+site_author     = "TheWinterShadow"
+copyright       = "Copyright &copy; 2025 TheWinterShadow &mdash; MIT License"
+repo_name       = "TheWinterShadow/The-Data-Packet"
+repo_url        = "https://github.com/TheWinterShadow/The-Data-Packet"
+edit_uri        = "edit/main/docs/"
+
+nav = [
+  {"Home" = "index.md"},
+  {"Overview" = [
+    "overview/index.md",
+    "overview/architecture.md",
+  ]},
+  {"Getting Started" = [
+    "getting-started/index.md",
+    "getting-started/installation.md",
+    "getting-started/usage.md",
+  ]},
+  {"Configuration" = "configuration/index.md"},
+  {"Infrastructure" = [
+    "infrastructure/index.md",
+    "infrastructure/docker.md",
+    "infrastructure/terraform.md",
+    "infrastructure/logging.md",
+    "infrastructure/mongodb.md",
+  ]},
+  {"Contributing" = [
+    "contributing/index.md",
+    "contributing/development.md",
+  ]},
+  {"API Reference" = "https://the-data-packet.thewintershadow.com/reference/"},
+]
+
+# ── Markdown extensions ──────────────────────────────────────────────────────
+
+[project.markdown_extensions.abbr]
+[project.markdown_extensions.admonition]
+[project.markdown_extensions.attr_list]
+[project.markdown_extensions.def_list]
+[project.markdown_extensions.footnotes]
+[project.markdown_extensions.md_in_html]
+
+[project.markdown_extensions.toc]
+permalink = true
+
+[project.markdown_extensions.pymdownx.betterem]
+smart_enable = "all"
+
+[project.markdown_extensions.pymdownx.caret]
+[project.markdown_extensions.pymdownx.details]
+
+[project.markdown_extensions.pymdownx.emoji]
+emoji_generator = "zensical.extensions.emoji.to_svg"
+emoji_index     = "zensical.extensions.emoji.twemoji"
+
+[project.markdown_extensions.pymdownx.highlight]
+anchor_linenums     = true
+line_spans          = "__span"
+pygments_lang_class = true
+
+[project.markdown_extensions.pymdownx.inlinehilite]
+[project.markdown_extensions.pymdownx.keys]
+[project.markdown_extensions.pymdownx.mark]
+[project.markdown_extensions.pymdownx.smartsymbols]
+[project.markdown_extensions.pymdownx.snippets]
+
+[project.markdown_extensions.pymdownx.superfences]
+custom_fences = [
+  { name = "mermaid", class = "mermaid", format = "pymdownx.superfences.fence_code_format" },
+]
+
+[project.markdown_extensions.pymdownx.tabbed]
+alternate_style = true
+
+[project.markdown_extensions.pymdownx.tasklist]
+custom_checkbox = true
+
+[project.markdown_extensions.pymdownx.tilde]
+
+# ── Theme ────────────────────────────────────────────────────────────────────
+
+[project.theme]
+features = [
+  # Instant SPA navigation
+  "navigation.instant",
+  "navigation.instant.prefetch",
+  "navigation.instant.progress",
+  "navigation.tracking",
+  # Navigation layout
+  "navigation.tabs",
+  "navigation.tabs.sticky",
+  "navigation.sections",
+  "navigation.path",
+  "navigation.indexes",
+  "navigation.top",
+  "navigation.footer",
+  # Search
+  "search.highlight",
+  "search.share",
+  "search.suggest",
+  # Code blocks
+  "content.code.annotate",
+  "content.code.copy",
+  "content.code.select",
+  # Tabs
+  "content.tabs.link",
+  # TOC
+  "toc.follow",
+]
+
+[project.theme.icon]
+repo = "fontawesome/brands/github"
+edit = "lucide/pencil"
+view = "lucide/eye"
+
+# ── Color palettes (respects system preference) ──────────────────────────────
+
+[[project.theme.palette]]
+media       = "(prefers-color-scheme: light)"
+scheme      = "default"
+primary     = "indigo"
+accent      = "indigo"
+toggle.icon = "lucide/sun"
+toggle.name = "Switch to dark mode"
+
+[[project.theme.palette]]
+media       = "(prefers-color-scheme: dark)"
+scheme      = "slate"
+primary     = "indigo"
+accent      = "indigo"
+toggle.icon = "lucide/moon"
+toggle.name = "Switch to light mode"
+
+# ── Footer social links ───────────────────────────────────────────────────────
+
+[[project.extra.social]]
+icon = "fontawesome/brands/github"
+link = "https://github.com/TheWinterShadow/The-Data-Packet"
+name = "GitHub"
+
+[[project.extra.social]]
+icon = "fontawesome/brands/docker"
+link = "https://github.com/TheWinterShadow/The-Data-Packet/pkgs/container/the-data-packet"
+name = "Docker Image (GHCR)"
+
+[[project.extra.social]]
+icon = "fontawesome/brands/python"
+link = "https://pypi.org/project/the-data-packet/"
+name = "PyPI"

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Private security advisory (high/critical vulnerabilities)
+    url: https://github.com/TheWinterShadow/The-Data-Packet/security/advisories/new
+    about: For high or critical severity vulnerabilities, please report privately before public disclosure.
+  - name: Documentation
+    url: https://the-data-packet.thewintershadow.com
+    about: Check the docs site for usage guides, configuration reference, and troubleshooting.

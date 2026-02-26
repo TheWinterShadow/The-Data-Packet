@@ -5,6 +5,8 @@ on:
         workflows: ["Python Build"]
         types:
             - completed
+    # Allow manual trigger without waiting for CI
+    workflow_dispatch:
 
 permissions:
     contents: read
@@ -19,33 +21,53 @@ jobs:
     build-docs:
         name: "Build Documentation"
         runs-on: ubuntu-latest
-        if: ${{ github.event.workflow_run.conclusion == 'success' }}
+        if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
         steps:
             - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0  # Full history needed for git-based features
 
             - name: Set up Python
-              uses: actions/setup-python@v4
+              uses: actions/setup-python@v5
               with:
                   python-version: "3.11"
+                  cache: "pip"
 
             - name: Install Hatch
               run: pip install hatch
 
-            - name: Build documentation
+            # ── Step 1: Build Zensical site → site/ ────────────────────────────
+            - name: Build Zensical site
               run: hatch run docs:build
 
-            - name: Copy coverage HTML report into docs
+            # ── Step 2: Build Sphinx API reference → site/reference/ ──────────
+            - name: Build Sphinx API reference
+              run: hatch run docs:build-sphinx
+
+            # ── Step 3: Copy coverage report into site/coverage/ (if present) ──
+            - name: Copy coverage report
               run: |
                   if [ -d "htmlcov" ]; then
-                    mkdir -p docs/build/coverage
-                    cp -r htmlcov/* docs/build/coverage/
+                    mkdir -p site/coverage
+                    cp -r htmlcov/* site/coverage/
+                    echo "Coverage report copied to site/coverage/"
+                  else
+                    echo "No coverage report found (run tests first to generate one)"
                   fi
 
-            - name: Workflow Summary
+            - name: Workflow summary
               run: |
-                  echo "✅ Documentation build completed successfully" >> $GITHUB_STEP_SUMMARY
-                  echo "📚 Documentation will be deployed to GitHub Pages" >> $GITHUB_STEP_SUMMARY
-                  echo "🔄 Next: CI Tests will run automatically" >> $GITHUB_STEP_SUMMARY
+                  echo "## Documentation Build Summary" >> $GITHUB_STEP_SUMMARY
+                  echo "" >> $GITHUB_STEP_SUMMARY
+                  echo "| Component | Output |" >> $GITHUB_STEP_SUMMARY
+                  echo "|---|---|" >> $GITHUB_STEP_SUMMARY
+                  echo "| ✅ Zensical site | \`site/\` |" >> $GITHUB_STEP_SUMMARY
+                  echo "| ✅ Sphinx API reference | \`site/reference/\` |" >> $GITHUB_STEP_SUMMARY
+                  echo "" >> $GITHUB_STEP_SUMMARY
+                  echo "### Built directories" >> $GITHUB_STEP_SUMMARY
+                  echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+                  find site -maxdepth 2 -type d | sort >> $GITHUB_STEP_SUMMARY
+                  echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
 
             - name: Setup Pages
               uses: actions/configure-pages@v4
@@ -53,10 +75,10 @@ jobs:
             - name: Upload artifact
               uses: actions/upload-pages-artifact@v3
               with:
-                  path: "docs/build"
+                  path: "site"
 
     deploy-docs:
-        name: "Deploy Documentation to GitHub Pages"
+        name: "Deploy to GitHub Pages"
         environment:
             name: github-pages
             url: ${{ steps.deployment.outputs.page_url }}

@@ -1,32 +1,79 @@
----
 name: Bug report
-about: Create a report to help us improve
-title: '[BUG] '
-labels: ['bug']
-assignees: ''
+description: Report a broken or unexpected behaviour
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. Please fill in as much detail as you can.
 
----
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: A clear description of the bug and what you expected to happen instead.
+      placeholder: |
+        I ran `the-data-packet --script-only` and expected a script file to be written to ./output,
+        but instead I got a KeyError: 'content' traceback.
+    validations:
+      required: true
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Exact commands or code needed to trigger the bug.
+      placeholder: |
+        1. docker run ... --script-only
+        2. ...
+    validations:
+      required: true
 
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Run command '...'
-2. With credentials '...'
-3. See error
+  - type: textarea
+    id: error
+    attributes:
+      label: Error output or logs
+      description: Paste the full error message, stack trace, or relevant log lines.
+      render: text
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
+  - type: dropdown
+    id: run_method
+    attributes:
+      label: How are you running The Data Packet?
+      options:
+        - Docker (GHCR image)
+        - Docker (locally built)
+        - Python package (pip / hatch)
+    validations:
+      required: true
 
-**Error output**
-If applicable, add the error message or stack trace.
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Output of `the-data-packet --version` or the Docker image tag.
+      placeholder: "e.g. 2.0.0 / latest"
+    validations:
+      required: true
 
-**Environment (please complete the following information):**
- - OS: [e.g. macOS, Ubuntu]
- - Python version: [e.g. 3.11.0]
- - Lock & Key version: [e.g. 1.0.1]
- - Cloud provider: [e.g. AWS, Azure, GCP]
+  - type: input
+    id: python
+    attributes:
+      label: Python version
+      description: Omit if running via Docker.
+      placeholder: "e.g. 3.11.4"
 
-**Additional context**
-Add any other context about the problem here.
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: "e.g. Ubuntu 24.04 / macOS 15 / Windows 11"
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Any other information that might help (config flags used, cloud provider, etc.).

@@ -22,3 +22,4 @@ infra/.terraform/
 docs/build/
 .coverage
 google_auth.json
+site/

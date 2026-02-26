@@ -1,23 +1,60 @@
----
 name: Feature request
-about: Suggest an idea for this project
-title: '[FEATURE] '
-labels: ['enhancement']
-assignees: ''
+description: Suggest a new feature or improvement
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the suggestion. Please describe what you'd like and why it would be useful.
+        For significant changes, open this issue before writing any code so we can agree on the approach first.
 
----
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: Describe the use case or pain point motivating this request.
+      placeholder: |
+        When generating long episodes, the GCS intermediate files aren't cleaned up,
+        causing storage costs to accumulate.
+    validations:
+      required: true
 
-**Is your feature request related to a problem? Please describe.**
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: Describe what you'd like to see added or changed.
+    validations:
+      required: true
 
-**Describe the solution you'd like**
-A clear and concise description of what you want to happen.
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Any other approaches you've thought about, and why you prefer your proposed solution.
 
-**Describe alternatives you've considered**
-A clear and concise description of any alternative solutions or features you've considered.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which part of the project does this affect?
+      multiple: true
+      options:
+        - Article scraping (sources)
+        - Script generation (Claude / AI)
+        - Audio synthesis (Google Cloud TTS)
+        - AWS S3 / RSS feed
+        - MongoDB episode tracking
+        - CLI / configuration
+        - Docker / deployment
+        - Documentation
+        - CI / tooling
+        - Other
+    validations:
+      required: true
 
-**Cloud provider**
-Which cloud provider is this feature related to? (AWS, Azure, GCP, or general)
-
-**Additional context**
-Add any other context or screenshots about the feature request here.
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Anything else that would help — links, examples, prior art, etc.

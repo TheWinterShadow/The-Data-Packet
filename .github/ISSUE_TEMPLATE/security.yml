@@ -1,0 +1,82 @@
+name: Security vulnerability
+description: Report a security vulnerability (use this for low/medium severity; see note below for high/critical)
+title: "[Security]: "
+labels: ["security"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        > [!CAUTION]
+        > **High or critical severity?** Please use [GitHub's private security advisory](https://github.com/TheWinterShadow/The-Data-Packet/security/advisories/new)
+        > instead of this public form, so the issue can be reviewed and fixed before public disclosure.
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - Low — minimal impact, no sensitive data at risk
+        - Medium — limited impact or requires specific conditions
+        - High — significant impact, use private advisory instead
+        - Critical — severe impact, use private advisory instead
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected component
+      multiple: true
+      options:
+        - Credential / API key handling
+        - Docker image
+        - Dependency (supply chain)
+        - Article scraping
+        - Script generation
+        - Audio synthesis
+        - AWS S3 / cloud storage
+        - MongoDB connection
+        - CLI / configuration parsing
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Vulnerability description
+      description: Describe the vulnerability, including what an attacker could achieve.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Minimal steps needed to trigger or demonstrate the vulnerability.
+    validations:
+      required: true
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: Potential impact
+      description: What data, systems, or users could be affected?
+    validations:
+      required: true
+
+  - type: textarea
+    id: mitigation
+    attributes:
+      label: Suggested mitigation
+      description: If you have a fix or workaround in mind, describe it here.
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I have checked that this is not a duplicate of an existing issue or advisory
+          required: true
+        - label: This is not a high/critical severity issue (those should use the private advisory link above)
+          required: false

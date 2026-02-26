@@ -46,7 +46,7 @@ classifiers = [
 ]
 
 [project.urls]
-Documentation = "https://thewintershadow.github.io/the_data_packet/"
+Documentation = "https://the-data-packet.thewintershadow.com"
 Homepage = "https://github.com/TheWinterShadow/the_data_packet"
 Repository = "https://github.com/TheWinterShadow/the_data_packet"
 Issues = "https://github.com/TheWinterShadow/the_data_packet/issues"
@@ -127,15 +127,29 @@ dependencies = [
 
 [tool.hatch.envs.docs]
 dependencies = [
+  # Zensical site (homepage + guides)
+  "zensical",
+  # Sphinx API reference
   "sphinx",
-  "furo", 
+  "furo",
   "myst-parser",
+  "sphinx-autodoc-typehints",
 ]
 
 [tool.hatch.envs.docs.scripts]
-build = "sphinx-build -b html docs/source docs/build"
-clean = "sphinx-build -b html -E docs/source docs/build"
-serve = "python -m http.server 8000 --directory docs/build"
+# Build Zensical site → site/
+build = "zensical build"
+# Build Sphinx API reference → site/reference/
+build-sphinx = "sphinx-build -b html sphinx site/reference"
+# Build both (Zensical first, then Sphinx into site/reference/)
+build-all = [
+  "zensical build",
+  "sphinx-build -b html sphinx site/reference",
+]
+# Local preview (Zensical dev server)
+serve = "zensical serve"
+# Clean Zensical build
+clean = "zensical build --clean"
 
 # ==============================================================================
 # HATCH SCRIPTS
@@ -176,10 +190,10 @@ cov = [
   "cov-report",
 ]
 
-# Documentation scripts
-docs = "sphinx-build -b html docs/source docs/build"
-docs-clean = "sphinx-build -b html -E docs/source docs/build"
-docs-serve = "python -m http.server 8000 --directory docs/build"
+# Documentation scripts (use 'hatch run docs:build' for full build)
+docs = "zensical build"
+docs-clean = "zensical build --clean"
+docs-serve = "zensical serve"
 
 # Build pipeline
 pre-build = [
@@ -245,7 +259,7 @@ python_version = "3.9"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
-exclude = ["docs/.*"]
+exclude = ["docs/.*", "sphinx/.*", "site/.*"]
 # Allow imports that might not be available at runtime (like type stubs)
 ignore_missing_imports = true
 # Show error codes for easier debugging
