@@ -112,7 +112,7 @@ dependencies = [
   "google-cloud-storage>=2.10.0",
   "google-auth>=2.17.0",
   "pydub",
-  "audioop-lts>=0.2.1",  # pydub compat for Python 3.13+ (audioop removed from stdlib)
+  "audioop-lts>=0.2.1; python_version >= '3.13'",  # pydub compat for Python 3.13+ (audioop removed from stdlib)
   # Development tools
   "ruff>=0.4.0",
   "mypy>=1.0.0",
