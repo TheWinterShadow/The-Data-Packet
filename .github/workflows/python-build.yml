@@ -8,7 +8,7 @@ on:
 
 env:
   PYTHON_VERSION: "3.11"
-  TERRAFORM_VERSION: "1.6.0"
+  TERRAFORM_VERSION: "1.14.5"
 
 jobs:
   readiness-test:
@@ -126,23 +126,16 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./infra
+        working-directory: ./terraform
+    env:
+      GOOGLE_CREDENTIALS: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
     steps:
       - uses: actions/checkout@v4
-      - name: Set up GCP credentials
-        run: |
-          echo "$GCP_SERVICE_ACCOUNT_KEY" > gcp-key.json
-        env:
-          GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
-      - name: Set GOOGLE_APPLICATION_CREDENTIALS env
-        run: echo "GOOGLE_APPLICATION_CREDENTIALS=$(pwd)/gcp-key.json" >> $GITHUB_ENV
-      - name: Authenticate gcloud with service account
-        run: |
-          gcloud auth activate-service-account --key-file=gcp-key.json
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -153,28 +146,6 @@ jobs:
         run: terraform init
       - name: Terraform Validate
         run: terraform validate
-      - name: Import existing resources if they exist
-        run: |
-          # Try to import existing S3 bucket if it exists
-          if aws s3 ls "s3://the-data-packet" 2>/dev/null; then
-              echo "Bucket exists, importing to state..."
-              terraform import aws_s3_bucket.data_packet_bucket the-data-packet || echo "Bucket already in state or import failed"
-              terraform import aws_s3_bucket_public_access_block.data_packet_bucket_pab the-data-packet || echo "PAB already in state or import failed"
-              terraform import aws_s3_bucket_policy.data_packet_bucket_policy the-data-packet || echo "Policy already in state or import failed"
-          fi
-
-          # Try to import existing GCP resources if they exist
-          # Import GCP Storage Bucket if it exists
-          if gsutil ls -b "gs://the-data-packet-audio" 2>/dev/null; then
-              echo "GCP bucket exists, importing to state..."
-              terraform import google_storage_bucket.audio_bucket the-data-packet-audio || echo "Bucket already in state or import failed"
-          fi
-
-          # Import GCP Service Account if it exists
-          if gcloud iam service-accounts list --project=${{ secrets.GCP_PROJECT_ID }} --filter="email:data-packet-service@${{ secrets.GCP_PROJECT_ID }}.iam.gserviceaccount.com" --format="value(email)" | grep -q "data-packet-service@${{ secrets.GCP_PROJECT_ID }}.iam.gserviceaccount.com"; then
-            echo "GCP service account exists, importing to state..."
-            terraform import google_service_account.data_packet_sa projects/${{ secrets.GCP_PROJECT_ID }}/serviceAccounts/data-packet-service@${{ secrets.GCP_PROJECT_ID }}.iam.gserviceaccount.com || echo "Service account already in state or import failed"
-          fi
       - name: Terraform Plan
         run: terraform plan -out=tfplan
       - name: Terraform Apply

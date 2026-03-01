@@ -113,6 +113,16 @@ class AudioGenerator:
                 f"Successfully validated access to GCS bucket: {self.gcs_bucket_name}"
             )
         except Exception as e:
+            error_str = str(e).lower()
+            if "invalid_grant" in error_str or "invalid jwt" in error_str:
+                raise ConfigurationError(
+                    f"Google Cloud authentication failed for bucket '{self.gcs_bucket_name}': {e}. "
+                    "This is caused by one of: "
+                    "(1) System clock skew — JWT tokens require the clock to be within 5 minutes of Google's servers. "
+                    "Fix with: sudo timedatectl set-ntp true && sudo systemctl restart systemd-timesyncd. "
+                    "(2) Revoked or expired service account key — regenerate the key in GCP Console "
+                    "(IAM → Service Accounts → [your SA] → Keys tab) and update GOOGLE_APPLICATION_CREDENTIALS."
+                )
             raise ConfigurationError(
                 f"Cannot access GCS bucket '{self.gcs_bucket_name}': {e}. "
                 "Ensure the bucket exists and you have proper permissions."
