@@ -109,7 +109,7 @@ class AudioGenerator:
         """Load GCP credentials from a file or AWS Secrets Manager."""
         if self.credentials_path and os.path.exists(self.credentials_path):
             logger.info(f"Loading GCP credentials from file: {self.credentials_path}")
-            return service_account.Credentials.from_service_account_file(
+            return service_account.Credentials.from_service_account_file(  # type: ignore[return-value]
                 self.credentials_path
             )
 
@@ -121,7 +121,7 @@ class AudioGenerator:
                 client = boto3.client("secretsmanager")
                 response = client.get_secret_value(SecretId=self.gcp_secret_name)
                 key_data = json.loads(response["SecretString"])
-                return service_account.Credentials.from_service_account_info(key_data)
+                return service_account.Credentials.from_service_account_info(key_data)  # type: ignore[return-value]
             except ClientError as e:
                 raise ConfigurationError(
                     f"Failed to fetch GCP credentials from Secrets Manager "
