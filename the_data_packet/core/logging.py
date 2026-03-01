@@ -183,9 +183,7 @@ class S3LogUploader:
                 self._s3_storage = S3Storage()
             except Exception as e:
                 # S3 not configured, skip uploads
-                logging.getLogger(__name__).warning(
-                    f"S3 not available for log uploads: {e}"
-                )
+                logging.getLogger(__name__).warning(f"S3 not available for log uploads: {e}")
                 return None
         return self._s3_storage
 
@@ -238,9 +236,7 @@ class S3LogUploader:
                         log_file.unlink()
                         logger.info(f"Removed local log file: {log_file}")
                 else:
-                    logger.error(
-                        f"Failed to upload log file {log_file}: {result.error_message}"
-                    )
+                    logger.error(f"Failed to upload log file {log_file}: {result.error_message}")
 
             except Exception as e:
                 logger.error(f"Error uploading log file {log_file}: {e}")
@@ -482,27 +478,17 @@ def upload_current_day_log(config: Config) -> None:
 
         # Upload to S3 with structured path
         timestamp = datetime.now().strftime("%Y-%m-%d")
-        s3_key = (
-            f"{config.show_name.lower().replace(' ', '-')}/{timestamp}/{log_file.name}"
-        )
+        s3_key = f"{config.show_name.lower().replace(' ', '-')}/{timestamp}/{log_file.name}"
 
-        result = s3_storage.upload_file(
-            local_path=log_file, s3_key=s3_key, content_type="application/x-ndjson"
-        )
+        result = s3_storage.upload_file(local_path=log_file, s3_key=s3_key, content_type="application/x-ndjson")
 
         if result.success:
             logger.info(f"Uploaded current day's log file to S3: {result.s3_url}")
         else:
-            logger.error(
-                f"Failed to upload current day's log file: {result.error_message}"
-            )
+            logger.error(f"Failed to upload current day's log file: {result.error_message}")
 
         # Upload to Grafana Loki if configured
-        if (
-            config.grafana_loki_url
-            and config.grafana_loki_username
-            and config.grafana_loki_password
-        ):
+        if config.grafana_loki_url and config.grafana_loki_username and config.grafana_loki_password:
             try:
                 from the_data_packet.utils.loki import upload_logs_to_loki
 

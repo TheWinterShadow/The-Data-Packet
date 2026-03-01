@@ -329,9 +329,7 @@ class TechCrunchSource(ArticleSource):
             content_elem = soup.select_one(selector)
             if content_elem:
                 # Remove unwanted elements
-                for unwanted in content_elem.select(
-                    "script, style, .advertisement, .ad, .promo"
-                ):
+                for unwanted in content_elem.select("script, style, .advertisement, .ad, .promo"):
                     unwanted.decompose()
 
                 content = content_elem.get_text(separator=" ", strip=True)

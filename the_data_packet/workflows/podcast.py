@@ -100,9 +100,7 @@ class PodcastPipeline:
                         logger.info("Uploading current day's log file to S3")
                         upload_current_day_log(self.config)
                     except Exception as e:
-                        logger.warning(
-                            f"Failed to upload current day's log file to S3: {e}"
-                        )
+                        logger.warning(f"Failed to upload current day's log file to S3: {e}")
                 raise TheDataPacketError("No new articles were collected")
 
             # Add used articles to database
@@ -125,9 +123,7 @@ class PodcastPipeline:
             # Step 3: Generate audio (if enabled)
             if self.config.generate_audio:
                 if not script_content:
-                    raise TheDataPacketError(
-                        "Script content required for audio generation"
-                    )
+                    raise TheDataPacketError("Script content required for audio generation")
 
                 self.config.validate_for_audio_generation()
                 audio_result = self._generate_audio(script_content)
@@ -148,14 +144,10 @@ class PodcastPipeline:
                 )
 
             # Calculate execution time
-            result.execution_time_seconds = (
-                datetime.now() - start_time
-            ).total_seconds()
+            result.execution_time_seconds = (datetime.now() - start_time).total_seconds()
             result.success = True
 
-            logger.info(
-                f"Pipeline completed successfully in {result.execution_time_seconds:.1f} seconds"
-            )
+            logger.info(f"Pipeline completed successfully in {result.execution_time_seconds:.1f} seconds")
 
             # Upload current log file to S3 alongside generated files
             if self._should_use_s3():
@@ -163,9 +155,7 @@ class PodcastPipeline:
                     logger.info("Uploading current day's log file to S3")
                     upload_current_day_log(self.config)
                 except Exception as e:
-                    logger.warning(
-                        f"Failed to upload current day's log file to S3: {e}"
-                    )
+                    logger.warning(f"Failed to upload current day's log file to S3: {e}")
 
             # Save episode metadata (non-critical, don't fail pipeline)
             try:
@@ -176,21 +166,15 @@ class PodcastPipeline:
             return result
 
         except Exception as e:
-            result.execution_time_seconds = (
-                datetime.now() - start_time
-            ).total_seconds()
+            result.execution_time_seconds = (datetime.now() - start_time).total_seconds()
             result.error_message = str(e)
-            logger.error(
-                f"Pipeline failed after {result.execution_time_seconds:.1f} seconds: {e}"
-            )
+            logger.error(f"Pipeline failed after {result.execution_time_seconds:.1f} seconds: {e}")
             if self._should_use_s3():
                 try:
                     logger.info("Uploading current day's log file to S3")
                     upload_current_day_log(self.config)
                 except Exception as e:
-                    logger.warning(
-                        f"Failed to upload current day's log file to S3: {e}"
-                    )
+                    logger.warning(f"Failed to upload current day's log file to S3: {e}")
 
             return result
 
@@ -211,9 +195,7 @@ class PodcastPipeline:
             for category in self.config.article_categories:
                 # Skip categories not supported by this source
                 if category not in source.supported_categories:
-                    logger.warning(
-                        f"Category '{category}' not supported by {source_name}"
-                    )
+                    logger.warning(f"Category '{category}' not supported by {source_name}")
                     continue
 
                 try:
@@ -223,23 +205,17 @@ class PodcastPipeline:
                         article = source.get_latest_article(category)
                         all_articles.append(article)
                     else:
-                        articles = source.get_multiple_articles(
-                            category, self.config.max_articles_per_source
-                        )
+                        articles = source.get_multiple_articles(category, self.config.max_articles_per_source)
                         all_articles.extend(articles)
 
                 except Exception as e:
-                    logger.error(
-                        f"Failed to collect {category} articles from {source_name}: {e}"
-                    )
+                    logger.error(f"Failed to collect {category} articles from {source_name}: {e}")
                     logger.error(traceback.format_exc())
 
         # Filter valid articles
         valid_articles = [a for a in all_articles if a.is_valid()]
 
-        logger.info(
-            f"Collected {len(valid_articles)} valid articles (out of {len(all_articles)} total)"
-        )
+        logger.info(f"Collected {len(valid_articles)} valid articles (out of {len(all_articles)} total)")
 
         return valid_articles
 
@@ -256,14 +232,10 @@ class PodcastPipeline:
             List of articles that have not been used before
         """
         if not self.config.mongodb_username or not self.config.mongodb_password:
-            logger.warning(
-                "MongoDB credentials are not configured, skipping deduplication"
-            )
+            logger.warning("MongoDB credentials are not configured, skipping deduplication")
             return articles
 
-        logger.info(
-            f"Attempting MongoDB connection for deduplication with username: {self.config.mongodb_username}"
-        )
+        logger.info(f"Attempting MongoDB connection for deduplication with username: {self.config.mongodb_username}")
         try:
             mongo_client = MongoDBClient(
                 username=self.config.mongodb_username,
@@ -283,15 +255,11 @@ class PodcastPipeline:
                 logger.debug(f"Checking if article already exists: {article.title}")
                 existing = mongo_client.find_documents("articles", {"url": article.url})
                 if len(list(existing)) > 0:
-                    logger.info(
-                        f"Article already used in previous episode: {article.title}"
-                    )
+                    logger.info(f"Article already used in previous episode: {article.title}")
                     continue
                 new_articles.append(article)
 
-            logger.info(
-                f"Deduplication complete: {len(new_articles)}/{len(articles)} articles are new"
-            )
+            logger.info(f"Deduplication complete: {len(new_articles)}/{len(articles)} articles are new")
         except Exception as e:
             logger.error(f"Error during deduplication: {e}")
             logger.warning("Proceeding with all articles (deduplication failed)")
@@ -311,14 +279,10 @@ class PodcastPipeline:
             articles: List of Article objects to store in the database
         """
         if not self.config.mongodb_username or not self.config.mongodb_password:
-            logger.warning(
-                "MongoDB credentials are not configured, skipping article storage"
-            )
+            logger.warning("MongoDB credentials are not configured, skipping article storage")
             return
 
-        logger.info(
-            f"Attempting MongoDB connection for article storage with username: {self.config.mongodb_username}"
-        )
+        logger.info(f"Attempting MongoDB connection for article storage with username: {self.config.mongodb_username}")
         try:
             mongo_client = MongoDBClient(
                 username=self.config.mongodb_username,
@@ -335,13 +299,9 @@ class PodcastPipeline:
 
         try:
             for i, article in enumerate(article_docs):
-                logger.debug(
-                    f"Storing article {i+1}/{len(article_docs)}: {article.get('title', 'Unknown')}"
-                )
+                logger.debug(f"Storing article {i + 1}/{len(article_docs)}: {article.get('title', 'Unknown')}")
                 mongo_client.insert_document("articles", article)
-            logger.info(
-                f"Successfully stored {len(article_docs)} articles to MongoDB database"
-            )
+            logger.info(f"Successfully stored {len(article_docs)} articles to MongoDB database")
         except Exception as e:
             logger.error(f"Failed to store articles to MongoDB: {e}")
         finally:
@@ -371,9 +331,7 @@ class PodcastPipeline:
         self.config.output_directory.mkdir(parents=True, exist_ok=True)
 
         # Generate filename with timestamp if not specified
-        script_filename = (
-            f"episode_script_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
-        )
+        script_filename = f"episode_script_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
         script_path = self.config.output_directory / script_filename
 
         try:
@@ -466,14 +424,10 @@ class PodcastPipeline:
 
         # Validate that at least one generation is enabled
         if not self.config.generate_script and not self.config.generate_audio:
-            errors.append(
-                "At least one of generate_script or generate_audio must be enabled"
-            )
+            errors.append("At least one of generate_script or generate_audio must be enabled")
 
         if errors:
-            raise ValidationError(
-                f"Configuration validation failed: {'; '.join(errors)}"
-            )
+            raise ValidationError(f"Configuration validation failed: {'; '.join(errors)}")
 
     def _save_episode_metadata(self, episode_data: PodcastResult) -> None:
         """Save episode metadata to MongoDB for tracking and analytics.
@@ -488,9 +442,7 @@ class PodcastPipeline:
             episode_data: PodcastResult containing episode information to save
         """
         if not self.config.mongodb_username or not self.config.mongodb_password:
-            logger.warning(
-                "MongoDB credentials are not configured, skipping metadata save"
-            )
+            logger.warning("MongoDB credentials are not configured, skipping metadata save")
             return
 
         try:
@@ -501,9 +453,7 @@ class PodcastPipeline:
 
             # Convert the episode data to a dictionary, converting Article objects to dicts
             episode_dict = episode_data.__dict__.copy()
-            episode_dict["articles_collected"] = [
-                article.to_dict() for article in episode_data.articles_collected
-            ]
+            episode_dict["articles_collected"] = [article.to_dict() for article in episode_data.articles_collected]
 
             # Convert Path objects to strings for MongoDB compatibility
             if episode_dict.get("script_path"):

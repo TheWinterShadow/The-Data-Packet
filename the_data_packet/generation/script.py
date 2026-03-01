@@ -33,9 +33,7 @@ class ScriptGenerator:
 
         self.api_key = api_key or config.anthropic_api_key
         if not self.api_key:
-            raise ConfigurationError(
-                "Anthropic API key is required for script generation"
-            )
+            raise ConfigurationError("Anthropic API key is required for script generation")
 
         self.client = Anthropic(api_key=self.api_key)
         self.config = config
@@ -72,9 +70,7 @@ class ScriptGenerator:
             processed_articles: List[Article] = []
 
             for i, article in enumerate(valid_articles, 1):
-                logger.info(
-                    f"Generating segment {i}/{len(valid_articles)}: {article.title}"
-                )
+                logger.info(f"Generating segment {i}/{len(valid_articles)}: {article.title}")
                 try:
                     segment, summary = self._generate_segment(article)
                     segments.append(segment)
@@ -90,9 +86,7 @@ class ScriptGenerator:
             if not segments:
                 raise AIGenerationError("No valid tech articles were processed")
 
-            logger.info(
-                f"Successfully processed {len(processed_articles)} tech articles"
-            )
+            logger.info(f"Successfully processed {len(processed_articles)} tech articles")
 
             # Step 2: Generate show framework (intro, transitions, outro)
             logger.info("Generating show framework")
@@ -152,9 +146,7 @@ class ScriptGenerator:
             raise AIGenerationError(f"API error: {e}")
         except Exception as e:
             logger.error(f"Unexpected error for '{article.title}': {e}")
-            raise AIGenerationError(
-                f"Failed to generate segment for '{article.title}': {e}"
-            )
+            raise AIGenerationError(f"Failed to generate segment for '{article.title}': {e}")
 
     @retry(
         stop=stop_after_attempt(5),  # More retries for server issues
@@ -193,9 +185,7 @@ class ScriptGenerator:
         """Parse the segment response to extract script and summary."""
         # Check if AI is refusing to process the content
         if self._is_refusal_response(response):
-            raise AIGenerationError(
-                f"AI refused to process content: {response[:200]}..."
-            )
+            raise AIGenerationError(f"AI refused to process content: {response[:200]}...")
 
         lines = response.split("\n")
 
@@ -280,9 +270,9 @@ class ScriptGenerator:
 
             # Add transition (except after last segment)
             if i < len(segments) - 1:
-                transition_key = f"transition_{i+1}_{i+2}"
+                transition_key = f"transition_{i + 1}_{i + 2}"
                 if transition_key in framework_parts:
-                    parts.append(f"## TRANSITION {i+1}→{i+2}")
+                    parts.append(f"## TRANSITION {i + 1}→{i + 2}")
                     parts.append(framework_parts[transition_key])
                     parts.append("")
 
@@ -366,9 +356,7 @@ class ScriptGenerator:
             parts = [match.group(1), match.group(2), match.group(3)]
             result = []
             for part in parts:
-                result.append(
-                    " ".join([self._number_to_words(int(digit)) for digit in part])
-                )
+                result.append(" ".join([self._number_to_words(int(digit)) for digit in part]))
             return ", ".join(result)
 
         # Apply text normalization
@@ -492,38 +480,24 @@ class ScriptGenerator:
         elif number < 20:
             return teens[number - 10]
         elif number < 100:
-            return tens[number // 10] + (
-                "" if number % 10 == 0 else " " + ones[number % 10]
-            )
+            return tens[number // 10] + ("" if number % 10 == 0 else " " + ones[number % 10])
         elif number < 1000:
             return (
                 ones[number // 100]
                 + " hundred"
-                + (
-                    ""
-                    if number % 100 == 0
-                    else " " + self._number_to_words(number % 100)
-                )
+                + ("" if number % 100 == 0 else " " + self._number_to_words(number % 100))
             )
         elif number < 1000000:
             return (
                 self._number_to_words(number // 1000)
                 + " thousand"
-                + (
-                    ""
-                    if number % 1000 == 0
-                    else " " + self._number_to_words(number % 1000)
-                )
+                + ("" if number % 1000 == 0 else " " + self._number_to_words(number % 1000))
             )
         elif number < 1000000000:
             return (
                 self._number_to_words(number // 1000000)
                 + " million"
-                + (
-                    ""
-                    if number % 1000000 == 0
-                    else " " + self._number_to_words(number % 1000000)
-                )
+                + ("" if number % 1000000 == 0 else " " + self._number_to_words(number % 1000000))
             )
         else:
             return str(number)  # Fallback for very large numbers

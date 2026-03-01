@@ -148,38 +148,26 @@ class RSSGenerator:
         # Channel metadata
         ET.SubElement(channel, "title").text = channel_title or self.config.show_name
         ET.SubElement(channel, "description").text = (
-            channel_description
-            or f"{self.config.show_name} - Your source for the latest tech news and insights"
+            channel_description or f"{self.config.show_name} - Your source for the latest tech news and insights"
         )
-        ET.SubElement(channel, "link").text = (
-            channel_link or "https://github.com/TheWinterShadow/The-Data-Packet"
-        )
+        ET.SubElement(channel, "link").text = channel_link or "https://github.com/TheWinterShadow/The-Data-Packet"
 
         # Add email contact if provided
         email = channel_email or self.config.rss_channel_email
         if email:
-            ET.SubElement(channel, "managingEditor").text = (
-                f"{email} ({self.config.show_name})"
-            )
-            ET.SubElement(channel, "webMaster").text = (
-                f"{email} ({self.config.show_name})"
-            )
+            ET.SubElement(channel, "managingEditor").text = f"{email} ({self.config.show_name})"
+            ET.SubElement(channel, "webMaster").text = f"{email} ({self.config.show_name})"
 
         ET.SubElement(channel, "language").text = "en-us"
-        ET.SubElement(channel, "lastBuildDate").text = self._format_rfc822_date(
-            datetime.now()
-        )
-        ET.SubElement(channel, "pubDate").text = self._format_rfc822_date(
-            datetime.now()
-        )
+        ET.SubElement(channel, "lastBuildDate").text = self._format_rfc822_date(datetime.now())
+        ET.SubElement(channel, "pubDate").text = self._format_rfc822_date(datetime.now())
         ET.SubElement(channel, "generator").text = "The Data Packet RSS Generator"
 
         # iTunes specific tags
         ET.SubElement(channel, "itunes:subtitle").text = "Tech news and insights"
         ET.SubElement(channel, "itunes:author").text = self.config.show_name
         ET.SubElement(channel, "itunes:summary").text = (
-            channel_description
-            or f"{self.config.show_name} - Your source for the latest tech news and insights"
+            channel_description or f"{self.config.show_name} - Your source for the latest tech news and insights"
         )
         ET.SubElement(channel, "itunes:explicit").text = "no"
 
@@ -224,9 +212,7 @@ class RSSGenerator:
         else:
             return {1: "st", 2: "nd", 3: "rd"}.get(day % 10, "th")
 
-    def _add_episode_to_channel(
-        self, channel: ET.Element, episode: PodcastEpisode
-    ) -> None:
+    def _add_episode_to_channel(self, channel: ET.Element, episode: PodcastEpisode) -> None:
         """Add episode item to RSS channel."""
         item = ET.SubElement(channel, "item")
 
@@ -291,9 +277,9 @@ class RSSGenerator:
                     pub_date = datetime.now()
                     if pub_date_elem is not None and pub_date_elem.text:
                         try:
-                            pub_date = datetime.strptime(
-                                pub_date_elem.text, "%a, %d %b %Y %H:%M:%S %z"
-                            ).replace(tzinfo=None)
+                            pub_date = datetime.strptime(pub_date_elem.text, "%a, %d %b %Y %H:%M:%S %z").replace(
+                                tzinfo=None
+                            )
                         except ValueError:
                             pass
 
@@ -309,25 +295,15 @@ class RSSGenerator:
                     episode = PodcastEpisode(
                         title=title_elem.text if title_elem.text else "",
                         description=(
-                            description_elem.text
-                            if description_elem is not None and description_elem.text
-                            else ""
+                            description_elem.text if description_elem is not None and description_elem.text else ""
                         ),
                         audio_url=enclosure_elem.get("url", ""),
                         pub_date=pub_date,
                         episode_number=episode_number,
-                        duration=(
-                            duration_elem.text
-                            if duration_elem is not None and duration_elem.text
-                            else None
-                        ),
+                        duration=(duration_elem.text if duration_elem is not None and duration_elem.text else None),
                         file_size=file_size,
                         guid=guid_elem.text if guid_elem is not None else None,
-                        author=(
-                            author_elem.text
-                            if author_elem is not None and author_elem.text
-                            else None
-                        ),
+                        author=(author_elem.text if author_elem is not None and author_elem.text else None),
                     )
                     episodes.append(episode)
 
@@ -352,9 +328,7 @@ class RSSGenerator:
 
             # Auto-assign episode number if not already set
             if not new_episode.episode_number:
-                new_episode.episode_number = self._get_next_episode_number(
-                    existing_episodes
-                )
+                new_episode.episode_number = self._get_next_episode_number(existing_episodes)
                 # Update the title with the correct episode number
                 pub_date = new_episode.pub_date
                 day = pub_date.day
@@ -391,9 +365,7 @@ class RSSGenerator:
                     result.s3_url = s3_result.s3_url
                     logger.info(f"RSS feed updated successfully: {s3_result.s3_url}")
                 else:
-                    logger.warning(
-                        f"Failed to upload RSS to S3: {s3_result.error_message}"
-                    )
+                    logger.warning(f"Failed to upload RSS to S3: {s3_result.error_message}")
 
             result.success = True
 
@@ -411,9 +383,7 @@ class RSSGenerator:
         rss_key = f"{self.config.show_name.lower().replace(' ', '-')}/feed.xml"
 
         try:
-            response = self.s3_storage.s3_client.get_object(
-                Bucket=self.s3_storage.bucket_name, Key=rss_key
-            )
+            response = self.s3_storage.s3_client.get_object(Bucket=self.s3_storage.bucket_name, Key=rss_key)
             content: str = response["Body"].read().decode("utf-8")
             logger.info("Downloaded existing RSS feed from S3")
             return content
@@ -449,9 +419,7 @@ class RSSGenerator:
         # Use consistent S3 key for RSS feed
         rss_key = f"{self.config.show_name.lower().replace(' ', '-')}/feed.xml"
 
-        return self.s3_storage.upload_file(
-            rss_path, rss_key, content_type="application/rss+xml"
-        )
+        return self.s3_storage.upload_file(rss_path, rss_key, content_type="application/rss+xml")
 
     def _should_use_s3(self) -> bool:
         """Check if S3 should be used for uploads."""

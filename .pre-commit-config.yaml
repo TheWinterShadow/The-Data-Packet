@@ -1,0 +1,48 @@
+repos:
+  # Ruff: replaces black, isort, flake8
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.4.0
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+
+  # Mypy type checking
+  - repo: local
+    hooks:
+      - id: mypy
+        name: mypy
+        entry: hatch run dev:mypy
+        language: system
+        types: [python]
+        pass_filenames: false
+        args: [the_data_packet]
+
+  # Unit tests
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest
+        entry: hatch run dev:pytest
+        language: system
+        pass_filenames: false
+        args: [tests/, -q, --tb=short]
+
+  # Terraform formatting and validation
+  - repo: local
+    hooks:
+      - id: terraform-fmt
+        name: terraform fmt
+        entry: terraform fmt -check -recursive
+        language: system
+        files: \.tf$
+        pass_filenames: false
+        working_directory: terraform
+
+      - id: terraform-validate
+        name: terraform validate
+        entry: terraform validate
+        language: system
+        files: \.tf$
+        pass_filenames: false
+        working_directory: terraform

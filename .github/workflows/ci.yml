@@ -106,39 +106,28 @@ jobs:
               run: |
                   mkdir -p linting-reports
 
-            - name: Run isort
+            - name: Run ruff format check
               continue-on-error: true
               run: |
                   echo "🔍 **Code Formatting Checks**" >> $GITHUB_STEP_SUMMARY
                   echo "" >> $GITHUB_STEP_SUMMARY
-                  echo "Running isort import sorting check..."
-                  hatch run dev:isort ./the_data_packet --check-only --diff > linting-reports/isort-report.txt 2>&1 || echo "❌ isort found issues" >> $GITHUB_STEP_SUMMARY
+                  echo "Running ruff format check..."
+                  hatch run dev:ruff format --check --diff ./the_data_packet > linting-reports/ruff-format-report.txt 2>&1
                   if [ $? -eq 0 ]; then
-                    echo "✅ **isort**: Import sorting is correct" >> $GITHUB_STEP_SUMMARY
+                    echo "✅ **ruff format**: Code formatting is correct" >> $GITHUB_STEP_SUMMARY
                   else
-                    echo "❌ **isort**: Import sorting issues found" >> $GITHUB_STEP_SUMMARY
+                    echo "❌ **ruff format**: Formatting issues found" >> $GITHUB_STEP_SUMMARY
                   fi
 
-            - name: Run black
+            - name: Run ruff lint check
               continue-on-error: true
               run: |
-                  echo "Running black code formatting check..."
-                  hatch run dev:black ./the_data_packet --check --diff > linting-reports/black-report.txt 2>&1
+                  echo "Running ruff lint check..."
+                  hatch run dev:ruff check ./the_data_packet > linting-reports/ruff-lint-report.txt 2>&1
                   if [ $? -eq 0 ]; then
-                    echo "✅ **black**: Code formatting is correct" >> $GITHUB_STEP_SUMMARY
+                    echo "✅ **ruff lint**: No linting issues found" >> $GITHUB_STEP_SUMMARY
                   else
-                    echo "❌ **black**: Code formatting issues found" >> $GITHUB_STEP_SUMMARY
-                  fi
-
-            - name: Run flake8
-              continue-on-error: true
-              run: |
-                  echo "Running flake8 linting check..."
-                  hatch run dev:flake8 ./the_data_packet > linting-reports/flake8-report.txt 2>&1
-                  if [ $? -eq 0 ]; then
-                    echo "✅ **flake8**: No linting issues found" >> $GITHUB_STEP_SUMMARY
-                  else
-                    echo "❌ **flake8**: Linting issues found" >> $GITHUB_STEP_SUMMARY
+                    echo "❌ **ruff lint**: Linting issues found" >> $GITHUB_STEP_SUMMARY
                   fi
 
             - name: Generate linting summary

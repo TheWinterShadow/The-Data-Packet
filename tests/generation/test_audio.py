@@ -43,6 +43,7 @@ class TestAudioGenerator(unittest.TestCase):
         self.mock_config = Mock()
         self.mock_config.gcs_bucket_name = "test-audio-bucket"
         self.mock_config.google_credentials_path = None  # No credentials file in tests
+        self.mock_config.gcp_secret_name = None  # No Secrets Manager in tests
         self.mock_config.male_voice = "en-US-Studio-Q"
         self.mock_config.female_voice = "en-US-Studio-O"
         self.mock_config.output_directory = Path("/tmp/test")

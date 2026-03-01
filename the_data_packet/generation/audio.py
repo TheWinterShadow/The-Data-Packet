@@ -62,17 +62,11 @@ class AudioGenerator:
         """
         config = get_config()
 
-        self.credentials_path = credentials_path or getattr(
-            config, "google_credentials_path", None
-        )
+        self.credentials_path = credentials_path or getattr(config, "google_credentials_path", None)
         self.gcp_secret_name = getattr(config, "gcp_secret_name", None)
         self.male_voice = male_voice or getattr(config, "male_voice", "en-US-Studio-Q")
-        self.female_voice = female_voice or getattr(
-            config, "female_voice", "en-US-Studio-O"
-        )
-        self.gcs_bucket_name = gcs_bucket_name or getattr(
-            config, "gcs_bucket_name", None
-        )
+        self.female_voice = female_voice or getattr(config, "female_voice", "en-US-Studio-O")
+        self.gcs_bucket_name = gcs_bucket_name or getattr(config, "gcs_bucket_name", None)
         self.config = config
 
         if not self.gcs_bucket_name:
@@ -85,9 +79,7 @@ class AudioGenerator:
         try:
             credentials = self._load_credentials()
             if credentials:
-                self.tts_client = texttospeech.TextToSpeechLongAudioSynthesizeClient(
-                    credentials=credentials
-                )
+                self.tts_client = texttospeech.TextToSpeechLongAudioSynthesizeClient(credentials=credentials)
                 self.storage_client = storage.Client(credentials=credentials)
             else:
                 # Use default application credentials
@@ -109,23 +101,20 @@ class AudioGenerator:
         """Load GCP credentials from a file or AWS Secrets Manager."""
         if self.credentials_path and os.path.exists(self.credentials_path):
             logger.info(f"Loading GCP credentials from file: {self.credentials_path}")
-            return service_account.Credentials.from_service_account_file(  # type: ignore[return-value]
+            return service_account.Credentials.from_service_account_file(  # type: ignore[no-any-return]
                 self.credentials_path
             )
 
         if self.gcp_secret_name:
-            logger.info(
-                f"Loading GCP credentials from AWS Secrets Manager: {self.gcp_secret_name}"
-            )
+            logger.info(f"Loading GCP credentials from AWS Secrets Manager: {self.gcp_secret_name}")
             try:
                 client = boto3.client("secretsmanager")
                 response = client.get_secret_value(SecretId=self.gcp_secret_name)
                 key_data = json.loads(response["SecretString"])
-                return service_account.Credentials.from_service_account_info(key_data)  # type: ignore[return-value]
+                return service_account.Credentials.from_service_account_info(key_data)  # type: ignore[no-any-return]
             except ClientError as e:
                 raise ConfigurationError(
-                    f"Failed to fetch GCP credentials from Secrets Manager "
-                    f"'{self.gcp_secret_name}': {e}"
+                    f"Failed to fetch GCP credentials from Secrets Manager '{self.gcp_secret_name}': {e}"
                 )
 
         return None
@@ -136,9 +125,7 @@ class AudioGenerator:
             bucket = self.storage_client.bucket(self.gcs_bucket_name)
             # Test bucket access by attempting to list objects (just checking first one)
             list(bucket.list_blobs(max_results=1))
-            logger.info(
-                f"Successfully validated access to GCS bucket: {self.gcs_bucket_name}"
-            )
+            logger.info(f"Successfully validated access to GCS bucket: {self.gcs_bucket_name}")
         except Exception as e:
             error_str = str(e).lower()
             if "invalid_grant" in error_str or "invalid jwt" in error_str:
@@ -155,9 +142,7 @@ class AudioGenerator:
                 "Ensure the bucket exists and you have proper permissions."
             )
 
-    def generate_audio(
-        self, script: str, output_file: Optional[Path] = None
-    ) -> AudioResult:
+    def generate_audio(self, script: str, output_file: Optional[Path] = None) -> AudioResult:
         """
         Generate audio from a podcast script, automatically handling chunking and mp3 output.
         """
@@ -187,9 +172,7 @@ class AudioGenerator:
                 ssml_parts.append('<break time="0.5s"/>')
             elif line.startswith("Sam:"):
                 content = line[4:].strip()
-                ssml_parts.append(
-                    f'<voice name="{self.female_voice}">{content}</voice>'
-                )
+                ssml_parts.append(f'<voice name="{self.female_voice}">{content}</voice>')
                 # Pause between speakers
                 ssml_parts.append('<break time="0.5s"/>')
             else:
@@ -244,9 +227,7 @@ class AudioGenerator:
             # Start the Long Running Operation (LRO)
             operation_future = self.tts_client.synthesize_long_audio(request=request)
 
-            logger.info(
-                f"Long audio synthesis started. Operation name: {operation_future.operation.name}"
-            )
+            logger.info(f"Long audio synthesis started. Operation name: {operation_future.operation.name}")
 
             # Wait for the operation to complete with timeout and progress logging
             timeout_seconds = 1800  # 30 minutes timeout for very long audio
@@ -254,16 +235,12 @@ class AudioGenerator:
             elapsed = 0
 
             while not operation_future.done() and elapsed < timeout_seconds:
-                logger.info(
-                    f"Waiting for synthesis to complete... ({elapsed}s elapsed)"
-                )
+                logger.info(f"Waiting for synthesis to complete... ({elapsed}s elapsed)")
                 time.sleep(poll_interval)
                 elapsed += poll_interval
 
             if not operation_future.done():
-                raise AudioGenerationError(
-                    f"Audio synthesis timed out after {timeout_seconds} seconds"
-                )
+                raise AudioGenerationError(f"Audio synthesis timed out after {timeout_seconds} seconds")
 
             # Get the result
             operation_future.result()
@@ -273,9 +250,7 @@ class AudioGenerator:
 
         except Exception as e:
             logger.error(f"Long audio synthesis failed: {e}")
-            raise AudioGenerationError(
-                f"Failed to generate audio with Google Cloud TTS: {e}"
-            )
+            raise AudioGenerationError(f"Failed to generate audio with Google Cloud TTS: {e}")
 
     def _download_audio_from_gcs(self, gcs_uri: str, output_file: Path) -> None:
         """Download the generated audio file from Google Cloud Storage."""
@@ -313,12 +288,8 @@ class AudioGenerator:
                         time.sleep(retry_delay)
                 except Exception as e:
                     if attempt == max_retries - 1:
-                        raise AudioGenerationError(
-                            f"Audio file not found in GCS after {max_retries} attempts: {e}"
-                        )
-                    logger.warning(
-                        f"Error checking blob existence (attempt {attempt + 1}): {e}"
-                    )
+                        raise AudioGenerationError(f"Audio file not found in GCS after {max_retries} attempts: {e}")
+                    logger.warning(f"Error checking blob existence (attempt {attempt + 1}): {e}")
                     time.sleep(retry_delay)
 
             # Download the file
@@ -334,9 +305,7 @@ class AudioGenerator:
                     logger.warning(f"Could not clean up GCS file {gcs_uri}: {e}")
 
         except Exception as e:
-            raise AudioGenerationError(
-                f"Failed to download audio from GCS {gcs_uri}: {e}"
-            )
+            raise AudioGenerationError(f"Failed to download audio from GCS {gcs_uri}: {e}")
 
     def get_available_voices(self) -> Dict[str, List[str]]:
         """Get available Studio Multi-speaker voices for Google Cloud TTS."""
@@ -358,19 +327,13 @@ class AudioGenerator:
 
             # Use the regular TTS client for testing (not long audio client)
             test_client = texttospeech.TextToSpeechClient(
-                credentials=(
-                    self.tts_client._credentials
-                    if hasattr(self.tts_client, "_credentials")
-                    else None
-                )
+                credentials=(self.tts_client._credentials if hasattr(self.tts_client, "_credentials") else None)
             )
 
             voices_response = test_client.list_voices(request=request)
 
             if voices_response.voices:
-                logger.info(
-                    f"Authentication successful! Retrieved {len(voices_response.voices)} voices."
-                )
+                logger.info(f"Authentication successful! Retrieved {len(voices_response.voices)} voices.")
 
                 # Also test GCS bucket access
                 bucket = self.storage_client.bucket(self.gcs_bucket_name)
@@ -400,9 +363,7 @@ class AudioGenerator:
             chunks.append(current)
         return chunks
 
-    def generate_audio_chunked(
-        self, script: str, output_file: Optional[Path] = None
-    ) -> AudioResult:
+    def generate_audio_chunked(self, script: str, output_file: Optional[Path] = None) -> AudioResult:
         """
         Generate audio for long scripts by splitting into chunks and merging the results into a single mp3 file.
         """
@@ -421,11 +382,11 @@ class AudioGenerator:
         temp_wav_files = []
         try:
             for i, chunk in enumerate(chunks):
-                logger.info(f"Generating audio for chunk {i+1}/{len(chunks)}...")
+                logger.info(f"Generating audio for chunk {i + 1}/{len(chunks)}...")
                 ssml_content = self._parse_script_to_ssml(chunk)
                 gcs_uri = self._generate_with_long_audio_synthesis(ssml_content)
                 # Save each chunk as a temporary wav file
-                temp_wav = Path(tempfile.mktemp(suffix=f"_chunk{i+1}.wav"))
+                temp_wav = Path(tempfile.mktemp(suffix=f"_chunk{i + 1}.wav"))
                 self._download_audio_from_gcs(gcs_uri, temp_wav)
                 temp_wav_files.append(temp_wav)
             # Merge all wav files into one

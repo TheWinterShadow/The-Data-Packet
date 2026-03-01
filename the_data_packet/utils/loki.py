@@ -288,9 +288,7 @@ class LokiUploader:
                 # Parse and normalize timestamp
                 if "timestamp" in log:
                     if isinstance(log["timestamp"], str):
-                        timestamp = datetime.fromisoformat(log["timestamp"]).replace(
-                            tzinfo=timezone.utc
-                        )
+                        timestamp = datetime.fromisoformat(log["timestamp"]).replace(tzinfo=timezone.utc)
                     elif isinstance(log["timestamp"], datetime):
                         timestamp = log["timestamp"].replace(tzinfo=timezone.utc)
                     else:
@@ -312,9 +310,7 @@ class LokiUploader:
 
         return formatted_logs
 
-    def _create_loki_payload(
-        self, logs: List[List[str]], service_name: str, environment: str
-    ) -> Dict[str, Any]:
+    def _create_loki_payload(self, logs: List[List[str]], service_name: str, environment: str) -> Dict[str, Any]:
         """Create Loki API payload.
 
         Args:

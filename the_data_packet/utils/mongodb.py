@@ -37,15 +37,11 @@ class MongoDBClient:
         logger.info(
             f"Attempting MongoDB connection to: mongodb://{username}:***@{mongodb_host}:27017/the_data_packet?authSource=admin"  # noqa: E501
         )
-        logger.info(
-            f"Environment check - MONGODB_HOST: {os.getenv('MONGODB_HOST', 'not set')}"
-        )
+        logger.info(f"Environment check - MONGODB_HOST: {os.getenv('MONGODB_HOST', 'not set')}")
         logger.info(f"Docker environment detected: {os.path.exists('/.dockerenv')}")
 
         try:
-            self.client: MongoClient = MongoClient(
-                connection_string, serverSelectionTimeoutMS=5000
-            )
+            self.client: MongoClient = MongoClient(connection_string, serverSelectionTimeoutMS=5000)
             # Test the connection
             self.client.admin.command("ping")
             logger.info("MongoDB connection successful!")
@@ -68,9 +64,7 @@ class MongoDBClient:
         """
         return self.db[collection_name]
 
-    def insert_document(
-        self, collection_name: str, document: Dict[str, Any]
-    ) -> InsertOneResult:
+    def insert_document(self, collection_name: str, document: Dict[str, Any]) -> InsertOneResult:
         """Insert a single document into a collection.
 
         Args:
@@ -85,19 +79,13 @@ class MongoDBClient:
             logger.debug(f"Inserting document into collection '{collection_name}'")
             collection = self.get_collection(collection_name)
             result = collection.insert_one(document)
-            logger.debug(
-                f"Document inserted successfully with ID: {result.inserted_id}"
-            )
+            logger.debug(f"Document inserted successfully with ID: {result.inserted_id}")
             return result
         except Exception as e:
-            logger.error(
-                f"Failed to insert document into collection '{collection_name}': {e}"
-            )
+            logger.error(f"Failed to insert document into collection '{collection_name}': {e}")
             raise
 
-    def find_documents(
-        self, collection_name: str, query: Optional[Dict[str, Any]] = None
-    ) -> Cursor:
+    def find_documents(self, collection_name: str, query: Optional[Dict[str, Any]] = None) -> Cursor:
         """Find documents in a collection based on a query.
 
         Args:

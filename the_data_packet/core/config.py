@@ -258,9 +258,7 @@ class Config:
 
     # Network Settings
     http_timeout: int = 30
-    user_agent: str = (
-        "The Data Packet/1.0 (+https://github.com/TheWinterShadow/The-Data-Packet)"
-    )
+    user_agent: str = "The Data Packet/1.0 (+https://github.com/TheWinterShadow/The-Data-Packet)"
 
     # Logging
     log_level: str = "INFO"
@@ -278,40 +276,26 @@ class Config:
     def _load_from_env(self) -> None:
         """Load configuration from environment variables."""
         # API Keys
-        self.anthropic_api_key = self.anthropic_api_key or os.getenv(
-            "ANTHROPIC_API_KEY"
-        )
-        self.elevenlabs_api_key = self.elevenlabs_api_key or os.getenv(
-            "ELEVENLABS_API_KEY"
-        )
+        self.anthropic_api_key = self.anthropic_api_key or os.getenv("ANTHROPIC_API_KEY")
+        self.elevenlabs_api_key = self.elevenlabs_api_key or os.getenv("ELEVENLABS_API_KEY")
 
         # Google Cloud
-        self.google_credentials_path = self.google_credentials_path or os.getenv(
-            "GOOGLE_APPLICATION_CREDENTIALS"
-        )
+        self.google_credentials_path = self.google_credentials_path or os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
         self.gcp_secret_name = self.gcp_secret_name or os.getenv("GCP_SECRET_NAME")
         self.gcs_bucket_name = self.gcs_bucket_name or os.getenv("GCS_BUCKET_NAME")
         self.mongodb_username = self.mongodb_username or os.getenv("MONGODB_USERNAME")
         self.mongodb_password = self.mongodb_password or os.getenv("MONGODB_PASSWORD")
 
         # AWS
-        self.aws_access_key_id = self.aws_access_key_id or os.getenv(
-            "AWS_ACCESS_KEY_ID"
-        )
-        self.aws_secret_access_key = self.aws_secret_access_key or os.getenv(
-            "AWS_SECRET_ACCESS_KEY"
-        )
+        self.aws_access_key_id = self.aws_access_key_id or os.getenv("AWS_ACCESS_KEY_ID")
+        self.aws_secret_access_key = self.aws_secret_access_key or os.getenv("AWS_SECRET_ACCESS_KEY")
         self.aws_region = os.getenv("AWS_REGION", self.aws_region)
         self.s3_bucket_name = self.s3_bucket_name or os.getenv("S3_BUCKET_NAME")
 
         # Grafana Loki
         self.grafana_loki_url = self.grafana_loki_url or os.getenv("GRAFANA_LOKI_URL")
-        self.grafana_loki_username = self.grafana_loki_username or os.getenv(
-            "GRAFANA_LOKI_USERNAME"
-        )
-        self.grafana_loki_password = self.grafana_loki_password or os.getenv(
-            "GRAFANA_LOKI_PASSWORD"
-        )
+        self.grafana_loki_username = self.grafana_loki_username or os.getenv("GRAFANA_LOKI_USERNAME")
+        self.grafana_loki_password = self.grafana_loki_password or os.getenv("GRAFANA_LOKI_PASSWORD")
 
         # Other settings
         if env_show_name := os.getenv("SHOW_NAME"):
@@ -392,9 +376,7 @@ class Config:
             try:
                 self.output_directory.mkdir(parents=True, exist_ok=True)
             except Exception as e:
-                errors.append(
-                    f"Cannot create output directory {self.output_directory}: {e}"
-                )
+                errors.append(f"Cannot create output directory {self.output_directory}: {e}")
 
         # Validate log level
         valid_log_levels = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
@@ -414,18 +396,14 @@ class Config:
                         )
 
         if errors:
-            raise ConfigurationError(
-                f"Configuration validation failed: {'; '.join(errors)}"
-            )
+            raise ConfigurationError(f"Configuration validation failed: {'; '.join(errors)}")
 
     def validate_for_script_generation(self) -> None:
         """Validate configuration for script generation."""
         if not self.anthropic_api_key:
             from .exceptions import ConfigurationError
 
-            raise ConfigurationError(
-                "Anthropic API key is required for script generation"
-            )
+            raise ConfigurationError("Anthropic API key is required for script generation")
 
     def validate_for_audio_generation(self) -> None:
         """Validate configuration for audio generation."""
@@ -463,11 +441,7 @@ class Config:
         """
         if source not in self.source_category_mapping:
             return []
-        return [
-            category
-            for category in self.source_category_mapping[source]
-            if category in self.article_categories
-        ]
+        return [category for category in self.source_category_mapping[source] if category in self.article_categories]
 
     def to_dict(self) -> Dict:
         """Convert configuration to dictionary."""

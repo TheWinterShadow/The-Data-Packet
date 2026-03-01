@@ -98,9 +98,7 @@ class S3Storage:
             S3UploadResult with upload details
         """
         if not local_path.exists():
-            return S3UploadResult(
-                success=False, error_message=f"File not found: {local_path}"
-            )
+            return S3UploadResult(success=False, error_message=f"File not found: {local_path}")
 
         if s3_key is None:
             s3_key = local_path.name
@@ -128,9 +126,7 @@ class S3Storage:
             self.s3_client.upload_file(**upload_args)
 
             # Generate S3 URL
-            s3_url = (
-                f"https://{self.bucket_name}.s3.{self.region}.amazonaws.com/{s3_key}"
-            )
+            s3_url = f"https://{self.bucket_name}.s3.{self.region}.amazonaws.com/{s3_key}"
 
             logger.info(f"Upload successful: {s3_url}")
 
@@ -165,9 +161,7 @@ class S3Storage:
         except ClientError as e:
             error_code = e.response.get("Error", {}).get("Code", "Unknown")
             if error_code == "AccessDenied":
-                raise ConfigurationError(
-                    "AWS credentials are invalid or lack permissions"
-                )
+                raise ConfigurationError("AWS credentials are invalid or lack permissions")
             elif error_code == "SignatureDoesNotMatch":
                 raise ConfigurationError("AWS secret access key is incorrect")
             else:

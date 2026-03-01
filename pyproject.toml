@@ -91,8 +91,7 @@ dependencies = [
   "pytest-cov",
   "coverage[toml]",
   # Formatting and linting
-  "black",
-  "isort", 
+  "ruff",
   "mypy",
   # Type stubs for better type checking
   "types-requests",
@@ -114,15 +113,13 @@ dependencies = [
   "google-auth>=2.17.0",
   "pydub",
   # Development tools
-  "black>=23.0.0",
-  "isort>=5.12.0",
-  "flake8>=6.0.0",
+  "ruff>=0.4.0",
   "mypy>=1.0.0",
+  "pre-commit>=3.0.0",
   "types-requests>=2.28.11",
   "pytest>=7.0.0",
   "pytest-cov>=4.0.0",
   "bandit>=1.7.0",
-  "flake8-pyproject>=0.18.0",
 ]
 
 [tool.hatch.envs.docs]
@@ -157,15 +154,14 @@ clean = "zensical build --clean"
 [tool.hatch.envs.default.scripts]
 # Format code
 format = [
-  "isort the_data_packet tests",
-  "black the_data_packet tests",
+  "ruff format the_data_packet tests",
+  "ruff check --fix the_data_packet tests",
 ]
 
-# Check formatting
+# Check formatting (no writes)
 format-check = [
-  "isort --check the_data_packet tests",
-  "black --check the_data_packet tests",
-  "flake8 the_data_packet tests",
+  "ruff format --check the_data_packet tests",
+  "ruff check the_data_packet tests",
 ]
 
 # Type checking
@@ -174,7 +170,7 @@ typecheck = "mypy --exclude 'docs' the_data_packet"
 # Full quality check pipeline
 check = [
   "format",
-  "format-check", 
+  "format-check",
   "typecheck",
 ]
 
@@ -207,7 +203,7 @@ clean = "hatch clean"
 # Full build pipeline (equivalent to your bb command)
 bb = [
   "format",
-  "format-check", 
+  "format-check",
   "typecheck",
 ]
 
@@ -238,20 +234,24 @@ exclude_lines = [
   "if TYPE_CHECKING:",
 ]
 
-# Code formatting configuration
-[tool.black]
-line-length = 88
-target-version = ["py39"]
-include = '\.pyi?$'
+# Ruff: replaces black, isort, and flake8
+[tool.ruff]
+line-length = 120
+target-version = "py39"
 
-[tool.isort]
-profile = "black"
-multi_line_output = 3
-line_length = 88
+[tool.ruff.lint]
+select = [
+  "E",  # pycodestyle errors
+  "W",  # pycodestyle warnings
+  "F",  # pyflakes
+  "I",  # isort
+]
 
-# Linting configuration
-[tool.flake8]
-max-line-length = 120
+[tool.ruff.lint.isort]
+known-first-party = ["the_data_packet"]
+
+[tool.ruff.format]
+quote-style = "double"
 
 # Type checking configuration
 [tool.mypy]
