@@ -195,6 +195,8 @@ class Config:
     # Google Cloud Configuration
     # Path to service account JSON
     google_credentials_path: Optional[str] = None
+    # AWS Secrets Manager secret name holding the GCP service account JSON
+    gcp_secret_name: Optional[str] = None
     # GCS bucket for long audio synthesis
     gcs_bucket_name: Optional[str] = None
 
@@ -287,6 +289,7 @@ class Config:
         self.google_credentials_path = self.google_credentials_path or os.getenv(
             "GOOGLE_APPLICATION_CREDENTIALS"
         )
+        self.gcp_secret_name = self.gcp_secret_name or os.getenv("GCP_SECRET_NAME")
         self.gcs_bucket_name = self.gcs_bucket_name or os.getenv("GCS_BUCKET_NAME")
         self.mongodb_username = self.mongodb_username or os.getenv("MONGODB_USERNAME")
         self.mongodb_password = self.mongodb_password or os.getenv("MONGODB_PASSWORD")

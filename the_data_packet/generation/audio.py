@@ -1,5 +1,6 @@
 """Audio generation using Google Cloud Text-to-Speech Long Audio Synthesis."""
 
+import json
 import os
 import time
 from dataclasses import dataclass
@@ -7,6 +8,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
 
+import boto3
+from botocore.exceptions import ClientError
 from google.cloud import storage, texttospeech  # type: ignore[attr-defined]
 from google.oauth2 import service_account
 
@@ -62,6 +65,7 @@ class AudioGenerator:
         self.credentials_path = credentials_path or getattr(
             config, "google_credentials_path", None
         )
+        self.gcp_secret_name = getattr(config, "gcp_secret_name", None)
         self.male_voice = male_voice or getattr(config, "male_voice", "en-US-Studio-Q")
         self.female_voice = female_voice or getattr(
             config, "female_voice", "en-US-Studio-O"
@@ -79,10 +83,8 @@ class AudioGenerator:
 
         # Initialize Google Cloud clients
         try:
-            if self.credentials_path and os.path.exists(self.credentials_path):
-                credentials = service_account.Credentials.from_service_account_file(
-                    self.credentials_path
-                )
+            credentials = self._load_credentials()
+            if credentials:
                 self.tts_client = texttospeech.TextToSpeechLongAudioSynthesizeClient(
                     credentials=credentials
                 )
@@ -102,6 +104,31 @@ class AudioGenerator:
         logger.info(
             f"Initialized Google Cloud TTS generator with voices: {self.male_voice}, {self.female_voice} and bucket: {self.gcs_bucket_name}"  # noqa: E501
         )
+
+    def _load_credentials(self) -> Optional[service_account.Credentials]:
+        """Load GCP credentials from a file or AWS Secrets Manager."""
+        if self.credentials_path and os.path.exists(self.credentials_path):
+            logger.info(f"Loading GCP credentials from file: {self.credentials_path}")
+            return service_account.Credentials.from_service_account_file(
+                self.credentials_path
+            )
+
+        if self.gcp_secret_name:
+            logger.info(
+                f"Loading GCP credentials from AWS Secrets Manager: {self.gcp_secret_name}"
+            )
+            try:
+                client = boto3.client("secretsmanager")
+                response = client.get_secret_value(SecretId=self.gcp_secret_name)
+                key_data = json.loads(response["SecretString"])
+                return service_account.Credentials.from_service_account_info(key_data)
+            except ClientError as e:
+                raise ConfigurationError(
+                    f"Failed to fetch GCP credentials from Secrets Manager "
+                    f"'{self.gcp_secret_name}': {e}"
+                )
+
+        return None
 
     def _validate_gcs_bucket(self) -> None:
         """Validate that the GCS bucket is accessible."""

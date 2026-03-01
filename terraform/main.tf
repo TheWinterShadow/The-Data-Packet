@@ -149,6 +149,18 @@ resource "google_storage_bucket_iam_member" "audio_bucket_admin" {
   member = "serviceAccount:${google_service_account.data_packet_sa.email}"
 }
 
+# Store GCP service account key in AWS Secrets Manager so the container always
+# has access to the current key without manual rotation
+resource "aws_secretsmanager_secret" "gcp_credentials" {
+  name        = "the-data-packet/gcp-credentials"
+  description = "GCP service account key for The Data Packet podcast generation"
+}
+
+resource "aws_secretsmanager_secret_version" "gcp_credentials_value" {
+  secret_id     = aws_secretsmanager_secret.gcp_credentials.id
+  secret_string = base64decode(google_service_account_key.data_packet_key.private_key)
+}
+
 # ==============================================================================
 # OUTPUTS
 # ==============================================================================
@@ -184,5 +196,10 @@ output "service_account_key" {
   description = "Base64-encoded service account key (store securely)"
   value       = google_service_account_key.data_packet_key.private_key
   sensitive   = true
+}
+
+output "gcp_secret_name" {
+  description = "AWS Secrets Manager secret name for GCP credentials"
+  value       = aws_secretsmanager_secret.gcp_credentials.name
 }
 
