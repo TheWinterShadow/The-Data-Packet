@@ -69,14 +69,10 @@ class TestAudioGenerator(unittest.TestCase):
         self.assertEqual(AudioGenerator.AUDIO_CONFIG["sample_rate_hertz"], 44100)
 
     @patch("the_data_packet.generation.audio.get_config")
-    @patch(
-        "the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient"
-    )
+    @patch("the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient")
     @patch("the_data_packet.generation.audio.storage.Client")
     @patch("os.path.exists")
-    def test_init_with_gcs_bucket(
-        self, mock_exists, mock_storage, mock_tts, mock_get_config
-    ):
+    def test_init_with_gcs_bucket(self, mock_exists, mock_storage, mock_tts, mock_get_config):
         """Test AudioGenerator initialization with GCS bucket."""
         mock_get_config.return_value = self.mock_config
         mock_exists.return_value = True
@@ -107,14 +103,10 @@ class TestAudioGenerator(unittest.TestCase):
         self.assertIn("Google Cloud Storage bucket is required", str(cm.exception))
 
     @patch("the_data_packet.generation.audio.get_config")
-    @patch(
-        "the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient"
-    )
+    @patch("the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient")
     @patch("the_data_packet.generation.audio.storage.Client")
     @patch("os.path.exists")
-    def test_init_with_custom_voices(
-        self, mock_exists, mock_storage, mock_tts, mock_get_config
-    ):
+    def test_init_with_custom_voices(self, mock_exists, mock_storage, mock_tts, mock_get_config):
         """Test AudioGenerator initialization with custom voices."""
         mock_get_config.return_value = self.mock_config
         mock_exists.return_value = True
@@ -136,14 +128,10 @@ class TestAudioGenerator(unittest.TestCase):
         self.assertEqual(generator.female_voice, "Leda")
 
     @patch("the_data_packet.generation.audio.get_config")
-    @patch(
-        "the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient"
-    )
+    @patch("the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient")
     @patch("the_data_packet.generation.audio.storage.Client")
     @patch("os.path.exists")
-    def test_validate_gcs_bucket_success(
-        self, mock_exists, mock_storage, mock_tts, mock_get_config
-    ):
+    def test_validate_gcs_bucket_success(self, mock_exists, mock_storage, mock_tts, mock_get_config):
         """Test successful GCS bucket validation."""
         mock_get_config.return_value = self.mock_config
         mock_exists.return_value = True
@@ -159,14 +147,10 @@ class TestAudioGenerator(unittest.TestCase):
         self.assertIsNotNone(generator)
 
     @patch("the_data_packet.generation.audio.get_config")
-    @patch(
-        "the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient"
-    )
+    @patch("the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient")
     @patch("the_data_packet.generation.audio.storage.Client")
     @patch("os.path.exists")
-    def test_generate_audio_with_empty_script_raises_error(
-        self, mock_exists, mock_storage, mock_tts, mock_get_config
-    ):
+    def test_generate_audio_with_empty_script_raises_error(self, mock_exists, mock_storage, mock_tts, mock_get_config):
         """Test that empty script raises AudioGenerationError."""
         mock_get_config.return_value = self.mock_config
         mock_exists.return_value = True
@@ -185,14 +169,10 @@ class TestAudioGenerator(unittest.TestCase):
         self.assertIn("Script too short or empty", str(cm.exception))
 
     @patch("the_data_packet.generation.audio.get_config")
-    @patch(
-        "the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient"
-    )
+    @patch("the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient")
     @patch("the_data_packet.generation.audio.storage.Client")
     @patch("os.path.exists")
-    def test_generate_audio_with_short_script_raises_error(
-        self, mock_exists, mock_storage, mock_tts, mock_get_config
-    ):
+    def test_generate_audio_with_short_script_raises_error(self, mock_exists, mock_storage, mock_tts, mock_get_config):
         """Test that very short script raises AudioGenerationError."""
         mock_get_config.return_value = self.mock_config
         mock_exists.return_value = True
@@ -211,14 +191,10 @@ class TestAudioGenerator(unittest.TestCase):
         self.assertIn("Script too short or empty", str(cm.exception))
 
     @patch("the_data_packet.generation.audio.get_config")
-    @patch(
-        "the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient"
-    )
+    @patch("the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient")
     @patch("the_data_packet.generation.audio.storage.Client")
     @patch("os.path.exists")
-    def test_parse_script_to_ssml(
-        self, mock_exists, mock_storage, mock_tts, mock_get_config
-    ):
+    def test_parse_script_to_ssml(self, mock_exists, mock_storage, mock_tts, mock_get_config):
         """Test script parsing to SSML with voice switching."""
         mock_get_config.return_value = self.mock_config
         mock_exists.return_value = True
@@ -265,13 +241,10 @@ class TestAudioGenerator(unittest.TestCase):
             mock_get_config.return_value = self.mock_config
 
             with (
-                patch(
-                    "the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient"
-                ),
+                patch("the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient"),
                 patch("the_data_packet.generation.audio.storage.Client"),
                 patch("os.path.exists", return_value=True),
             ):
-
                 mock_storage_client = Mock()
                 mock_bucket = Mock()
                 mock_storage_client.bucket.return_value = mock_bucket
@@ -291,9 +264,7 @@ class TestAudioGenerator(unittest.TestCase):
                     self.assertIn("en-US-Studio-O", voices["female"])
 
     @patch("the_data_packet.generation.audio.get_config")
-    @patch(
-        "the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient"
-    )
+    @patch("the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient")
     @patch("the_data_packet.generation.audio.texttospeech.TextToSpeechClient")
     @patch("the_data_packet.generation.audio.storage.Client")
     @patch("os.path.exists")
@@ -328,9 +299,7 @@ class TestAudioGenerator(unittest.TestCase):
         self.assertTrue(result)
 
     @patch("the_data_packet.generation.audio.get_config")
-    @patch(
-        "the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient"
-    )
+    @patch("the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient")
     @patch("the_data_packet.generation.audio.texttospeech.TextToSpeechClient")
     @patch("the_data_packet.generation.audio.storage.Client")
     @patch("os.path.exists")
@@ -362,15 +331,11 @@ class TestAudioGenerator(unittest.TestCase):
         self.assertFalse(result)
 
     @patch("the_data_packet.generation.audio.get_config")
-    @patch(
-        "the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient"
-    )
+    @patch("the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient")
     @patch("the_data_packet.generation.audio.storage.Client")
     @patch("os.path.exists")
     @patch("time.sleep")
-    def test_generate_audio_success(
-        self, mock_sleep, mock_exists, mock_storage, mock_tts, mock_get_config
-    ):
+    def test_generate_audio_success(self, mock_sleep, mock_exists, mock_storage, mock_tts, mock_get_config):
         """Test successful audio generation with Google Cloud TTS."""
         mock_get_config.return_value = self.mock_config
         mock_exists.return_value = True
@@ -410,9 +375,7 @@ Sam: Absolutely. Let's dive into the details."""
             generation_time_seconds=45.2,
         )
 
-        with patch.object(
-            generator, "generate_audio_chunked", return_value=mock_result
-        ) as mock_chunked:
+        with patch.object(generator, "generate_audio_chunked", return_value=mock_result) as mock_chunked:
             result = generator.generate_audio(script)
 
             # Verify generate_audio_chunked was called
@@ -423,14 +386,10 @@ Sam: Absolutely. Let's dive into the details."""
             self.assertEqual(result.file_size_bytes, 1024)
 
     @patch("the_data_packet.generation.audio.get_config")
-    @patch(
-        "the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient"
-    )
+    @patch("the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient")
     @patch("the_data_packet.generation.audio.storage.Client")
     @patch("os.path.exists")
-    def test_generate_audio_no_segments_found(
-        self, mock_exists, mock_storage, mock_tts, mock_get_config
-    ):
+    def test_generate_audio_no_segments_found(self, mock_exists, mock_storage, mock_tts, mock_get_config):
         """Test audio generation when synthesis fails."""
         mock_get_config.return_value = self.mock_config
         mock_exists.return_value = True
@@ -455,20 +414,14 @@ Sam: Thanks for having me, Alex. Today we're discussing AI."""
         with self.assertRaises(AudioGenerationError) as context:
             generator.generate_audio(script)
 
-        self.assertIn(
-            "Failed to generate audio with Google Cloud TTS", str(context.exception)
-        )
+        self.assertIn("Failed to generate audio with Google Cloud TTS", str(context.exception))
 
     @patch("the_data_packet.generation.audio.get_config")
-    @patch(
-        "the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient"
-    )
+    @patch("the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient")
     @patch("the_data_packet.generation.audio.storage.Client")
     @patch("os.path.exists")
     @patch("time.sleep")
-    def test_generate_audio_operation_timeout(
-        self, mock_sleep, mock_exists, mock_storage, mock_tts, mock_get_config
-    ):
+    def test_generate_audio_operation_timeout(self, mock_sleep, mock_exists, mock_storage, mock_tts, mock_get_config):
         """Test audio generation with operation timeout."""
         mock_get_config.return_value = self.mock_config
         mock_exists.return_value = True
@@ -499,14 +452,10 @@ Sam: Thanks for having me, Alex. Today we're discussing AI."""
         self.assertIn("Audio synthesis timed out", str(context.exception))
 
     @patch("the_data_packet.generation.audio.get_config")
-    @patch(
-        "the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient"
-    )
+    @patch("the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient")
     @patch("the_data_packet.generation.audio.storage.Client")
     @patch("os.path.exists")
-    def test_generate_audio_api_failure(
-        self, mock_exists, mock_storage, mock_tts, mock_get_config
-    ):
+    def test_generate_audio_api_failure(self, mock_exists, mock_storage, mock_tts, mock_get_config):
         """Test audio generation with API failure."""
         mock_get_config.return_value = self.mock_config
         mock_exists.return_value = True
@@ -531,20 +480,14 @@ Sam: Thanks for having me, Alex. Today we're discussing AI."""
         with self.assertRaises(AudioGenerationError) as context:
             generator.generate_audio(script)
 
-        self.assertIn(
-            "Failed to generate audio with Google Cloud TTS", str(context.exception)
-        )
+        self.assertIn("Failed to generate audio with Google Cloud TTS", str(context.exception))
 
     @patch("the_data_packet.generation.audio.get_config")
-    @patch(
-        "the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient"
-    )
+    @patch("the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient")
     @patch("the_data_packet.generation.audio.storage.Client")
     @patch("os.path.exists")
     @patch("time.sleep")
-    def test_download_audio_from_gcs_success(
-        self, mock_sleep, mock_exists, mock_storage, mock_tts, mock_get_config
-    ):
+    def test_download_audio_from_gcs_success(self, mock_sleep, mock_exists, mock_storage, mock_tts, mock_get_config):
         """Test successful audio download from GCS."""
         from pathlib import Path
 
@@ -579,9 +522,7 @@ Sam: Thanks for having me, Alex. Today we're discussing AI."""
             mock_get_config.return_value = self.mock_config
 
             with (
-                patch(
-                    "the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient"
-                ),
+                patch("the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient"),
                 patch("the_data_packet.generation.audio.storage.Client"),
                 patch("os.path.exists", return_value=True),
             ):
@@ -605,9 +546,7 @@ Sam: Thanks for having me, Alex. Today we're discussing AI."""
                         self.assertLessEqual(len(chunk.encode("utf-8")), 4000)
 
     @patch("the_data_packet.generation.audio.get_config")
-    @patch(
-        "the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient"
-    )
+    @patch("the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient")
     @patch("the_data_packet.generation.audio.storage.Client")
     @patch("os.path.exists")
     @patch("time.sleep")
@@ -681,15 +620,11 @@ Sam: Thanks for having me, Alex. Today we're discussing AI."""
             self.assertEqual(result.file_size_bytes, 2048)
 
     @patch("the_data_packet.generation.audio.get_config")
-    @patch(
-        "the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient"
-    )
+    @patch("the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient")
     @patch("the_data_packet.generation.audio.storage.Client")
     @patch("os.path.exists")
     @patch("pydub.AudioSegment")
-    def test_convert_wav_to_mp3(
-        self, mock_audio_segment, mock_exists, mock_storage, mock_tts, mock_get_config
-    ):
+    def test_convert_wav_to_mp3(self, mock_audio_segment, mock_exists, mock_storage, mock_tts, mock_get_config):
         """Test WAV to MP3 conversion."""
         mock_get_config.return_value = self.mock_config
         mock_exists.return_value = True
@@ -720,14 +655,10 @@ Sam: Thanks for having me, Alex. Today we're discussing AI."""
         mock_segment.export.assert_called_once_with(mp3_path, format="mp3")
 
     @patch("the_data_packet.generation.audio.get_config")
-    @patch(
-        "the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient"
-    )
+    @patch("the_data_packet.generation.audio.texttospeech.TextToSpeechLongAudioSynthesizeClient")
     @patch("the_data_packet.generation.audio.storage.Client")
     @patch("os.path.exists")
-    def test_generate_audio_calls_chunked_generation(
-        self, mock_exists, mock_storage, mock_tts, mock_get_config
-    ):
+    def test_generate_audio_calls_chunked_generation(self, mock_exists, mock_storage, mock_tts, mock_get_config):
         """Test that generate_audio calls generate_audio_chunked."""
         mock_get_config.return_value = self.mock_config
         mock_exists.return_value = True

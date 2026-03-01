@@ -59,9 +59,7 @@ class TestTechCrunchSource(unittest.TestCase):
 
     @patch.object(TechCrunchSource, "_extract_article")
     @patch.object(TechCrunchSource, "_get_latest_url_from_rss")
-    def test_get_latest_article_structure(
-        self, mock_get_url: MagicMock, mock_extract: MagicMock
-    ):
+    def test_get_latest_article_structure(self, mock_get_url: MagicMock, mock_extract: MagicMock):
         """Test get_latest_article method structure (mocked)."""
         mock_get_url.return_value = "https://techcrunch.com/test"
         mock_extract.return_value = Article(
@@ -86,9 +84,7 @@ class TestTechCrunchSource(unittest.TestCase):
 
     @patch.object(TechCrunchSource, "_extract_article")
     @patch.object(TechCrunchSource, "_get_urls_from_rss")
-    def test_get_multiple_articles_structure(
-        self, mock_get_urls: MagicMock, mock_extract: MagicMock
-    ):
+    def test_get_multiple_articles_structure(self, mock_get_urls: MagicMock, mock_extract: MagicMock):
         """Test get_multiple_articles method structure (mocked)."""
         mock_get_urls.return_value = [
             "https://techcrunch.com/test1",

@@ -88,9 +88,7 @@ def run_tests(verbosity=1, pattern="test*.py"):
     # Discover tests starting from the tests directory
     tests_dir = Path(__file__).parent
     loader = unittest.TestLoader()
-    suite = loader.discover(
-        start_dir=str(tests_dir), pattern=pattern, top_level_dir=str(project_root)
-    )
+    suite = loader.discover(start_dir=str(tests_dir), pattern=pattern, top_level_dir=str(project_root))
 
     # Run the tests
     runner = unittest.TextTestRunner(verbosity=verbosity, buffer=True)
@@ -122,9 +120,7 @@ Examples:
         help="Verbose output (show each test method)",
     )
 
-    parser.add_argument(
-        "--quiet", "-q", action="store_true", help="Quiet output (minimal)"
-    )
+    parser.add_argument("--quiet", "-q", action="store_true", help="Quiet output (minimal)")
 
     parser.add_argument(
         "--pattern",

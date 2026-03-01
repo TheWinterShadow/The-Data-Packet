@@ -78,14 +78,14 @@ resource "aws_s3_bucket_policy" "data_packet_bucket_policy" {
 resource "google_project_service" "texttospeech_api" {
   project = var.project_id
   service = "texttospeech.googleapis.com"
-  
+
   disable_dependent_services = true
 }
 
 resource "google_project_service" "storage_api" {
   project = var.project_id
   service = "storage.googleapis.com"
-  
+
   disable_dependent_services = true
 }
 
@@ -103,7 +103,7 @@ resource "google_storage_bucket" "audio_bucket" {
   # Lifecycle management to clean up old audio files
   lifecycle_rule {
     condition {
-      age = 30  # Delete files older than 30 days
+      age = 30 # Delete files older than 30 days
     }
     action {
       type = "Delete"

@@ -182,9 +182,7 @@ class TestCLI(unittest.TestCase):
     @patch("the_data_packet.cli.setup_logging")
     @patch("argparse.ArgumentParser.parse_args")
     @patch("sys.exit")
-    def test_configuration_error_handling(
-        self, mock_exit, mock_parse_args, mock_setup_logging, mock_get_config
-    ):
+    def test_configuration_error_handling(self, mock_exit, mock_parse_args, mock_setup_logging, mock_get_config):
         """Test configuration error handling."""
         mock_args = Mock(
             anthropic_key=None,
@@ -289,9 +287,7 @@ class TestCLI(unittest.TestCase):
     @patch("argparse.ArgumentParser.parse_args")
     @patch("the_data_packet.cli.get_config")
     @patch("the_data_packet.cli.PodcastPipeline")
-    def test_mongodb_arguments_parsed_correctly(
-        self, mock_pipeline_class, mock_get_config, mock_parse_args
-    ):
+    def test_mongodb_arguments_parsed_correctly(self, mock_pipeline_class, mock_get_config, mock_parse_args):
         """Test that MongoDB arguments are parsed and passed to configuration."""
         # Setup mock arguments with MongoDB credentials
         mock_parse_args.return_value = Mock(
@@ -341,9 +337,7 @@ class TestCLI(unittest.TestCase):
     @patch("argparse.ArgumentParser.parse_args")
     @patch("the_data_packet.cli.get_config")
     @patch("the_data_packet.cli.PodcastPipeline")
-    def test_mongodb_arguments_none_when_not_provided(
-        self, mock_pipeline_class, mock_get_config, mock_parse_args
-    ):
+    def test_mongodb_arguments_none_when_not_provided(self, mock_pipeline_class, mock_get_config, mock_parse_args):
         """Test that MongoDB arguments are not in overrides when not provided."""
         # Setup mock arguments without MongoDB credentials
         mock_parse_args.return_value = Mock(
@@ -397,9 +391,7 @@ class TestCLI(unittest.TestCase):
         parser.add_argument("--mongodb-password", help="MongoDB password")
 
         # Test parsing MongoDB arguments
-        args = parser.parse_args(
-            ["--mongodb-username", "test_user", "--mongodb-password", "test_password"]
-        )
+        args = parser.parse_args(["--mongodb-username", "test_user", "--mongodb-password", "test_password"])
 
         self.assertEqual(args.mongodb_username, "test_user")
         self.assertEqual(args.mongodb_password, "test_password")

@@ -70,9 +70,7 @@ class TestScriptGenerator(unittest.TestCase):
 
     @patch("the_data_packet.generation.script.get_config")
     @patch("the_data_packet.generation.script.Anthropic")
-    def test_generate_script_empty_articles_raises_error(
-        self, mock_anthropic, mock_get_config
-    ):
+    def test_generate_script_empty_articles_raises_error(self, mock_anthropic, mock_get_config):
         """Test that empty articles list raises AIGenerationError."""
         mock_get_config.return_value = self.mock_config
         mock_client = Mock()
@@ -87,9 +85,7 @@ class TestScriptGenerator(unittest.TestCase):
 
     @patch("the_data_packet.generation.script.get_config")
     @patch("the_data_packet.generation.script.Anthropic")
-    def test_generate_script_invalid_articles_raises_error(
-        self, mock_anthropic, mock_get_config
-    ):
+    def test_generate_script_invalid_articles_raises_error(self, mock_anthropic, mock_get_config):
         """Test that invalid articles raise AIGenerationError."""
         mock_get_config.return_value = self.mock_config
         mock_client = Mock()
@@ -363,9 +359,7 @@ class TestScriptGenerator(unittest.TestCase):
                 self.assertIn("opening", sections)
                 self.assertIn("Welcome to the show!", sections["opening"])
                 # The parser creates transition_TRANSITION due to parsing logic
-                transition_key = [
-                    k for k in sections.keys() if k.startswith("transition_")
-                ][0]
+                transition_key = [k for k in sections.keys() if k.startswith("transition_")][0]
                 self.assertIn("move to our next story", sections[transition_key])
                 self.assertIn("closing", sections)
                 self.assertIn("Thanks for listening!", sections["closing"])

@@ -137,9 +137,7 @@ class TestConfig(unittest.TestCase):
     def test_incompatible_source_category_validation(self):
         """Test that incompatible source-category combinations are caught."""
         with self.assertRaises(ConfigurationError) as cm:
-            Config(
-                article_sources=["wired"], article_categories=["nonexistent_category"]
-            )
+            Config(article_sources=["wired"], article_categories=["nonexistent_category"])
 
         self.assertIn("not supported by source", str(cm.exception))
 

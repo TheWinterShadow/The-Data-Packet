@@ -56,12 +56,8 @@ class TestPodcastResult(unittest.TestCase):
         self.assertEqual(result.script_path, Path("/tmp/script.txt"))
         self.assertEqual(result.audio_path, Path("/tmp/audio.mp3"))
         self.assertEqual(result.rss_path, Path("/tmp/feed.xml"))
-        self.assertEqual(
-            result.s3_script_url, "https://s3.amazonaws.com/bucket/script.txt"
-        )
-        self.assertEqual(
-            result.s3_audio_url, "https://s3.amazonaws.com/bucket/audio.mp3"
-        )
+        self.assertEqual(result.s3_script_url, "https://s3.amazonaws.com/bucket/script.txt")
+        self.assertEqual(result.s3_audio_url, "https://s3.amazonaws.com/bucket/audio.mp3")
         self.assertEqual(result.s3_rss_url, "https://s3.amazonaws.com/bucket/feed.xml")
         self.assertEqual(result.execution_time_seconds, 45.2)
         self.assertIsNone(result.error_message)
@@ -231,9 +227,7 @@ class TestPodcastPipeline(unittest.TestCase):
 
     @patch("the_data_packet.workflows.podcast.get_config")
     @patch.object(PodcastPipeline, "_validate_config")
-    def test_collect_articles_integration(
-        self, mock_validate: MagicMock, mock_get_config: MagicMock
-    ):
+    def test_collect_articles_integration(self, mock_validate: MagicMock, mock_get_config: MagicMock):
         """Test _collect_articles method integration."""
         mock_get_config.return_value = self.mock_config
 
@@ -256,9 +250,7 @@ class TestPodcastPipeline(unittest.TestCase):
 
     @patch("the_data_packet.workflows.podcast.get_config")
     @patch.object(PodcastPipeline, "_validate_config")
-    def test_collect_articles_unknown_source(
-        self, mock_validate: MagicMock, mock_get_config: MagicMock
-    ):
+    def test_collect_articles_unknown_source(self, mock_validate: MagicMock, mock_get_config: MagicMock):
         """Test _collect_articles with unknown source."""
         config_unknown_source = Mock()
         config_unknown_source.article_sources = ["unknown_source"]
@@ -323,9 +315,7 @@ class TestPodcastPipeline(unittest.TestCase):
     @patch.object(PodcastPipeline, "_validate_config")
     # Mock JSONL logging
     @patch("the_data_packet.core.logging.JSONLHandler.emit")
-    def test_save_script(
-        self, mock_emit: MagicMock, mock_validate: MagicMock, mock_get_config: MagicMock
-    ):
+    def test_save_script(self, mock_emit: MagicMock, mock_validate: MagicMock, mock_get_config: MagicMock):
         """Test script saving."""
         mock_get_config.return_value = self.mock_config
 
@@ -333,28 +323,19 @@ class TestPodcastPipeline(unittest.TestCase):
 
         with patch("pathlib.Path.mkdir") as mock_mkdir:
             with patch("builtins.open", create=True) as mock_open:
-                with patch(
-                    "the_data_packet.workflows.podcast.datetime"
-                ) as mock_datetime:
-                    mock_datetime.now.return_value.strftime.return_value = (
-                        "20231201_120000"
-                    )
+                with patch("the_data_packet.workflows.podcast.datetime") as mock_datetime:
+                    mock_datetime.now.return_value.strftime.return_value = "20231201_120000"
 
                     script_path = pipeline._save_script("Test script content")
 
-                    expected_path = (
-                        self.mock_config.output_directory
-                        / "episode_script_20231201_120000.txt"
-                    )
+                    expected_path = self.mock_config.output_directory / "episode_script_20231201_120000.txt"
                     self.assertEqual(script_path, expected_path)
                 mock_mkdir.assert_called_once_with(parents=True, exist_ok=True)
                 mock_open.assert_called_once_with(expected_path, "w", encoding="utf-8")
 
     @patch("the_data_packet.workflows.podcast.get_config")
     @patch.object(PodcastPipeline, "_validate_config")
-    def test_should_use_s3_true(
-        self, mock_validate: MagicMock, mock_get_config: MagicMock
-    ):
+    def test_should_use_s3_true(self, mock_validate: MagicMock, mock_get_config: MagicMock):
         """Test S3 usage detection when properly configured."""
         mock_get_config.return_value = self.mock_config
 
@@ -363,9 +344,7 @@ class TestPodcastPipeline(unittest.TestCase):
 
     @patch("the_data_packet.workflows.podcast.get_config")
     @patch.object(PodcastPipeline, "_validate_config")
-    def test_should_use_s3_false(
-        self, mock_validate: MagicMock, mock_get_config: MagicMock
-    ):
+    def test_should_use_s3_false(self, mock_validate: MagicMock, mock_get_config: MagicMock):
         """Test S3 usage detection when not configured."""
         config_no_s3 = Mock()
         config_no_s3.s3_bucket_name = None
@@ -429,9 +408,7 @@ class TestPodcastPipeline(unittest.TestCase):
         self.assertEqual(result[0].title, "New Article")
 
         # Verify MongoDB client was created and called correctly
-        mock_mongodb_client.assert_called_once_with(
-            username="test_user", password="test_password"
-        )
+        mock_mongodb_client.assert_called_once_with(username="test_user", password="test_password")
         self.assertEqual(mock_client_instance.find_documents.call_count, 2)
 
     @patch("the_data_packet.workflows.podcast.get_config")
@@ -479,18 +456,12 @@ class TestPodcastPipeline(unittest.TestCase):
         pipeline._add_article_to_db(articles)
 
         # Verify MongoDB client was created and insert was called
-        mock_mongodb_client.assert_called_once_with(
-            username="test_user", password="test_password"
-        )
-        mock_client_instance.insert_document.assert_called_once_with(
-            "articles", self.sample_article.to_dict()
-        )
+        mock_mongodb_client.assert_called_once_with(username="test_user", password="test_password")
+        mock_client_instance.insert_document.assert_called_once_with("articles", self.sample_article.to_dict())
 
     @patch("the_data_packet.workflows.podcast.get_config")
     @patch.object(PodcastPipeline, "_validate_config")
-    def test_add_article_to_db_no_mongodb_credentials(
-        self, mock_validate: MagicMock, mock_get_config: MagicMock
-    ):
+    def test_add_article_to_db_no_mongodb_credentials(self, mock_validate: MagicMock, mock_get_config: MagicMock):
         """Test adding articles to database without MongoDB credentials."""
         # Setup config without MongoDB credentials
         config_no_mongo = Mock()
@@ -539,9 +510,7 @@ class TestPodcastPipeline(unittest.TestCase):
         pipeline._save_episode_metadata(episode_result)
 
         # Verify MongoDB client was created and insert was called
-        mock_mongodb_client.assert_called_once_with(
-            username="test_user", password="test_password"
-        )
+        mock_mongodb_client.assert_called_once_with(username="test_user", password="test_password")
 
         # Verify insert was called once with episode metadata
         self.assertEqual(mock_client_instance.insert_document.call_count, 1)
@@ -562,9 +531,7 @@ class TestPodcastPipeline(unittest.TestCase):
 
     @patch("the_data_packet.workflows.podcast.get_config")
     @patch.object(PodcastPipeline, "_validate_config")
-    def test_save_episode_metadata_no_mongodb_credentials(
-        self, mock_validate: MagicMock, mock_get_config: MagicMock
-    ):
+    def test_save_episode_metadata_no_mongodb_credentials(self, mock_validate: MagicMock, mock_get_config: MagicMock):
         """Test saving episode metadata without MongoDB credentials."""
         # Setup config without MongoDB credentials
         config_no_mongo = Mock()

@@ -100,9 +100,7 @@ class TestHTTPClient(unittest.TestCase):
         client = HTTPClient()
         client.get("https://example.com", headers={"Custom": "Header"})
 
-        mock_session_get.assert_called_once_with(
-            "https://example.com", timeout=30, headers={"Custom": "Header"}
-        )
+        mock_session_get.assert_called_once_with("https://example.com", timeout=30, headers={"Custom": "Header"})
 
     @patch("the_data_packet.core.config.get_config")
     @patch("requests.Session.get")
@@ -173,9 +171,7 @@ class TestHTTPClient(unittest.TestCase):
         client = HTTPClient()
         client.get_soup("https://example.com", headers={"Custom": "Header"})
 
-        mock_get.assert_called_once_with(
-            "https://example.com", headers={"Custom": "Header"}
-        )
+        mock_get.assert_called_once_with("https://example.com", headers={"Custom": "Header"})
 
     @patch("the_data_packet.core.config.get_config")
     @patch.object(HTTPClient, "get")

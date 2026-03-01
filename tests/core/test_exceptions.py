@@ -123,9 +123,7 @@ class TestExceptions(unittest.TestCase):
     def test_exception_with_complex_messages(self):
         """Test exceptions with complex error messages."""
         # Test with formatted strings
-        error_msg = (
-            "Failed to process article: 'Test Article' with error: Connection timeout"
-        )
+        error_msg = "Failed to process article: 'Test Article' with error: Connection timeout"
         exc = ScrapingError(error_msg)
         self.assertEqual(str(exc), error_msg)
 

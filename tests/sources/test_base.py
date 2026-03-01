@@ -64,7 +64,8 @@ class TestArticle(unittest.TestCase):
     def test_is_valid_with_short_content(self) -> None:
         """Test is_valid returns False for very short content."""
         article = Article(
-            title="Valid Title", content="Short"  # Less than 100 characters
+            title="Valid Title",
+            content="Short",  # Less than 100 characters
         )
 
         self.assertFalse(article.is_valid())
@@ -143,10 +144,7 @@ class ConcreteArticleSource(ArticleSource):
     def get_latest_article(self, category: str) -> Article:
         return Article(
             title=f"Latest {category} article",
-            content=(
-                f"This is the latest article from the {category} category "
-                "with enough content to be valid."
-            ),
+            content=(f"This is the latest article from the {category} category " "with enough content to be valid."),
             category=category,
             source=self._name,
         )
@@ -155,10 +153,7 @@ class ConcreteArticleSource(ArticleSource):
         return [
             Article(
                 title=f"{category} article {i}",
-                content=(
-                    f"This is article {i} from the {category} category "
-                    "with enough content to be valid."
-                ),
+                content=(f"This is article {i} from the {category} category " "with enough content to be valid."),
                 category=category,
                 source=self._name,
             )
@@ -238,14 +233,10 @@ class TestArticleSource(unittest.TestCase):
 
     def test_custom_source_implementation(self) -> None:
         """Test custom source with different categories."""
-        custom_source = ConcreteArticleSource(
-            name="custom", categories=["ai", "security", "blockchain"]
-        )
+        custom_source = ConcreteArticleSource(name="custom", categories=["ai", "security", "blockchain"])
 
         self.assertEqual(custom_source.name, "custom")
-        self.assertEqual(
-            custom_source.supported_categories, ["ai", "security", "blockchain"]
-        )
+        self.assertEqual(custom_source.supported_categories, ["ai", "security", "blockchain"])
 
         # Valid categories
         custom_source.validate_category("ai")

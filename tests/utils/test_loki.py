@@ -237,9 +237,7 @@ class TestLokiUploader(unittest.TestCase):
 
         # Create test log file
         with tempfile.NamedTemporaryFile(mode="w", suffix=".jsonl", delete=False) as f:
-            f.write(
-                '{"timestamp": "2023-12-27T12:30:45Z", "level": "INFO", "message": "Test"}\n'
-            )
+            f.write('{"timestamp": "2023-12-27T12:30:45Z", "level": "INFO", "message": "Test"}\n')
             temp_path = Path(f.name)
 
         try:

@@ -382,9 +382,7 @@ class TestS3LogUploader(unittest.TestCase):
 
     def test_s3_log_uploader_init(self):
         """Test S3LogUploader initialization."""
-        uploader = S3LogUploader(
-            log_dir=str(self.log_dir), upload_interval=60, remove_after_upload=True
-        )
+        uploader = S3LogUploader(log_dir=str(self.log_dir), upload_interval=60, remove_after_upload=True)
 
         self.assertEqual(uploader.log_dir, self.log_dir)
         self.assertEqual(uploader.upload_interval, 60)

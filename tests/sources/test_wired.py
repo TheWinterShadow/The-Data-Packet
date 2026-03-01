@@ -60,9 +60,7 @@ class TestWiredSource(unittest.TestCase):
 
     @patch.object(WiredSource, "_extract_article")
     @patch.object(WiredSource, "_get_latest_url_from_rss")
-    def test_get_latest_article_structure(
-        self, mock_get_url: MagicMock, mock_extract: MagicMock
-    ):
+    def test_get_latest_article_structure(self, mock_get_url: MagicMock, mock_extract: MagicMock):
         """Test get_latest_article method structure (mocked)."""
         # Mock the URL and extraction
         mock_get_url.return_value = "https://wired.com/test"
@@ -87,9 +85,7 @@ class TestWiredSource(unittest.TestCase):
 
     @patch.object(WiredSource, "_extract_article")
     @patch.object(WiredSource, "_get_urls_from_rss")
-    def test_get_multiple_articles_structure(
-        self, mock_get_urls: MagicMock, mock_extract: MagicMock
-    ):
+    def test_get_multiple_articles_structure(self, mock_get_urls: MagicMock, mock_extract: MagicMock):
         """Test get_multiple_articles method structure (mocked)."""
         # Mock URLs and article extraction
         mock_get_urls.return_value = [

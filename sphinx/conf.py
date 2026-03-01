@@ -8,42 +8,43 @@
 
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../'))
 
-project = 'The Data Packet'
-copyright = '2025, TheWinterShadow'
-author = 'TheWinterShadow'
+sys.path.insert(0, os.path.abspath("../"))
+
+project = "The Data Packet"
+copyright = "2025, TheWinterShadow"
+author = "TheWinterShadow"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
 # The short X.Y version.
-version = '2.0'
+version = "2.0"
 # The full version, including alpha/beta/rc tags.
-release = '2.0.0'
+release = "2.0.0"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.autosummary',
-    'sphinx.ext.viewcode',
-    'sphinx.ext.napoleon',
-    'sphinx.ext.intersphinx',
-    'sphinx.ext.coverage',
-    'myst_parser',
+    "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
+    "sphinx.ext.viewcode",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.coverage",
+    "myst_parser",
 ]
 
-templates_path = ['_templates']
+templates_path = ["_templates"]
 exclude_patterns = []
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = 'furo'
-html_static_path = ['_static']
+html_theme = "furo"
+html_static_path = ["_static"]
 
 # -- Extension configuration -------------------------------------------------
 
@@ -65,11 +66,11 @@ napoleon_attr_annotations = True
 
 # AutoDoc settings
 autodoc_default_options = {
-    'members': True,
-    'member-order': 'bysource',
-    'special-members': '__init__',
-    'undoc-members': True,
-    'exclude-members': '__weakref__'
+    "members": True,
+    "member-order": "bysource",
+    "special-members": "__init__",
+    "undoc-members": True,
+    "exclude-members": "__weakref__",
 }
 
 # Autosummary settings
@@ -77,9 +78,9 @@ autosummary_generate = True
 
 # Intersphinx mapping
 intersphinx_mapping = {
-    'python': ('https://docs.python.org/3', None),
-    'requests': ('https://requests.readthedocs.io/en/latest/', None),
-    'beautifulsoup4': ('https://www.crummy.com/software/BeautifulSoup/bs4/doc/', None),
+    "python": ("https://docs.python.org/3", None),
+    "requests": ("https://requests.readthedocs.io/en/latest/", None),
+    "beautifulsoup4": ("https://www.crummy.com/software/BeautifulSoup/bs4/doc/", None),
 }
 
 # MyST settings

@@ -33,16 +33,14 @@ repos:
     hooks:
       - id: terraform-fmt
         name: terraform fmt
-        entry: terraform fmt -check -recursive
+        entry: terraform -chdir=terraform fmt -check -recursive
         language: system
         files: \.tf$
         pass_filenames: false
-        working_directory: terraform
 
       - id: terraform-validate
         name: terraform validate
-        entry: terraform validate
+        entry: terraform -chdir=terraform validate
         language: system
         files: \.tf$
         pass_filenames: false
-        working_directory: terraform

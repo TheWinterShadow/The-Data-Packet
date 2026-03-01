@@ -200,18 +200,14 @@ class TestS3Storage(unittest.TestCase):
                 mock_stat.return_value = Mock(st_size=2048)
 
                 test_path = Path("/tmp/test.json")
-                result = storage.upload_file(
-                    test_path, s3_key="data/test.json", content_type="application/json"
-                )
+                result = storage.upload_file(test_path, s3_key="data/test.json", content_type="application/json")
 
                 self.assertTrue(result.success)
 
                 # Check that ExtraArgs were passed with ContentType
                 call_args = mock_s3_client.upload_file.call_args
                 self.assertIn("ExtraArgs", call_args[1])
-                self.assertEqual(
-                    call_args[1]["ExtraArgs"]["ContentType"], "application/json"
-                )
+                self.assertEqual(call_args[1]["ExtraArgs"]["ContentType"], "application/json")
 
     @patch("the_data_packet.utils.s3.get_config")
     @patch("boto3.client")
