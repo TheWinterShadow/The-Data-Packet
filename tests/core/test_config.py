@@ -105,20 +105,11 @@ class TestConfig(unittest.TestCase):
         self.assertIn("Anthropic API key is required", str(cm.exception))
 
     def test_validate_for_audio_generation_success(self):
-        """Test audio generation validation with valid GCS bucket."""
-        config = Config(gcs_bucket_name="test-bucket")
-
-        # Should not raise an exception
-        config.validate_for_audio_generation()
-
-    def test_validate_for_audio_generation_failure(self):
-        """Test audio generation validation without GCS bucket."""
+        """Test audio generation validation always passes (no external deps required)."""
         config = Config()
 
-        with self.assertRaises(ConfigurationError) as cm:
-            config.validate_for_audio_generation()
-
-        self.assertIn("Google Cloud Storage bucket is required", str(cm.exception))
+        # GCS bucket is no longer required for audio generation (Vertex AI TTS)
+        config.validate_for_audio_generation()
 
     def test_invalid_log_level_validation(self):
         """Test that invalid log level raises ConfigurationError."""

@@ -408,27 +408,11 @@ class ScriptGenerator:
             # Use word boundaries to avoid partial matches
             text = re.sub(rf"\b{re.escape(abbrev)}\b", expansion, text)
 
-        # Add natural pauses for better flow
-        # After introductory phrases
-        text = re.sub(
-            r"(Speaking of|Now,|Meanwhile,|However,|Actually,)",
-            r'\1 <break time="0.3s"/>',
-            text,
-        )
+        # Convert ellipses to long pauses (Vertex AI TTS expression tag)
+        text = re.sub(r"\.\.\. ?", " [long pause] ", text)
 
-        # Before important statements
-        text = re.sub(
-            r"(But here\'s the thing|The key point is|What\'s interesting is)",
-            r'<break time="0.5s"/> \1',
-            text,
-        )
-
-        # Improve punctuation for speech flow
-        # Convert ellipses to pauses
-        text = re.sub(r"\.\.\. ?", ' <break time="0.7s"/> ', text)
-
-        # Add slight pauses after em dashes
-        text = re.sub(r" — ", ' <break time="0.2s"/> ', text)
+        # Convert em dashes to short pauses
+        text = re.sub(r" — ", " [short pause] ", text)
 
         return text
 
@@ -522,6 +506,18 @@ Convert the provided article into a focused news discussion segment between two 
 - Add natural conversation fillers occasionally ("you know", "I mean", "actually")
 - Use punctuation that helps with speech flow (commas for pauses, periods for stops)
 
+## AUDIO EXPRESSION TAGS
+Embed these inline within spoken text to add emotion, pacing, and texture to the audio:
+Emotion: [determination], [enthusiasm], [adoration], [interest], [awe], [admiration], \
+[nervousness], [frustration], [excitement], [curiosity], [hope], [annoyance], [amusement], \
+[aggression], [tension], [agitation], [confusion], [anger], [positive], [neutral], [negative]
+Non-verbal: [laughs], [whispers]
+Pacing: [slow], [fast], [short pause], [long pause]
+
+Use these tags naturally and liberally — they shape how the audio sounds. For example:
+"Alex: [excitement] Okay so this is the part that blew my mind. [short pause] You ready for this?"
+"Sam: [curiosity] Wait, so they actually did that? [laughs] That's wild."
+
 ## OUTPUT FORMAT
 ### SEGMENT SCRIPT
 Alex: [dialogue]
@@ -544,6 +540,18 @@ Create show opening, transitions between segments, and show closing.
 **Show Name**: {show_name}
 **Episode Date**: {episode_date}
 **Number of Stories**: {num_segments}
+
+## AUDIO EXPRESSION TAGS
+Embed these inline within spoken text to add emotion, pacing, and texture to the audio:
+Emotion: [determination], [enthusiasm], [adoration], [interest], [awe], [admiration], \
+[nervousness], [frustration], [excitement], [curiosity], [hope], [annoyance], [amusement], \
+[aggression], [tension], [agitation], [confusion], [anger], [positive], [neutral], [negative]
+Non-verbal: [laughs], [whispers]
+Pacing: [slow], [fast], [short pause], [long pause]
+
+Use these tags naturally and liberally — they shape how the audio sounds. For example:
+"Alex: [excitement] Welcome back to The Data Packet! [short pause] We've got a packed show today."
+"Sam: [enthusiasm] Oh this one is good. [laughs] You're going to love this story."
 
 ## OUTPUT FORMAT
 ## SHOW OPENING

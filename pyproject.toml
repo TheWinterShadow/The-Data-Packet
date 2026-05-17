@@ -21,9 +21,8 @@ dependencies = [
     "anthropic>=0.25.0",
     "boto3>=1.20.0",
     "pymongo",
-    # Google Cloud dependencies for TTS Long Audio Synthesis
-    "google-cloud-texttospeech>=2.16.0",
-    "google-cloud-storage>=2.10.0",
+    # Google Cloud dependencies for Vertex AI TTS
+    "google-genai>=1.0.0",
     "google-auth>=2.17.0",
     "pydub",
 ]
@@ -108,8 +107,7 @@ dependencies = [
   "anthropic>=0.25.0",
   "boto3>=1.20.0",
   # Google Cloud dependencies
-  "google-cloud-texttospeech>=2.16.0",
-  "google-cloud-storage>=2.10.0",
+  "google-genai>=1.0.0",
   "google-auth>=2.17.0",
   "pydub",
   "audioop-lts>=0.2.1; python_version >= '3.13'",  # pydub compat for Python 3.13+ (audioop removed from stdlib)

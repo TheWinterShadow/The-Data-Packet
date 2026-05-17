@@ -233,10 +233,11 @@ class Config:
     max_tokens: int = 3000
     temperature: float = 0.7
 
-    # Audio Settings (Google Cloud Studio Multi-speaker voices)
-    male_voice: str = "en-US-Studio-Q"  # Alex (male narrator)
-    female_voice: str = "en-US-Studio-O"  # Sam (female narrator)
-    audio_sample_rate: int = 44100
+    # Audio Settings (Vertex AI Gemini TTS voices)
+    male_voice: str = "Puck"  # Alex (male narrator)
+    female_voice: str = "Kore"  # Sam (female narrator)
+    audio_sample_rate: int = 24000
+    google_cloud_project: str = "gen-lang-client-0429374219"
 
     # Processing Options
     generate_script: bool = True
@@ -283,6 +284,8 @@ class Config:
         self.google_credentials_path = self.google_credentials_path or os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
         self.gcp_secret_name = self.gcp_secret_name or os.getenv("GCP_SECRET_NAME")
         self.gcs_bucket_name = self.gcs_bucket_name or os.getenv("GCS_BUCKET_NAME")
+        if env_project := os.getenv("GOOGLE_CLOUD_PROJECT"):
+            self.google_cloud_project = env_project
         self.mongodb_username = self.mongodb_username or os.getenv("MONGODB_USERNAME")
         self.mongodb_password = self.mongodb_password or os.getenv("MONGODB_PASSWORD")
 
@@ -407,13 +410,7 @@ class Config:
 
     def validate_for_audio_generation(self) -> None:
         """Validate configuration for audio generation."""
-        if not self.gcs_bucket_name:
-            from .exceptions import ConfigurationError
-
-            raise ConfigurationError(
-                "Google Cloud Storage bucket is required for audio generation. "
-                "Set gcs_bucket_name in config or GCS_BUCKET_NAME environment variable."
-            )
+        pass
 
     def get_sources_for_category(self, category: str) -> List[str]:
         """Get list of sources that support a given category.

@@ -144,7 +144,7 @@ class ConcreteArticleSource(ArticleSource):
     def get_latest_article(self, category: str) -> Article:
         return Article(
             title=f"Latest {category} article",
-            content=(f"This is the latest article from the {category} category " "with enough content to be valid."),
+            content=(f"This is the latest article from the {category} category with enough content to be valid."),
             category=category,
             source=self._name,
         )
@@ -153,7 +153,7 @@ class ConcreteArticleSource(ArticleSource):
         return [
             Article(
                 title=f"{category} article {i}",
-                content=(f"This is article {i} from the {category} category " "with enough content to be valid."),
+                content=(f"This is article {i} from the {category} category with enough content to be valid."),
                 category=category,
                 source=self._name,
             )
