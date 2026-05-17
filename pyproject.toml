@@ -128,22 +128,16 @@ dependencies = [
   # Zensical site (homepage + guides)
   "zensical",
   # Sphinx API reference
-  "sphinx",
-  "furo",
-  "myst-parser",
-  "sphinx-autodoc-typehints",
-]
+  ]
 
 [tool.hatch.envs.docs.scripts]
 # Build Zensical site → site/
 build = "zensical build"
 # Build Sphinx API reference → site/reference/
-build-sphinx = "sphinx-build -b html sphinx site/reference"
 # Build both (Zensical first, then Sphinx into site/reference/)
 build-all = [
   "zensical build",
-  "sphinx-build -b html sphinx site/reference",
-]
+  ]
 # Local preview (Zensical dev server)
 serve = "zensical serve"
 # Clean Zensical build

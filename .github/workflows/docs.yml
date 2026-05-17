@@ -5,7 +5,6 @@ on:
         workflows: ["Python Build"]
         types:
             - completed
-    # Allow manual trigger without waiting for CI
     workflow_dispatch:
 
 permissions:
@@ -25,7 +24,7 @@ jobs:
         steps:
             - uses: actions/checkout@v4
               with:
-                  fetch-depth: 0  # Full history needed for git-based features
+                  fetch-depth: 0
 
             - name: Set up Python
               uses: actions/setup-python@v5
@@ -33,18 +32,12 @@ jobs:
                   python-version: "3.11"
                   cache: "pip"
 
-            - name: Install Hatch
-              run: pip install "hatch" "virtualenv<20.27.0"
+            - name: Install Documentation Dependencies
+              run: pip install zensical mkdocstrings[python] mkdocs-material
 
-            # ── Step 1: Build Zensical site → site/ ────────────────────────────
             - name: Build Zensical site
-              run: hatch run docs:build
+              run: zensical build
 
-            # ── Step 2: Build Sphinx API reference → site/reference/ ──────────
-            - name: Build Sphinx API reference
-              run: hatch run docs:build-sphinx
-
-            # ── Step 3: Copy coverage report into site/coverage/ (if present) ──
             - name: Copy coverage report
               run: |
                   if [ -d "htmlcov" ]; then
@@ -54,20 +47,6 @@ jobs:
                   else
                     echo "No coverage report found (run tests first to generate one)"
                   fi
-
-            - name: Workflow summary
-              run: |
-                  echo "## Documentation Build Summary" >> $GITHUB_STEP_SUMMARY
-                  echo "" >> $GITHUB_STEP_SUMMARY
-                  echo "| Component | Output |" >> $GITHUB_STEP_SUMMARY
-                  echo "|---|---|" >> $GITHUB_STEP_SUMMARY
-                  echo "| ✅ Zensical site | \`site/\` |" >> $GITHUB_STEP_SUMMARY
-                  echo "| ✅ Sphinx API reference | \`site/reference/\` |" >> $GITHUB_STEP_SUMMARY
-                  echo "" >> $GITHUB_STEP_SUMMARY
-                  echo "### Built directories" >> $GITHUB_STEP_SUMMARY
-                  echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-                  find site -maxdepth 2 -type d | sort >> $GITHUB_STEP_SUMMARY
-                  echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
 
             - name: Setup Pages
               uses: actions/configure-pages@v4

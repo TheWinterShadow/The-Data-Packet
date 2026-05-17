@@ -9,30 +9,70 @@ repo_url        = "https://github.com/TheWinterShadow/The-Data-Packet"
 edit_uri        = "edit/main/docs/"
 
 nav = [
-  {"Home" = "index.md"},
-  {"Overview" = [
-    "overview/index.md",
-    "overview/architecture.md",
+  { "🏠 Home" = "index.md" },
+  { "🏗️ Overview" = [
+    { "Introduction" = "overview/index.md" },
+    { "Architecture" = "overview/architecture.md" }
   ]},
-  {"Getting Started" = [
-    "getting-started/index.md",
-    "getting-started/installation.md",
-    "getting-started/usage.md",
+  { "🚀 Getting Started" = [
+    { "Quick Start" = "getting-started/index.md" },
+    { "Installation" = "getting-started/installation.md" },
+    { "Usage" = "getting-started/usage.md" }
   ]},
-  {"Configuration" = "configuration/index.md"},
-  {"Infrastructure" = [
-    "infrastructure/index.md",
-    "infrastructure/docker.md",
-    "infrastructure/terraform.md",
-    "infrastructure/logging.md",
-    "infrastructure/mongodb.md",
+  { "⚙️ Configuration" = "configuration/index.md" },
+  { "☁️ Infrastructure" = [
+    { "Overview" = "infrastructure/index.md" },
+    { "Docker" = "infrastructure/docker.md" },
+    { "Terraform" = "infrastructure/terraform.md" },
+    { "Logging" = "infrastructure/logging.md" },
+    { "MongoDB" = "infrastructure/mongodb.md" }
   ]},
-  {"Contributing" = [
-    "contributing/index.md",
-    "contributing/development.md",
+  { "🤝 Contributing" = [
+    { "Guide" = "contributing/index.md" },
+    { "Development" = "contributing/development.md" }
   ]},
-  {"API Reference" = "https://the-data-packet.thewintershadow.com/reference/"},
+  { "📚 API Reference" = [
+    { "CLI" = "api/cli.md" },
+    { "Core" = [
+      { "Config" = "api/core/config.md" },
+      { "Logging" = "api/core/logging.md" },
+      { "Exceptions" = "api/core/exceptions.md" }
+    ]},
+    { "Workflows" = [
+      { "Podcast" = "api/workflows/podcast.md" }
+    ]},
+    { "Sources" = [
+      { "Base" = "api/sources/base.md" },
+      { "TechCrunch" = "api/sources/techcrunch.md" },
+      { "Wired" = "api/sources/wired.md" }
+    ]},
+    { "Generation" = [
+      { "Audio" = "api/generation/audio.md" },
+      { "Script" = "api/generation/script.md" },
+      { "RSS" = "api/generation/rss.md" }
+    ]},
+    { "Utils" = [
+      { "HTTP" = "api/utils/http.md" },
+      { "MongoDB" = "api/utils/mongodb.md" },
+      { "S3" = "api/utils/s3.md" },
+      { "Loki" = "api/utils/loki.md" }
+    ]}
+  ]}
 ]
+
+[project.plugins.search]
+[project.plugins.autorefs]
+
+[project.plugins.mkdocstrings.handlers.python]
+paths = ["."]
+[project.plugins.mkdocstrings.handlers.python.options]
+docstring_style = "google"
+show_source = false
+show_root_heading = true
+show_signature_annotations = true
+show_if_no_docstring = true
+members_order = "source"
+show_bases = false
 
 # ── Markdown extensions ──────────────────────────────────────────────────────
 
