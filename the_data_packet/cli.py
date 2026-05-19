@@ -107,13 +107,13 @@ Environment Variables:
     # Audio Settings
     parser.add_argument(
         "--male-voice",
-        default="en-US-Studio-Q",
-        help="Google Cloud TTS voice name for first speaker (default: en-US-Studio-Q - Alex)",
+        default="Puck",
+        help="Google Cloud TTS voice name for first speaker (default: Puck)",
     )
     parser.add_argument(
         "--female-voice",
-        default="en-US-Studio-O",
-        help="Google Cloud TTS voice name for second speaker (default: en-US-Studio-O - Sam)",
+        default="Kore",
+        help="Google Cloud TTS voice name for second speaker (default: Kore)",
     )
 
     # Output Settings
